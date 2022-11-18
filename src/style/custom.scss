@@ -1,0 +1,188 @@
+
+
+
+
+$primary: teal;
+$secondary: green;
+$body-bg:#F0EFEF;
+
+body {
+  background-color: $body-bg !important;
+  font-family: 'Lato' !important;
+  //font-size: calc(.5em + 1vw) !important;
+}
+a {
+  color: #dc3545;
+}
+
+
+
+// change the theme
+$white: #ffffff;
+$primary:  #0f12a9;
+$hover-color:  #171ad1;
+$dark: #393f4c;
+$light: #f6f8fe;
+$secondary: #6d717c;
+$secondarylight: #cbd2e5;
+$header-height: 3rem;
+$nav-width: 68px;
+$normal-font-size: 1rem;
+$z-fixed: 100;
+
+$disabled-color: #f5a7c8;
+$danger: #ff4136;
+
+$theme-colors: (
+    "light":      $light,
+    "dark":       $dark,
+    "primary":    $primary,
+    "secondary":  $secondary,
+    "info":       #4177b6,
+    "danger": #dc3545
+);
+
+
+
+
+.navbar{
+    @extend .navbar;
+    background-color:#000 !important;
+    color:#fff;
+    height: 100vh;
+    width: 70px;
+    align-items: center;
+}
+
+.nav-link{
+    @extend .nav-link;
+    display: flex !important;
+    color: #fff !important;
+    padding: 10px 15px !important;
+    transition: all 0.5s !important;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav-link:hover{
+    @extend .nav-link, :hover;
+    background: $hover-color;
+    color: #000;
+    transition: all 0.5s;
+}
+
+.navbar-brand{
+    @extend .navbar-brand;
+    font-size: 14px !important;
+    color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding-bottom:2rem !important;
+}
+
+.navbar-collapse{
+    @extend .navbar-collapse;
+    flex-grow: 0 !important;
+}
+
+.main_container_layout{
+    @extend .container-fluid;
+    //background-color: aqua !important;
+    padding: 0px !important;
+    display: flex !important;
+    flex-direction: row !important;
+}
+
+.content_container_layout{
+    @extend .container-fluid;
+    //background-color: rgb(255, 255, 255) !important;
+    padding: 0px !important;
+}
+
+.top_bar{
+    @extend .navbar;
+    height: 30px !important;
+    width:calc(100vw) !important;
+    background-color: #000 !important;
+    padding:1.5rem !important;
+    color: #fff !important;
+    justify-content: space-between !important;
+  }
+
+  .navbar-text{
+    @extend .navbar-text;
+    color:#fff !important;
+  }
+  .top_bar_container{
+    @extend .row;
+    --bs-gutter-x: 0 !important;
+    --bs-gutter-y: 0 !important;
+    margin: 0 !important;
+  }
+
+
+  .title-main{
+    //color: $hover-color !important;
+    font-size: 52px !important;
+    font-weight: bold !important;
+    text-align: left !important;
+  }
+
+  .text-icon{
+    font-size: 10px !important;
+  }
+
+  .card-title{
+    font-weight: bold !important;
+    padding-bottom: 1rem !important;
+    font-size: 1.2rem !important;
+    //padding-top: 1.5rem!important;
+    //padding-left: 1rem;
+  }
+
+  .main_container{
+    min-width: 90% !important;
+  }
+
+  .card-thanks{
+    padding: 1rem !important;
+    border: none !important;
+    border-radius: 0% !important;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+  }
+
+  .ThanksIcon{
+    font-size: 6rem;
+    align-items: center !important;
+    color: #0f12a9 !important
+  }
+
+  .btn-secondary{
+    @extend .btn-secondary;
+    --bs-btn-hover-bg:#0f12a9 !important;
+  }
+
+.btn-primary {
+    @extend .btn-primary;
+    --bs-btn-bg: #0f12a9 !important;
+    --bs-btn-border-color: #0f12a9 !important;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #171ad1 !important;
+    --bs-btn-hover-border-color: #0a58ca;
+    --bs-btn-focus-shadow-rgb: 49,132,253;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #0a58ca;
+    --bs-btn-active-border-color: #0a53be;
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #0f12a9 !important;
+    --bs-btn-disabled-border-color: #0f12a9 !important;
+}
+
+
+// Import Bootstrap and its default variables
+@import '~bootstrap/scss/bootstrap.scss';
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/mixins';

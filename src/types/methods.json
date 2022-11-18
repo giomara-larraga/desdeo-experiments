@@ -1,0 +1,21 @@
+[
+{
+    "id": 0,
+    "name": "Reference point method",
+    "preferences": "reference point",
+    "type": "Analytical"
+  },
+  {
+    "id": 1,
+    "name": "Nautilus Navigator",
+    "preferences": "other",
+    "type": "Discrete"
+  },
+  {
+    "id": 2,
+    "name": "NIMBUS",
+    "preferences": "classification",
+    "type": "Analytical"
+  }
+
+]
