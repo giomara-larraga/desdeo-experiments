@@ -7,14 +7,14 @@ import { Tokens } from "../types/AppTypes";
 // @ts-ignore
 import Likert from 'react-likert-scale';
 
-  interface QuestionInit {
+  interface QuestionEnd {
     id: number;
     question_text: string;
     question_type: "open"| "likert";
     show_solution: number;
   }
   
-  interface FirstQuestionnaireProps {
+  interface LastQuestionnaireProps {
     isLoggedIn: boolean;
     loggedAs: string;
     tokens: Tokens;
@@ -25,6 +25,8 @@ import Likert from 'react-likert-scale';
   interface FormData {
     values: string[];
   }
+
+
   const likertOptions = {
     //question: "What is your opinion of the President’s performance?",
     responses: [
@@ -41,14 +43,14 @@ import Likert from 'react-likert-scale';
     }
   };
 
-const FirstQuestionnaire = ({
+const LastQuestionnaire = ({
     isLoggedIn,
     loggedAs,
     tokens,
     apiUrl,
-    setCurrentPage}: FirstQuestionnaireProps) => {
+    setCurrentPage}: LastQuestionnaireProps) => {
     setCurrentPage("Questionnaire")
-    const [questions, SetQuestions] = useState<QuestionInit[]>([]);
+    const [questions, SetQuestions] = useState<QuestionEnd[]>([]);
     const [fetched, SetFetched] = useState(false);
     const { register, handleSubmit, control } = useForm<FormData>();
     const [answers, SetAnswers] = useState<FormData>({ values: [] });
@@ -56,7 +58,7 @@ const FirstQuestionnaire = ({
     useEffect(() => {
       const fetchQuestions = async () => {
         try {
-          const res = await fetch(`${apiUrl}/questionnaire/init`, {
+          const res = await fetch(`${apiUrl}/questionnaire/end`, {
             method: "GET",
             headers: {
               Authorization: `Bearer ${tokens.access}`,
@@ -94,7 +96,7 @@ const FirstQuestionnaire = ({
       {fetched && (
           <Form className='mb-5'>
           {questions.map((q, i) => {
-          console.log(q.question_text)
+          console.log(q.show_solution)
           if (q.question_type === "open") {
             return(
               <Form.Group className='mb-3'>
@@ -102,10 +104,18 @@ const FirstQuestionnaire = ({
               <Form.Control as="textarea" rows={2} />
               </Form.Group>
             );
-          }else if (q.question_type === "likert") {
+          }else if (q.question_type === "likert" && q.show_solution==0) {
             return(
               <Form.Group className='mb-3'>
               <Form.Label>{`${i+1}. ${q.question_text}`}</Form.Label>
+              <Likert {...likertOptions} />
+              </Form.Group>
+            );
+          } else if (q.question_type === "likert" && q.show_solution==1) {
+            return(
+              <Form.Group className='mb-3'>
+              <Form.Label>{`${i+1}. ${q.question_text}`}</Form.Label>
+              <Form.Label>HEllo I am a solution</Form.Label>
               <Likert {...likertOptions} />
               </Form.Group>
             );
@@ -113,14 +123,14 @@ const FirstQuestionnaire = ({
           })}
            <Row className="mb-3">
           <Col style={{display:"flex", justifyContent:"flex-start"}}>
-          <Link to={"/demographic"}>
+          <Link to={"/prequestionnaire"}>
               <Button>
                   Back
               </Button>
           </Link>
           </Col>
           <Col>
-          <Link to={"/postquestionnaire"} style={{display:"flex", justifyContent:"flex-end"}}>
+          <Link to={"/switchquestionnaire"} style={{display:"flex", justifyContent:"flex-end"}}>
               <Button>
                   Next
               </Button>
@@ -137,4 +147,4 @@ const FirstQuestionnaire = ({
     )
 
 }
-export default FirstQuestionnaire;
+export default LastQuestionnaire;

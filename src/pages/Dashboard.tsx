@@ -65,7 +65,7 @@ const Dashboard = ({setCurrentPage}: DashboardProps) => {
             </Row>
         </Row>
         <Row className="mb-3">
-            <Link to={"/prequestionnaire"} style={{textAlign:"left", display:"flex", justifyContent:"center"}}>
+            <Link to={"/demographic"} style={{textAlign:"left", display:"flex", justifyContent:"center"}}>
                 <Button>
                     Start
                 </Button>

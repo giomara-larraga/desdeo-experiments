@@ -42,7 +42,10 @@ $theme-colors: (
     "danger": #dc3545
 );
 
-
+fieldset.likertScale .likertIndicator {
+  border: thin solid darkblue;
+  background-color: lightGray;
+}
 
 
 .navbar{

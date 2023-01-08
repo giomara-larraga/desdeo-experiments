@@ -9,7 +9,10 @@ import Product from './pages/Product';
 import Analytics from './pages/Analytics';
 import Comment from './pages/Comment';
 import LayoutExperiment from './pages/LayoutExperiment';
+import DemographicQuestionnaire from './pages/DemographicQuestionnaire';
 import FirstQuestionnaire from './pages/FirstQuestionnaire';
+import LastQuestionnaire from './pages/LastQuestionnaire';
+import SwitchQuestionnaire from './pages/SwitchQuestionnaire';
 import { Tokens } from "./types/AppTypes";
 import NautilusNavigatorMethod from "./pages/NautilusNavigatorMethod"
 
@@ -17,6 +20,7 @@ import './style/custom.scss'
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
+//import LastQuestionnaire from './pages/LastQuestionnaire';
 function App() {
   const [isLoggedIn, SetIsLoggedIn] = useState<boolean>(false);
   const [loggedAs, SetLoggedAs] = useState<string>("");
@@ -57,7 +61,12 @@ function App() {
               currentPage={currentPage}
           />}>
           <Route path="/home" element={<Dashboard setCurrentPage={setCurrentPage}/>}/> 
+          <Route path="/demographic" element={<DemographicQuestionnaire setCurrentPage={setCurrentPage} isLoggedIn={isLoggedIn} loggedAs={loggedAs} tokens={tokens} apiUrl={API_URL}/>}/>
           <Route path="/prequestionnaire" element={<FirstQuestionnaire setCurrentPage={setCurrentPage} isLoggedIn={isLoggedIn} loggedAs={loggedAs} tokens={tokens} apiUrl={API_URL}/>}/>
+          <Route path="/postquestionnaire" element={<LastQuestionnaire setCurrentPage={setCurrentPage} isLoggedIn={isLoggedIn} loggedAs={loggedAs} tokens={tokens} apiUrl={API_URL}/>}/>
+          <Route path="/switchquestionnaire" element={<SwitchQuestionnaire setCurrentPage={setCurrentPage} isLoggedIn={isLoggedIn} loggedAs={loggedAs} tokens={tokens} apiUrl={API_URL}/>}/>
+          
+          
           <Route path="/nautilus" element={<NautilusNavigatorMethod 
           apiUrl={API_URL}
           isLoggedIn={isLoggedIn}
