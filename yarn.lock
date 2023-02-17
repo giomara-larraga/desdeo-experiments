@@ -8051,7 +8051,7 @@ react-dev-utils@^12.0.1:
     strip-ansi "^6.0.1"
     text-table "^0.2.0"
 
-react-dom@^18.2.0:
+"react-dom@^16.5.0 || ^17.0.1 || ^18.1.0", react-dom@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.2.0.tgz#22aaf38708db2674ed9ada224ca4aa708d821e3d"
   integrity sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==
@@ -8198,7 +8198,7 @@ react-transition-group@^4.4.2:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
-react@^18.2.0:
+"react@^16.5.0 || ^17.0.1 || ^18.1.0", react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
@@ -8974,6 +8974,20 @@ supports-preserve-symlinks-flag@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
+
+survey-core@*:
+  version "1.9.68"
+  resolved "https://registry.yarnpkg.com/survey-core/-/survey-core-1.9.68.tgz#a107b010904cc488ab211b15d15045cdea73a944"
+  integrity sha512-lPKWUCECvXThdT9ezyDx2AqcxkYoNuK7SDKIPGyCtxw8C46a5gBoY60CYs04a87iXJ5OplPQwlDl5w7skCPKxw==
+
+survey-react-ui@^1.9.68:
+  version "1.9.68"
+  resolved "https://registry.yarnpkg.com/survey-react-ui/-/survey-react-ui-1.9.68.tgz#3ee34c2b2ef5599c8ca3500075fda1cce590c561"
+  integrity sha512-xbW54e1bQas7tb1wnY7LLEpBLr6indx6Brtff/aii3c5GNgCgyUxpjvwS0iUFUsC9LgMnmcycHhsgCIzg8Xqvw==
+  dependencies:
+    react "^16.5.0 || ^17.0.1 || ^18.1.0"
+    react-dom "^16.5.0 || ^17.0.1 || ^18.1.0"
+    survey-core "*"
 
 svg-parser@^2.0.2:
   version "2.0.4"

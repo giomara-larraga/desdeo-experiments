@@ -1,5 +1,6 @@
 import React from 'react';
 import { Col, Container, Row, Button, Card } from 'react-bootstrap';
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
 MdVolunteerActivism
@@ -10,7 +11,10 @@ interface DashboardProps {
 }
 
 const Dashboard = ({setCurrentPage}: DashboardProps) => {
-    setCurrentPage("Home")
+    useEffect(() => {
+        setCurrentPage("Home");
+    }, []);
+    
     return (
         <Container className="py-4 main-container">
         <Row className="mb-3">

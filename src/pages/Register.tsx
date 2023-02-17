@@ -92,9 +92,7 @@ function Register({ apiUrl }: { apiUrl: string }) {
         <hr />
       </Form>
       <Link to="/">
-        <div className='text-link'>
-          <a style={{cursor:'pointer'}}>Already have an account? Login</a>
-        </div>
+      Already have an account? Login
       </Link>
 
     </div>
