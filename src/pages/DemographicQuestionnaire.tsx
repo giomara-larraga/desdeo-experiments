@@ -23,6 +23,7 @@ interface DemographicQuestionnaireProps {
   loggedAs: string;
   tokens: Tokens;
   apiUrl: string;
+  groupId: number;
   //setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -65,6 +66,7 @@ const DemographicQuestionnaire = ({
   loggedAs,
   tokens,
   apiUrl,
+  groupId,
 }: DemographicQuestionnaireProps) => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<QuestionDemographic>(

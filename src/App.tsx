@@ -21,15 +21,18 @@ import "./style/custom.scss";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import NimbusMethod from "./pages/NimbusMethod";
+import Thanks from "./pages/Thanks";
 
 //import LastQuestionnaire from './pages/LastQuestionnaire';
 function App() {
   const [isLoggedIn, SetIsLoggedIn] = useState<boolean>(false);
   const [loggedAs, SetLoggedAs] = useState<string>("");
-  const [methodCreated, SetMethodCreated] = useState<boolean>(false);
+  const [groupId, SetGroupId] = useState<number>(-1);
+  //const [methodCreated, SetMethodCreated] = useState<boolean>(false);
   const [activeProblemId, SetActiveProblemId] = useState<number | null>(2);
   const [tokens, SetTokens] = useState<Tokens>({ access: "", refresh: "" });
-  const [chosenMethod, SetChosenMethod] = useState("");
+  //const [chosenMethod, SetChosenMethod] = useState("");
   //const [currentPage, setCurrentPage] = useState("");
 
   const API_URL: string = "http://127.0.0.1:5000";
@@ -48,6 +51,7 @@ function App() {
                   setIsLoggedIn={SetIsLoggedIn}
                   setLoggedAs={SetLoggedAs}
                   setTokens={SetTokens}
+                  setGroupId={SetGroupId}
                 />
               }
             />
@@ -61,6 +65,7 @@ function App() {
                 isLoggedIn={isLoggedIn}
                 loggedAs={loggedAs}
                 tokens={tokens}
+                groupId={groupId}
                 //currentPage={currentPage}
               />
             }
@@ -75,6 +80,7 @@ function App() {
                   loggedAs={loggedAs}
                   tokens={tokens}
                   apiUrl={API_URL}
+                  groupId={groupId}
                 />
               }
             />
@@ -87,6 +93,7 @@ function App() {
                   loggedAs={loggedAs}
                   tokens={tokens}
                   apiUrl={API_URL}
+                  groupId={groupId}
                 />
               }
             />
@@ -99,6 +106,7 @@ function App() {
                   loggedAs={loggedAs}
                   tokens={tokens}
                   apiUrl={API_URL}
+                  groupId={groupId}
                 />
               }
             />
@@ -111,6 +119,7 @@ function App() {
                   loggedAs={loggedAs}
                   tokens={tokens}
                   apiUrl={API_URL}
+                  groupId={groupId}
                 />
               }
             />
@@ -123,7 +132,34 @@ function App() {
                   isLoggedIn={isLoggedIn}
                   loggedAs={loggedAs}
                   tokens={tokens}
-                  activeProblemId={activeProblemId}
+                  groupId={groupId}
+                  //setCurrentPage={setCurrentPage}
+                />
+              }
+            />
+            <Route
+              path="/nimbus"
+              element={
+                <NimbusMethod
+                  apiUrl={API_URL}
+                  isLoggedIn={isLoggedIn}
+                  loggedAs={loggedAs}
+                  tokens={tokens}
+                  groupId={groupId}
+                  //setCurrentPage={setCurrentPage}
+                />
+              }
+            />
+
+            <Route
+              path="/thanks"
+              element={
+                <Thanks
+                  apiUrl={API_URL}
+                  isLoggedIn={isLoggedIn}
+                  loggedAs={loggedAs}
+                  tokens={tokens}
+                  groupId={groupId}
                   //setCurrentPage={setCurrentPage}
                 />
               }

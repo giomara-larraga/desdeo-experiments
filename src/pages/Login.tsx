@@ -16,11 +16,13 @@ export const Login = ({
   setIsLoggedIn,
   setLoggedAs,
   setTokens,
+  setGroupId,
 }: {
   apiUrl: string;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
   setLoggedAs: React.Dispatch<React.SetStateAction<string>>;
   setTokens: React.Dispatch<React.SetStateAction<Tokens>>;
+  setGroupId: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   const {
     register,
@@ -47,6 +49,7 @@ export const Login = ({
 
         const body = await res.json();
         setTokens({ access: body.access_token, refresh: body.refresh_token });
+        setGroupId(body.group_id);
         SetErrorMessage("");
         navigate("/home");
       } else {

@@ -26,6 +26,7 @@ interface GeneralProps {
   loggedAs: string;
   tokens: Tokens;
   apiUrl: string;
+  groupId: number;
 }
 
 export default function LayoutExperiment({
@@ -33,6 +34,7 @@ export default function LayoutExperiment({
   loggedAs,
   tokens,
   apiUrl,
+  groupId,
 }: GeneralProps) {
   if (!isLoggedIn) {
     return <Navigate to={"/"} replace />;

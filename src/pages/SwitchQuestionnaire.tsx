@@ -31,6 +31,7 @@ interface SwitchQuestionnaireProps {
   loggedAs: string;
   tokens: Tokens;
   apiUrl: string;
+  groupId: number;
   //setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -43,6 +44,7 @@ const SwitchQuestionnaire = ({
   loggedAs,
   tokens,
   apiUrl,
+  groupId,
 }: //setCurrentPage,
 SwitchQuestionnaireProps) => {
   /*useEffect(() => {
@@ -150,7 +152,7 @@ SwitchQuestionnaireProps) => {
       // Do nothing
     }
 
-    navigate(`/nautilus`);
+    navigate(`/thanks`);
   }, []);
   return (
     <Container className="py-4 main-container">

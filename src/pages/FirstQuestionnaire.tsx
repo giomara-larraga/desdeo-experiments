@@ -35,6 +35,7 @@ interface FirstQuestionnaireProps {
   loggedAs: string;
   tokens: Tokens;
   apiUrl: string;
+  groupId: number;
   //setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -48,6 +49,7 @@ const FirstQuestionnaire = ({
   loggedAs,
   tokens,
   apiUrl,
+  groupId,
 }: //setCurrentPage,
 FirstQuestionnaireProps) => {
   /*useEffect(() => {
@@ -131,8 +133,11 @@ FirstQuestionnaireProps) => {
       console.log(e);
       // Do nothing
     }
-
-    navigate(`/postquestionnaire`);
+    if (groupId === 1) {
+      navigate(`/nimbus`);
+    } else {
+      navigate(`/nautilus`);
+    }
   }, []);
 
   return (

@@ -34,6 +34,7 @@ interface LastQuestionnaireProps {
   loggedAs: string;
   tokens: Tokens;
   apiUrl: string;
+  groupId: number;
   //setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -47,6 +48,7 @@ const LastQuestionnaire = ({
   loggedAs,
   tokens,
   apiUrl,
+  groupId,
 }: //setCurrentPage,
 LastQuestionnaireProps) => {
   /*useEffect(() => {
@@ -151,8 +153,11 @@ LastQuestionnaireProps) => {
       console.log(e);
       // Do nothing
     }
-
-    navigate(`/switchquestionnaire`);
+    if (groupId === 1) {
+      navigate(`/thanks`);
+    } else {
+      navigate(`/switchquestionnaire`);
+    }
   }, []);
 
   return (
