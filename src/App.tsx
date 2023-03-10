@@ -55,7 +55,6 @@ function App() {
                 />
               }
             />
-            <Route path="/register" element={<Register apiUrl={API_URL} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
           <Route

@@ -101,9 +101,6 @@ export const Login = ({
             <Form.Control.Feedback type="invalid">{`${errors.password.message}`}</Form.Control.Feedback>
           )}
         </Form.Group>
-        <Form.Group className="mb-3" controlId="formBasicCheckbox">
-          <Form.Check type="checkbox" label="Remember me" />
-        </Form.Group>
         {!loginOk && <p className="text-error">{`${errorMessage}`}</p>}
         <Button
           className="w-100"
@@ -113,9 +110,7 @@ export const Login = ({
         >
           Login
         </Button>
-        <hr />
       </Form>
-      <Link to="/register">Create an Account</Link>
     </div>
   );
 };
