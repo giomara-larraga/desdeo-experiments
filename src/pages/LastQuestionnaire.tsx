@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useEffect, useState } from "react";
 import {
   Col,
@@ -34,43 +34,28 @@ interface LastQuestionnaireProps {
   loggedAs: string;
   tokens: Tokens;
   apiUrl: string;
-  setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
+  //setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
-interface FormData {
-  values: string[];
+interface IAnswer {
+  key: string[];
+  value: any[];
 }
-
-/*const likertOptions = {
-  //question: "What is your opinion of the President’s performance?",
-  responses: [
-    { value: 1, text: "Strongly disagree" },
-    { value: 2, text: "Disagree" },
-    { value: 3, text: "Somewhat disagree" },
-    { value: 4, text: "Neutral" },
-    { value: 5, text: "Somewhat agree" },
-    { value: 6, text: "Agree" },
-    { value: 7, text: "Strongly agree" },
-  ],
-  picked: (val: any) => {
-    console.log(val);
-  },
-};*/
 
 const LastQuestionnaire = ({
   isLoggedIn,
   loggedAs,
   tokens,
   apiUrl,
-  setCurrentPage,
-}: LastQuestionnaireProps) => {
-  useEffect(() => {
+}: //setCurrentPage,
+LastQuestionnaireProps) => {
+  /*useEffect(() => {
     setCurrentPage("Questionnaire");
-  }, []);
+  }, []);*/
   const [questions, SetQuestions] = useState<QuestionEnd>(QuestionEndDefaults);
-  const [fetched, SetFetched] = useState(false);
-  const { register, handleSubmit, control } = useForm<FormData>();
-  const [answers, SetAnswers] = useState<FormData>({ values: [] });
+  //const [fetched, SetFetched] = useState(false);
+  //const { register, handleSubmit, control } = useForm<FormData>();
+  //const [answers, SetAnswers] = useState<FormData>({ values: [] });
   const navigate = useNavigate();
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -82,11 +67,11 @@ const LastQuestionnaire = ({
           },
         });
 
-        if (res.status == 200) {
+        if (res.status === 200) {
           const body = await res.json();
           // set questions
           SetQuestions(body);
-          SetFetched(true);
+          //SetFetched(true);
           console.log("Questions fetched successfully!");
         } else {
           console.log(
@@ -103,6 +88,72 @@ const LastQuestionnaire = ({
 
     fetchQuestions();
   }, []);
+  const onSurveyComplete = useCallback(async (sender: any) => {
+    console.log("Sender Data: ", JSON.stringify(sender.data));
+    console.log("Sender PlainData: ", sender.getPlainData());
+
+    const data = JSON.parse(JSON.stringify(sender.data));
+
+    var keys = Object.keys(data);
+    var validated_keys = [];
+    var validated_values = [];
+
+    for (let i = 0; i < keys.length; i++) {
+      const item = parseInt(keys[i]);
+      const value = data[keys[i]];
+
+      if (isNaN(item)) {
+        var inner_keys = Object.keys(value);
+        var inner_values = Object.values(value);
+        for (let j = 0; j < inner_keys.length; j++) {
+          validated_keys.push(inner_keys[j]);
+          validated_values.push(inner_values[j]);
+        }
+      } else {
+        validated_keys.push(keys[i]);
+        validated_values.push(value);
+      }
+    }
+    console.log("validated keys", validated_keys);
+    console.log("validated values", validated_values);
+
+    const responses: IAnswer = {
+      key: validated_keys,
+      value: validated_values,
+    };
+    console.log("responses", responses);
+    //setAnswers(responses);
+
+    // save responses to database
+    const newAnswers = {
+      key: responses.key.map((k) => parseInt(k)),
+      value: responses.value,
+    };
+    console.log("newAnswers:", newAnswers);
+    try {
+      const res = await fetch(`${apiUrl}/answer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokens.access}`,
+        },
+        body: JSON.stringify(newAnswers),
+      });
+
+      console.log(res);
+
+      if (res.status === 200) {
+        // OK
+        console.log("saved");
+        //navigate(`/prequestionnaire`);
+      }
+    } catch (e) {
+      console.log(e);
+      // Do nothing
+    }
+
+    navigate(`/switchquestionnaire`);
+  }, []);
 
   return (
     <Container className="py-4 main-container">
@@ -117,10 +168,7 @@ const LastQuestionnaire = ({
           css={defaultSurveyConfig.defaulsSurveyCSS}
           data={defaultSurveyConfig.defaultSurveyData}
           json={questions}
-          onComplete={(survey: any) => {
-            navigate(`/switchquestionnaire`);
-            /** Save to a database  **/
-          }}
+          onComplete={onSurveyComplete}
         />
       </Row>
     </Container>
