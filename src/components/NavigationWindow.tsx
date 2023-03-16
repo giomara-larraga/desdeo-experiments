@@ -36,7 +36,11 @@ export const NavigationWindow = ({
 
   const numObj = objectiveData.objectiveNames.length;
 
-  console.log(objectiveData);
+  // console.log(objectiveData);
+  let reachableColors: string[] = [];
+  if (numObj === 3) {
+    reachableColors = ["violet", "pink", "lightgreen"];
+  }
 
   for (let i = 0; i < numObj; i++) {
     singleObjectiveDataArray.push({
@@ -51,6 +55,7 @@ export const NavigationWindow = ({
       bounds: objectiveData.boundaries[i],
       totalSteps: objectiveData.totalSteps,
       stepsTaken: objectiveData.stepsTaken,
+      reachableColor: reachableColors[i],
     });
   }
   return (
@@ -67,6 +72,7 @@ export const NavigationWindow = ({
               handleStep(x);
             }}
             dimensionsMaybe={dimensionsMaybe}
+            reachableColorMaybe={data.reachableColor}
           ></NavigationBar>
         );
       })}

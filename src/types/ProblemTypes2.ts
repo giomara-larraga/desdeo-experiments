@@ -59,6 +59,7 @@ type NavigationDataSingleObjective = {
   stepsTaken: number;
   distance?: number;
   reachableIdx?: number[];
+  reachableColor?: string
 };
 
 export type {

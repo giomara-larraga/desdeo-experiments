@@ -3,7 +3,7 @@ import { select, Selection } from "d3-selection";
 import { drag } from "d3-drag";
 import { scaleLinear } from "d3-scale";
 import { range } from "d3-array";
-import { axisLeft } from "d3-axis";
+import { axisLeft, axisRight } from "d3-axis";
 import { line, curveStepBefore } from "d3-shape";
 import { format } from "d3-format";
 import "d3-transition";
@@ -25,6 +25,9 @@ interface NavigationBarProps {
     | ((x: number) => void);
   newStep: number | undefined;
   dimensionsMaybe?: RectDimensions;
+  refLineColorMaybe?: string;
+  boundLineColorMaybe?: string;
+  reachableColorMaybe?: string;
 }
 
 // data type to hold datapoints for ref and boundary lines
@@ -49,6 +52,9 @@ export const NavigationBar = ({
   handleNewStep,
   newStep,
   dimensionsMaybe,
+  refLineColorMaybe,
+  boundLineColorMaybe,
+  reachableColorMaybe,
 }: NavigationBarProps) => {
   const ref = useRef(null);
   const [selection, setSelection] = useState<null | Selection<
@@ -66,6 +72,19 @@ export const NavigationBar = ({
   const [dimensions] = useState(
     dimensionsMaybe ? dimensionsMaybe : defaultDimensions
   );
+
+  const [refLineColor] = useState(
+    refLineColorMaybe ? refLineColorMaybe : "blue"
+  );
+
+  const [boundLineColor] = useState(
+    boundLineColorMaybe ? boundLineColorMaybe : "red"
+  );
+
+  const [reachableColor] = useState(
+    reachableColorMaybe ? reachableColorMaybe : "#10ff10aa"
+  );
+
   const [referencePoint, SetReferencePoint] = useState<number>();
   const [boundValue, SetBoundValue] = useState<number>();
 
@@ -308,7 +327,6 @@ export const NavigationBar = ({
         }
         return poly;
       };
-      const color = "#10ff10aa";
 
       // draw the polygons to the svg
       let dataPoly = drawPolygons2();
@@ -330,7 +348,7 @@ export const NavigationBar = ({
       enter
         .append("polygon")
         .attr("transform", `translate(0)`)
-        .attr("fill", color)
+        .attr("fill", reachableColor)
         .attr("points", function (d) {
           return d
             .map(function (d) {
@@ -432,10 +450,14 @@ export const NavigationBar = ({
     useEffect for boundary
     ===================*/
   const updateBound = useCallback(
-    (boundvalue: number) => {
-      // if (boundvalue < lReach[lReach.length - 1]) {
-      //   boundvalue = lReach[lReach.length - 1];
-      // }
+    (boundvalue: number, referencePoint?: number) => {
+      if (referencePoint) {
+        console.log(boundvalue);
+        console.log(referencePoint);
+        if (boundvalue * minOrMax < referencePoint * minOrMax) {
+          boundvalue = referencePoint;
+        }
+      }
       // if (boundvalue > uReach[uReach.length - 1]) {
       //   boundvalue = uReach[uReach.length - 1];
       // }
@@ -475,7 +497,7 @@ export const NavigationBar = ({
           .attr("d", lineGenerator)
           .attr("transform", `translate(0)`)
           .attr("fill", "none")
-          .attr("stroke", "red")
+          .attr("stroke", boundLineColor)
           //.attr("stroke-dasharray", "4,2")
           .attr("stroke-width", "3px");
       };
@@ -493,7 +515,7 @@ export const NavigationBar = ({
           `translate( ${dimensions.marginLeft} ${dimensions.marginTop})`
         )
         .attr("fill", "none")
-        .attr("stroke", "red")
+        .attr("stroke", boundLineColor)
         //.attr("stroke-dasharray", "4,2")
         .attr("stroke-width", "3px")
         .call(
@@ -510,7 +532,7 @@ export const NavigationBar = ({
             })
             .on("end", function (event) {
               // add line coords to reference data
-              updateBound(yPixelToObjVal()(event.y));
+              updateBound(yPixelToObjVal()(event.y), referencePoint);
             })
         );
     },
@@ -540,8 +562,15 @@ export const NavigationBar = ({
     } else {
       lastPoint = bounds[bounds.length - 1];
     }
-    updateBound(lastPoint);
-  }, [selection, handleBoundValue, bounds, boundValue, updateBound]);
+    updateBound(lastPoint, referencePoint);
+  }, [
+    selection,
+    handleBoundValue,
+    bounds,
+    boundValue,
+    updateBound,
+    referencePoint,
+  ]);
 
   /*===================
     useEffect for refLines
@@ -619,7 +648,7 @@ export const NavigationBar = ({
           .attr("d", lineGenerator)
           .attr("transform", `translate(0)`)
           .attr("fill", "none")
-          .attr("stroke", "darkgreen")
+          .attr("stroke", refLineColor)
           //.attr("stroke-dasharray", "4,2")
           .attr("stroke-width", "3px");
       };
@@ -637,7 +666,7 @@ export const NavigationBar = ({
           `translate( ${dimensions.marginLeft} ${dimensions.marginTop})`
         )
         .attr("fill", "none")
-        .attr("stroke", "darkgreen")
+        .attr("stroke", refLineColor)
         //.attr("stroke-dasharray", "4,2")
         .attr("stroke-width", "3px")
         .call(
