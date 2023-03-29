@@ -36,6 +36,7 @@ interface FirstQuestionnaireProps {
   tokens: Tokens;
   apiUrl: string;
   groupId: number;
+  problemGroup: number;
   //setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -50,6 +51,7 @@ const FirstQuestionnaire = ({
   tokens,
   apiUrl,
   groupId,
+  problemGroup,
 }: //setCurrentPage,
 FirstQuestionnaireProps) => {
   /*useEffect(() => {
@@ -133,11 +135,41 @@ FirstQuestionnaireProps) => {
       console.log(e);
       // Do nothing
     }
+    let methodName;
+    let route: string;
+
     if (groupId === 1) {
-      navigate(`/nimbus`);
+      methodName = "nimbus";
+      route = "/nimbus";
     } else {
-      navigate(`/nautilus`);
+      methodName = "nautilus_navigator";
+      route = "/nautilus";
     }
+
+    try {
+      const methodCreation = { problemGroup: problemGroup, method: methodName };
+      const res = await fetch(`${apiUrl}/method/create`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${tokens.access}`,
+        },
+        body: JSON.stringify(methodCreation),
+      });
+
+      if (res.status === 201) {
+        const body = await res.json();
+        console.log(body);
+        // created!
+      } else {
+        console.log(`Got return code ${res.status}. Could not create method.`);
+        // do nothing
+      }
+    } catch (e) {
+      console.log(e);
+      // Do nothing
+    }
+    navigate(route);
   }, []);
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "./logo.svg";
 import Sidebar from "./components/Sidebar";
 import "./App.css";
@@ -28,6 +28,7 @@ function App() {
   const [isLoggedIn, SetIsLoggedIn] = useState<boolean>(false);
   const [loggedAs, SetLoggedAs] = useState<string>("");
   const [groupId, SetGroupId] = useState<number>(-1);
+  const [problemGroup, SetproblemGroup] = useState<number>(-1);
   //const [methodCreated, SetMethodCreated] = useState<boolean>(false);
   const [activeProblemId, SetActiveProblemId] = useState<number | null>(2);
   const [tokens, SetTokens] = useState<Tokens>({ access: "", refresh: "" });
@@ -35,6 +36,19 @@ function App() {
   //const [currentPage, setCurrentPage] = useState("");
 
   const API_URL: string = "http://127.0.0.1:5000";
+
+  // useEffect(() => {
+  //   if (groupId === -1) {
+  //     return;
+  //   }
+  //   if (groupId === 1) {
+
+  //     return;
+  //   }
+  //   if (groupId === 2) {
+  //     return;
+  //   }
+  // }, [groupId, problemGroup]);
 
   return (
     <>
@@ -51,6 +65,7 @@ function App() {
                   setLoggedAs={SetLoggedAs}
                   setTokens={SetTokens}
                   setGroupId={SetGroupId}
+                  setproblemGroup={SetproblemGroup}
                 />
               }
             />
@@ -92,6 +107,7 @@ function App() {
                   tokens={tokens}
                   apiUrl={API_URL}
                   groupId={groupId}
+                  problemGroup={problemGroup}
                 />
               }
             />
@@ -130,7 +146,7 @@ function App() {
                   isLoggedIn={isLoggedIn}
                   loggedAs={loggedAs}
                   tokens={tokens}
-                  groupId={groupId}
+                  problemGroup={problemGroup}
                   //setCurrentPage={setCurrentPage}
                 />
               }
