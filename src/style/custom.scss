@@ -151,6 +151,11 @@ $theme-colors: (
   color: #0f12a9 !important;
 }
 
+.h4{
+  @extend .h4;
+  color: #0f12a9 !important;
+}
+
 h1{
   color: #0f12a9 !important;
 }

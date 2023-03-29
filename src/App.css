@@ -11,3 +11,13 @@
 .top_bar_controls .navbar-text{
   padding-left: 10px;
 }
+
+.login,
+.image {
+  min-height: 100vh;
+}
+.bg-image {
+  background-image: url('https://www.ionbeamcenters.eu/wp-content/uploads/2018/11/JYU_campus_timo_sajavaara-1920x1440.jpg');
+  background-size: cover;
+  background-position: center center;
+}

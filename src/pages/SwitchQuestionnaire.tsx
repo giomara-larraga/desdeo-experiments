@@ -156,18 +156,17 @@ SwitchQuestionnaireProps) => {
   }, []);
   return (
     <Container className="py-4 main-container">
-      <Row className="mb-3">
-        <h1>Questionnaire 3</h1>
+      <Row className="mb-3" style={{ textAlign: "center" }}>
+        <h4>Questionnaire</h4>
       </Row>
       <Row>
-        <h5>
+        <p>
           Please, complete the following questionnaire related to the steps of
           the solution process.
-        </h5>
+        </p>
       </Row>
       <Row className="mb-3">
         <SurveyComponent
-          css={defaultSurveyConfig.defaulsSurveyCSS}
           data={defaultSurveyConfig.defaultSurveyData}
           json={questions}
           onComplete={onSurveyComplete}

@@ -1,0 +1,64 @@
+
+
+#surveyElement {
+    --primary: #1924b3;
+    --background: #ffffff;
+    --background-dim: #5e0d0d00;
+    --background-dim-light: #ffffff;
+    --primary-foreground: #ffffff;
+    --foreground: #161616;
+    --base-unit: 7px;
+    /* Paste variables here */
+  }
+
+  #surveyElement .sv-title {
+    font-family: "Lato";
+    /*font-weight: 300;*/
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: normal;
+}
+
+.sv_main.sv_default_css .sv_custom_header {
+  background-color: #e7e7e700;
+}
+
+.sv_main .sv-action-bar {
+  display: flex;
+  position: relative;
+  align-items: center;
+  margin-left: auto;
+  padding: 16px 0 0 16px;
+  overflow: hidden;
+  white-space: nowrap;
+  justify-content: flex-end;
+}
+
+.sv_body .sv_body--responsive1{
+  --header-background-color: #e7e7e7;
+  --body-container-background-color: #f4f4f4;
+  --main-color: #0f12a9;
+  --main-hover-color: #393f4c;
+  --body-background-color: white;
+  --inputs-background-color: white;
+  --text-color: #6d7072;
+  --text-input-color: #6d7072;
+  --header-color: #6d7072;
+  --border-color: #e7e7e7;
+  --error-color: #ed5565;
+  --error-background-color: #fcdfe2;
+  --progress-text-color: #9d9d9d;
+  --disable-color: #dbdbdb;
+  --disabled-label-color: rgba(64, 64, 64, 0.5);
+  --slider-color: white;
+  --disabled-switch-color: #9f9f9f;
+  --disabled-slider-color: #cfcfcf;
+  --foreground-light: #909090;
+  --foreground-disabled: #161616;
+  --background-dim: #f3f3f3;
+  --progress-buttons-color: #8dd9ca;
+  --progress-buttons-line-color: #d4d4d4;
+}
+
+  

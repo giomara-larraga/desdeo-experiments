@@ -158,19 +158,18 @@ const DemographicQuestionnaire = ({
 
   return (
     <Container className="py-4 main-container">
-      <Row className="mb-3">
-        <h1>Demographic Information</h1>
+      <Row className="mb-3" style={{ textAlign: "center" }}>
+        <h4>Demographic Information</h4>
       </Row>
       <Row>
-        <h5>
+        <p>
           Please answer the following questions to let us learn more about you.
           The information provided will be used solely for this research
           project.
-        </h5>
+        </p>
       </Row>
       <Row className="mb-3">
         <SurveyComponent
-          css={defaultSurveyConfig.defaulsSurveyCSS}
           data={defaultSurveyConfig.defaultSurveyData}
           json={questions}
           onComplete={onSurveyComplete}

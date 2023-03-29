@@ -23,8 +23,11 @@ function Topbar({
       <Navbar.Toggle />
 
       <Navbar.Collapse>
-        <Navbar.Text>
-          Signed in as: <a href="#login">{loggedAs}</a>
+        <Navbar.Text style={{ color: "#fff" }}>
+          Signed in as:{" "}
+          <a href="#login" style={{ color: "#fff" }}>
+            {loggedAs}
+          </a>
         </Navbar.Text>
       </Navbar.Collapse>
     </Navbar>

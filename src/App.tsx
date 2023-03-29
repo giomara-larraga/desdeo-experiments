@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import logo from "./logo.svg";
 import Sidebar from "./components/Sidebar";
-//import './App.css';
+import "./App.css";
 import {
   BrowserRouter as Router,
   Routes,
@@ -20,7 +20,6 @@ import NautilusNavigatorMethod from "./pages/NautilusNavigatorMethod";
 import "./style/custom.scss";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import NimbusMethod from "./pages/NimbusMethod";
 import Thanks from "./pages/Thanks";
 
