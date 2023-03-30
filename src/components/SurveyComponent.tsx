@@ -4,8 +4,11 @@ import { StylesManager } from "survey-core";
 import "survey-core/survey.min.css";
 //StylesManager.applyTheme("defaultV2");
 //StylesManager.applyTheme("defaultV2");
+import { defaultCss } from "survey-core/plugins/bootstrap-material-integration";
+//import "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css";
+import "survey-core/defaultV2.min.css";
 
-import "../style/survey.css";
+//import "../style/survey.css";
 interface ISurveyComponentProps {
   //css: any;
   json: any;
@@ -19,9 +22,9 @@ const SurveyComponent = ({
   data,
   onComplete,
 }: ISurveyComponentProps) => {
-  /*useEffect(() => {
-    StylesManager.applyTheme("bootstrap");
-  }, []);*/
+  useEffect(() => {
+    StylesManager.applyTheme("bootstrapmaterial");
+  }, []);
   return (
     <Survey.Survey
       data={data}

@@ -1,3 +1,9 @@
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import { createTheme } from "@mui/material/styles";
+import { amber } from "@mui/material/colors";
+
 import React from "react";
 import {
   Container,
@@ -16,21 +22,17 @@ function Topbar({
   loggedAs: string;
 }) {
   return (
-    <Navbar className="top_bar" expand="lg">
-      <Navbar.Text>
-        Experiment with interactive multiobjective optimization methods
-      </Navbar.Text>
-      <Navbar.Toggle />
-
-      <Navbar.Collapse>
-        <Navbar.Text style={{ color: "#fff" }}>
-          Signed in as:{" "}
-          <a href="#login" style={{ color: "#fff" }}>
-            {loggedAs}
-          </a>
-        </Navbar.Text>
-      </Navbar.Collapse>
-    </Navbar>
+    <AppBar
+      position="fixed"
+      sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      style={{ background: "#1a237e" }}
+    >
+      <Toolbar>
+        <Typography variant="h6" noWrap component="div">
+          Experiment with interactive multiobjective optimization methods
+        </Typography>
+      </Toolbar>
+    </AppBar>
   );
 }
 

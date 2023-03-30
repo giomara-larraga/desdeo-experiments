@@ -4,7 +4,20 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Tokens } from "../types/AppTypes";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
+import { Form, Container, Row, Col } from "react-bootstrap";
+
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import CssBaseline from "@mui/material/CssBaseline";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+
+import Typography from "@mui/material/Typography";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 interface FormData {
   username: string;
@@ -17,7 +30,7 @@ export const Login = ({
   setLoggedAs,
   setTokens,
   setGroupId,
-  setproblemGroup
+  setproblemGroup,
 }: {
   apiUrl: string;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
@@ -66,13 +79,41 @@ export const Login = ({
   };
 
   return (
-    <Form
-      className="user"
-      action=""
-      onSubmit={handleSubmit(onSubmit)}
-      autoComplete="on"
-    >
-      <Form.Group className="mb-3" controlId="formBasicUsername">
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
+      <TextField
+        margin="normal"
+        required
+        fullWidth
+        id="username"
+        label="Username"
+        //name="username"
+        autoComplete="username"
+        autoFocus
+        {...register("username", {
+          required: { value: true, message: "Username is required." },
+        })}
+      />
+
+      <TextField
+        margin="normal"
+        required
+        fullWidth
+        //name="password"
+        label="Password"
+        type="password"
+        id="password"
+        autoComplete="current-password"
+        {...register("password", {
+          required: { value: true, message: "Password is required." },
+        })}
+        //isInvalid={errors.username !== undefined}
+        //helperText={`${errors.password.message}`}
+      />
+
+      <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+        Sign In
+      </Button>
+      {/*       <Form.Group className="mb-3" controlId="formBasicUsername">
         <Form.Label>Username</Form.Label>
         <Form.Control
           type="username"
@@ -108,8 +149,8 @@ export const Login = ({
         type="submit"
       >
         Login
-      </Button>
-    </Form>
+      </Button> */}
+    </Box>
   );
 };
 
