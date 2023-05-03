@@ -1,5 +1,5 @@
 import React from "react";
-import Container from "react-bootstrap/Container";
+import Container from "@mui/material/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
@@ -41,19 +41,10 @@ export default function LayoutExperiment({
   } else {
     return (
       <>
-        <Container fluid className="main_container_layout g0">
-          <Container fluid className="content_container_layout g0">
-            <Row className="top_bar_container">
-              <Col>
-                <Topbar isLoggedIn={isLoggedIn} loggedAs={loggedAs}></Topbar>
-              </Col>
-            </Row>
-            <Row className="top_bar_container">
-              <Col>
-                <Outlet />
-              </Col>
-            </Row>
-          </Container>
+        <Container className="main_container_layout g0">
+          <Topbar isLoggedIn={isLoggedIn} loggedAs={loggedAs}></Topbar>
+
+          <Outlet />
         </Container>
       </>
     );
