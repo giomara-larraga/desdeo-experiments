@@ -190,7 +190,7 @@ const HorizontalBars = ({
       const enter = selection.append("g").selectAll("rect").data(data).enter();
 
       // append the labels for each bar positioned after the bar, roughly center to the bar
-      enter
+      /*enter
         .append("text")
         .attr("fill", "black")
         .attr("text-anchor", "start")
@@ -201,7 +201,7 @@ const HorizontalBars = ({
         })
         .text((d) => `${d.name} ${d.direction === -1 ? "(max)" : "(min)️"}`)
         .attr("font-size", "14px")
-        .attr("font-weight", "bold");
+        .attr("font-weight", "bold");*/
 
       // draw the positive space for max problems and negative space for min problems
       enter

@@ -140,14 +140,14 @@ FirstQuestionnaireProps) => {
     let route: string;
 
     if (groupId === 1) {
-      methodName = "nimbus";
+      methodName = "synchronous_nimbus";
       route = "/nimbus";
     } else {
       methodName = "nautilus_navigator";
       route = "/nautilus";
     }
 
-    /*try {
+    try {
       const methodCreation = { problemGroup: problemGroup, method: methodName };
       const res = await fetch(`${apiUrl}/method/create`, {
         method: "POST",
@@ -169,7 +169,7 @@ FirstQuestionnaireProps) => {
     } catch (e) {
       console.log(e);
       // Do nothing
-    }*/
+    }
     navigate(route);
   }, []);
 
