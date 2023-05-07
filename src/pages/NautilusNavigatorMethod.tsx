@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { ProblemInfo, NavigationData } from "../types/ProblemTypes";
 import { Tokens } from "../types/AppTypes";
 import { Row, Col, ProgressBar } from "react-bootstrap";
@@ -6,7 +6,7 @@ import ReactLoading from "react-loading";
 import { NavigationWindow } from "../components/NavigationWindow";
 //import Slider from "@material-ui/core/Slider";
 import "desdeo-components/src/components/Svg.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
@@ -17,6 +17,7 @@ import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Toolbar from "@mui/material/Toolbar";
 import Slider from "@mui/material/Slider";
+import { createMethod } from "./nimbus/nimbusHelpers";
 
 const drawerWidth = 300;
 // TODO: should be imported, and need to update the NavigationData type in NavigationBars /types
@@ -65,6 +66,8 @@ function NautilusNavigatorMethod({
   const [iterateNavi, SetIterateNavi] = useState<boolean>(false);
   const itestateRef = useRef<boolean>();
   itestateRef.current = iterateNavi;
+
+  const navigate = useNavigate();
 
   // track dataArch change during iterate
   const dRef = useRef<Array<NavigationData>>();
@@ -776,15 +779,25 @@ function NautilusNavigatorMethod({
             justifyContent={"center"}
             width={"-webkit-fill-available"}
           >
-            <Link to={"/nimbus"}>
-              <Button
-                variant="contained"
-                size="large"
-                disabled={showFinal ? false : true}
-              >
-                {"Next"}
-              </Button>
-            </Link>
+            <Button
+              //component={Link}
+              //to="/nimbus"
+              variant="contained"
+              color="primary"
+              size="large"
+              disabled={showFinal ? false : true}
+              onClick={() => {
+                createMethod(
+                  apiUrl,
+                  tokens,
+                  problemGroup,
+                  "synchronous_nimbus"
+                );
+                navigate("/nimbus");
+              }}
+            >
+              Next
+            </Button>
           </Box>
         </Drawer>
       </Box>

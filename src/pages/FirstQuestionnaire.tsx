@@ -17,6 +17,7 @@ import defaultSurveyConfig from "../types/survey";
 import SurveyComponent from "../components/SurveyComponent";
 import { prequestionnaire } from "../utils/questionnaires";
 import Toolbar from "@mui/material/Toolbar";
+import { createMethod } from "./nimbus/nimbusHelpers";
 
 interface QuestionInit {
   elements: any[];
@@ -146,6 +147,7 @@ FirstQuestionnaireProps) => {
       methodName = "nautilus_navigator";
       route = "/nautilus";
     }
+    createMethod(apiUrl, tokens, problemGroup, methodName);
 
     /*try {
       const methodCreation = { problemGroup: problemGroup, method: methodName };

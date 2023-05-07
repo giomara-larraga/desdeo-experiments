@@ -125,7 +125,7 @@ DashboardProps) => {
             </Button>
             <Button
               //component={Link}
-              //to="/nimbus"
+              //to="/nautilus"
               sx={{ mr: "1rem" }}
               variant="contained"
               color="primary"
