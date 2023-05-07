@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from "react";
 
 import { useForm } from "react-hook-form";
-import {
-  Form,
-  Button,
-  Container,
-  Row,
-  Col,
-  ListGroup,
-  ListGroupItem,
-} from "react-bootstrap";
+import { Form, Row, Col, ListGroup } from "react-bootstrap";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
+import Container from "@mui/material/Container";
+import Button from "@mui/material/Button";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 
-import { MinOrMax } from "../types/ProblemTypes";
+import { MinOrMax } from "../../types/ProblemTypes";
 import { ErrorMessage } from "@hookform/error-message";
 
 // refactor me, NIMBUS has same type defined
@@ -114,8 +112,10 @@ function ClassificationsInputForm({
       <ListGroup>
         <ListGroup.Item variant="dark">
           <Row>
-            <Col sm={8}>Class</Col>
+            <Col sm={2}>Lower bound</Col>
+            <Col sm={4}>Class</Col>
             <Col sm={4}>Limit</Col>
+            <Col sm={2}>Upper bound</Col>
           </Row>
         </ListGroup.Item>
         <ListGroup.Item>
@@ -124,7 +124,10 @@ function ClassificationsInputForm({
               return (
                 <div key={`${name}`}>
                   <Row>
-                    <Col sm={8}>
+                    <Col sm={2}>
+                      {directions[i] === 1 ? ideal[i] : -nadir[i]}
+                    </Col>
+                    <Col sm={4}>
                       <Form.Label column="sm" key={`labelof${name}`}>
                         {name}
                       </Form.Label>
@@ -280,13 +283,18 @@ function ClassificationsInputForm({
                         render={({ message }) => <p>{message}</p>}
                       />
                     </Col>
+                    <Col sm={2}>
+                      {directions[i] === 1 ? nadir[i] : -ideal[i]}
+                    </Col>
                   </Row>
                 </div>
               );
             })}
           </Form.Group>
         </ListGroup.Item>
-        <Button type="submit">Set</Button>
+        <Button variant="contained" type="submit">
+          Set
+        </Button>
       </ListGroup>
     </Form>
   );

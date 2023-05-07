@@ -25,11 +25,10 @@ function Topbar({
     <AppBar
       position="fixed"
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-      style={{ background: "#1a237e" }}
     >
       <Toolbar>
         <Typography variant="h6" noWrap component="div">
-          Experiment with interactive multiobjective optimization methods
+          DESDEO
         </Typography>
       </Toolbar>
     </AppBar>

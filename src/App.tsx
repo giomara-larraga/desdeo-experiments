@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import logo from "./logo.svg";
 import Sidebar from "./components/Sidebar";
-import "./App.css";
+//import "./App.css";
 import {
   BrowserRouter as Router,
   Routes,
@@ -20,8 +20,9 @@ import NautilusNavigatorMethod from "./pages/NautilusNavigatorMethod";
 import "./style/custom.scss";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
-import NimbusMethod from "./pages/NimbusMethod";
+import NimbusMethod from "./pages/nimbus/NimbusMethod";
 import Thanks from "./pages/Thanks";
+import LayoutMethod from "./pages/LayoutMethod";
 
 //import LastQuestionnaire from './pages/LastQuestionnaire';
 function App() {
@@ -83,7 +84,19 @@ function App() {
               />
             }
           >
-            <Route path="/home" element={<Dashboard />} />
+            <Route
+              path="/home"
+              element={
+                <Dashboard
+                  isLoggedIn={isLoggedIn}
+                  loggedAs={loggedAs}
+                  tokens={tokens}
+                  apiUrl={API_URL}
+                  groupId={groupId}
+                  problemGroup={problemGroup}
+                />
+              }
+            />
             <Route
               path="/demographic"
               element={
@@ -151,19 +164,6 @@ function App() {
                 />
               }
             />
-            <Route
-              path="/nimbus"
-              element={
-                <NimbusMethod
-                  apiUrl={API_URL}
-                  isLoggedIn={isLoggedIn}
-                  loggedAs={loggedAs}
-                  tokens={tokens}
-                  groupId={groupId}
-                  //setCurrentPage={setCurrentPage}
-                />
-              }
-            />
 
             <Route
               path="/thanks"
@@ -174,6 +174,32 @@ function App() {
                   loggedAs={loggedAs}
                   tokens={tokens}
                   groupId={groupId}
+                  //setCurrentPage={setCurrentPage}
+                />
+              }
+            />
+          </Route>
+          <Route
+            element={
+              <LayoutMethod
+                apiUrl={API_URL}
+                isLoggedIn={isLoggedIn}
+                loggedAs={loggedAs}
+                tokens={tokens}
+                groupId={groupId}
+                //currentPage={currentPage}
+              />
+            }
+          >
+            <Route
+              path="/nimbus"
+              element={
+                <NimbusMethod
+                  apiUrl={API_URL}
+                  isLoggedIn={isLoggedIn}
+                  loggedAs={loggedAs}
+                  tokens={tokens}
+                  problemGroup={groupId}
                   //setCurrentPage={setCurrentPage}
                 />
               }

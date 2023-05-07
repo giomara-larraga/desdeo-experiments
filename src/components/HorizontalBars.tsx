@@ -9,7 +9,7 @@ import { ObjectiveData } from "../types/ProblemTypes";
 import { RectDimensions } from "../types/ComponentTypes";
 
 interface HorizontalBarsProps {
-objectiveData: ObjectiveData;
+  objectiveData: ObjectiveData;
   setReferencePoint:
     | React.Dispatch<React.SetStateAction<number[]>>
     | ((x: number[]) => void);
@@ -83,7 +83,7 @@ const HorizontalBars = ({
     "#94DAFF",
     "#F6D7A7",
     "#CAF7E3",
-    "#FFB6B9"
+    "#FFB6B9",
   ];
   const colors_sup = [
     "#A6B1E150",
@@ -95,7 +95,7 @@ const HorizontalBars = ({
     "#94DAFF50",
     "#F6D7A750",
     "#CAF7E350",
-    "#FFB6B950"
+    "#FFB6B950",
   ];
 
   useEffect(() => {
@@ -171,18 +171,19 @@ const HorizontalBars = ({
       selection.selectAll("*").remove();
 
       // Position the x-axises
-      data.map((d, i) =>
-        selection
-          .append("g")
-          .attr(
-            "transform",
-            `translate(${dimensions.marginLeft}, ${
-              y().call(y, d.name) as number + y().bandwidth() * 1.05
-            })`
-          )
-          .call(xAxises()[i].tickSizeOuter(0))
-          .attr("font-size","14px")
-          //.attr("font-weight", "bold")
+      data.map(
+        (d, i) =>
+          selection
+            .append("g")
+            .attr(
+              "transform",
+              `translate(${dimensions.marginLeft}, ${
+                (y().call(y, d.name) as number) + y().bandwidth() * 1.05
+              })`
+            )
+            .call(xAxises()[i].tickSizeOuter(0))
+            .attr("font-size", "14px")
+        //.attr("font-weight", "bold")
       );
 
       // enter selection, append to this
@@ -196,7 +197,7 @@ const HorizontalBars = ({
         .attr("transform", (d) => {
           return `translate(${
             dimensions.marginLeft + dimensions.chartWidth + 10
-          }, ${y()(d.name) as number + y().bandwidth() / 2})`;
+          }, ${(y()(d.name) as number) + y().bandwidth() / 2})`;
         })
         .text((d) => `${d.name} ${d.direction === -1 ? "(max)" : "(min)️"}`)
         .attr("font-size", "14px")
@@ -219,7 +220,7 @@ const HorizontalBars = ({
         })
         .attr("x", 0)
         .attr("height", y().bandwidth)
-        .attr("fill", (d,i) => {
+        .attr("fill", (d, i) => {
           if (d.direction === -1) {
             return colors[i];
           } else {
@@ -250,7 +251,7 @@ const HorizontalBars = ({
           }
         })
         .attr("height", y().bandwidth)
-        .attr("fill", (d,i) => {
+        .attr("fill", (d, i) => {
           if (d.direction === -1) {
             return colors_sup[i];
           } else {
@@ -263,7 +264,7 @@ const HorizontalBars = ({
         .append("line")
         .attr("class", "infoPointer")
         .attr("y1", (d) => y()(d.name) as number)
-        .attr("y2", (d) => y()(d.name) as number + y().bandwidth())
+        .attr("y2", (d) => (y()(d.name) as number) + y().bandwidth())
         .attr("x1", (d, i) => {
           if (d.direction === -1) {
             return xs()[i](d.value) + dimensions.marginLeft;
@@ -287,7 +288,7 @@ const HorizontalBars = ({
         .append("line")
         .attr("class", "preferencePointer")
         .attr("y1", (d) => y()(d.name) as number)
-        .attr("y2", (d) => y()(d.name) as number + y().bandwidth())
+        .attr("y2", (d) => (y()(d.name) as number) + y().bandwidth())
         .attr("x1", (d, i) => {
           if (d.direction === -1) {
             return xs()[i](d.value) + dimensions.marginLeft;
@@ -325,12 +326,9 @@ const HorizontalBars = ({
             d.direction === -1
               ? xs()[i](d.value) + dimensions.marginLeft
               : xs_rev()[i](d.value) + dimensions.marginLeft
-          }, ${y()(d.name) as number + y().bandwidth() / 2})`;
+          }, ${(y()(d.name) as number) + y().bandwidth() / 2})`;
         })
-        .text(
-          (d) =>
-            `${d.value}`
-        )
+        .text((d) => `${d.value}`)
         .attr("font-size", "16px")
         .attr("font-weight", "light");
 
@@ -456,10 +454,7 @@ const HorizontalBars = ({
             return "start";
           }
         })
-        .text(
-          (d, i) =>
-            `${infoPointerLocs[i].toExponential(2)}`
-        );
+        .text((d, i) => `${infoPointerLocs[i].toExponential(2)}`);
 
       // select the event detection overlay, this needs to be updated because the first useEffect
       // does not have access to the updated state of preferencePointerLocs
@@ -469,9 +464,8 @@ const HorizontalBars = ({
 
       enterOverlay.on("click", (event, d) => {
         const match_index = data.findIndex((datum) => datum.name === d.name);
-        const prefValue = (d.direction === -1
-          ? xs()[match_index]
-          : xs_rev()[match_index]
+        const prefValue = (
+          d.direction === -1 ? xs()[match_index] : xs_rev()[match_index]
         ).invert(pointer(event)[0]);
         // SUPER IMPORTANT TO **NOT** CHANGE STATE, BUT TO CREATE A NEW OBJECT!
         const newLocs = prefPointerLocs.map((loc) => loc);
@@ -482,9 +476,8 @@ const HorizontalBars = ({
 
       enterOverlay.on("mousemove", (event, d) => {
         const match_index = data.findIndex((datum) => datum.name === d.name);
-        const prefValue = (d.direction === -1
-          ? xs()[match_index]
-          : xs_rev()[match_index]
+        const prefValue = (
+          d.direction === -1 ? xs()[match_index] : xs_rev()[match_index]
         ).invert(pointer(event)[0]);
         // SUPER IMPORTANT TO **NOT** CHANGE STATE, BUT TO CREATE A NEW OBJECT!
         const newLocs = infoPointerLocs.map((loc) => loc);

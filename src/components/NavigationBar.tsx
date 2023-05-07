@@ -74,11 +74,11 @@ export const NavigationBar = ({
   );
 
   const [refLineColor] = useState(
-    refLineColorMaybe ? refLineColorMaybe : "blue"
+    refLineColorMaybe ? refLineColorMaybe : "#0000FF"
   );
 
   const [boundLineColor] = useState(
-    boundLineColorMaybe ? boundLineColorMaybe : "red"
+    boundLineColorMaybe ? boundLineColorMaybe : "#C00000"
   );
 
   const [reachableColor] = useState(

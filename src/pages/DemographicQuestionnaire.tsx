@@ -8,6 +8,8 @@ import { Tokens } from "../types/AppTypes";
 import defaultSurveyConfig from "../types/survey";
 import { useNavigate } from "react-router-dom";
 import "../style/custom.scss";
+import { CssBaseline, Typography } from "@mui/material";
+import Toolbar from "@mui/material/Toolbar";
 //import ReactDOM from "react-dom";
 //import { json } from "d3";
 
@@ -158,9 +160,15 @@ const DemographicQuestionnaire = ({
 
   return (
     <Container className="py-4 main-container">
-      <Row className="mb-3" style={{ textAlign: "center" }}>
-        <h4>Demographic Information</h4>
-      </Row>
+      <CssBaseline />
+      <Toolbar />
+      <Typography
+        variant="h4"
+        color="primary"
+        style={{ marginBottom: "2rem", textAlign: "left" }}
+      >
+        Demographic Information
+      </Typography>
       <Row>
         <p>
           Please answer the following questions to let us learn more about you.
