@@ -606,7 +606,7 @@ function NimbusMethod({
 
   return (
     <Box sx={{ display: "flex", width: "-webkit-fill-available" }}>
-      <Toolbar />
+      <Toolbar variant="dense" />
       {nimbusState !== "stop" && (
         <>
           <Box
@@ -628,8 +628,7 @@ function NimbusMethod({
               anchor="left"
               PaperProps={{ elevation: 9 }}
             >
-              <Toolbar />
-              <Box sx={{ borderBottom: 1, borderColor: "divider" }}></Box>
+              <Toolbar variant="dense" />
               {nimbusState === "not started" && (
                 <div>Method not started yet</div>
               )}
@@ -765,7 +764,7 @@ function NimbusMethod({
                   >
                     Archive solutions
                   </Typography>
-                  <Typography>
+                  <Typography sx={{ marginBottom: "1rem" }}>
                     Select the solutions you want to save. You can click the
                     desired solutions from the table or from the plot.
                   </Typography>

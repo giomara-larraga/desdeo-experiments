@@ -40,11 +40,37 @@ export const demographic = {
       "maxRateDescription": "Very tired"
 
     }, {
-      "name": "expectations",
-      "type": "text",
-      "title": "What objective function values do you think you can achieve as your final solution?",
+      "type": "multipletext",
+      "name": "pricelimit",
+      "title": "How much would you be willing to pay for a product like ours?",
       "isRequired": true,
-    }],
+      "items": [
+        {
+          "name": "mostamount",
+          "title": "Highest price",
+          "inputType": "number",
+          "validators": [{
+            "type": "expression",
+            "expression": "{pricelimit.mostamount} >= {pricelimit.leastamount}",
+            "text": "The highest price must be higher than the lowest price."
+          }, {
+            "type": "numeric",
+            "minValue": 0,
+            "text": "Price cannot be less than zero."
+          }]
+        },
+        {
+          "name": "leastamount",
+          "title": "Lowest price",
+          "inputType": "number",
+          "validators": [{
+            "type": "numeric",
+            "minValue": 0,
+            "text": "Price cannot be less than zero."
+          }]
+        }
+      ]
+    },],
     "showQuestionNumbers": true
   };
 

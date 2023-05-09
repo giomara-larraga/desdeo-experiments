@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Grid from "@mui/material/Grid";
-import { Box, Typography } from "@material-ui/core";
+import { Box, Typography, Toolbar, Container } from "@material-ui/core";
 import CssBaseline from "@mui/material/CssBaseline";
 import Button from "@mui/material/Button";
 import List from "@mui/material/List";
@@ -12,7 +12,7 @@ import Avatar from "@mui/material/Avatar";
 import { useNavigate } from "react-router-dom";
 import { createMethod } from "./nimbus/nimbusHelpers";
 import { Tokens } from "../types/AppTypes";
-
+//import "../style/custom.scss";
 interface DashboardProps {
   isLoggedIn: boolean;
   loggedAs: string;
@@ -34,96 +34,90 @@ const Dashboard = ({
 DashboardProps) => {
   const navigate = useNavigate();
   return (
-    <Grid container component="main">
+    <Container className="py-4 main-container">
       <CssBaseline />
-      <Grid item xs={12} sm={12} md={12} display={"flex"}>
-        <Box
-          sx={{
-            my: 8,
-            mx: "auto",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "left",
-            justifyContent: "center",
-            padding: "2rem",
-          }}
-        >
-          <Typography
-            variant="h4"
-            color="primary"
-            style={{ marginBottom: "2rem", textAlign: "left" }}
-          >
-            Welcome to the study
-          </Typography>
-          <Typography paragraph style={{ textAlign: "left" }}>
-            During the study, you will have the opportunity to work with
-            state-of-the-art interactive multiobjective optimization methods,
-            and contribute to our research by providing valuable insights on
-            their performance and usability. The study take XX minutes to be
-            completed and involves the following steps:
-          </Typography>
+      <Toolbar variant="dense" />
 
-          <List sx={{ width: "100%" }}>
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar>1</Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary="Demographic Information"
-                secondary="Before starting the study, you will be asked to fill out a brief survey
+      <Typography
+        variant="h4"
+        color="primary"
+        style={{ marginBottom: "2rem", textAlign: "left" }}
+      >
+        Welcome to the study
+      </Typography>
+      <Typography paragraph style={{ textAlign: "left" }}>
+        During the study, you will have the opportunity to work with
+        state-of-the-art interactive multiobjective optimization methods, and
+        contribute to our research by providing valuable insights on their
+        performance and usability. The study take XX minutes to be completed and
+        involves the following steps:
+      </Typography>
+
+      <List sx={{ width: "100%" }}>
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>1</Avatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary="Demographic Information"
+            secondary="Before starting the study, you will be asked to fill out a brief survey
       regarding your demographic information. This information is strictly
       confidential and will be used solely for research purposes."
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar>2</Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary="Pre-Solution Process"
-                secondary="You will be asked to answer a few questions related to your experience and
+          />
+        </ListItem>
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>2</Avatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary="Pre-Solution Process"
+            secondary="You will be asked to answer a few questions related to your experience and
       expertise in the field before beginning the solution process. This survey
       is aimed at understanding your background and experience in
       the field."
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar>3</Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary=" Interactive Solution Process"
-                secondary="During the solution process, you will use state-of-the-art interactive
+          />
+        </ListItem>
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>3</Avatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary=" Interactive Solution Process"
+            secondary="During the solution process, you will use state-of-the-art interactive
       optimization methods to solve a given problem. You will be asked to provide
       feedback on the usability and effectiveness of these methods. Please feel
       free to ask any questions or request any clarifications throughout the
       process."
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar>4</Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary="Overall Experience"
-                secondary="At the end of the study, you will be asked to provide feedback on your
+          />
+        </ListItem>
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>4</Avatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary="Overall Experience"
+            secondary="At the end of the study, you will be asked to provide feedback on your
       overall experience, including your satisfaction with the methods and the
       study as a whole. Your input is essential to ensure the success of
       this research."
-              />
-            </ListItem>
-          </List>
-          <Box justifyContent={"flex-end"} display={"flex"}>
-            <Button
-              component={Link}
-              to="/demographic"
-              variant="contained"
-              color="primary"
-              sx={{ mr: "1rem" }}
-            >
-              Start
-            </Button>
-            <Button
+          />
+        </ListItem>
+      </List>
+      <Box justifyContent={"flex-end"} display={"flex"}>
+        <Button
+          //component={Link}
+          //to="/demographic"
+          size="large"
+          variant="contained"
+          color="primary"
+          sx={{ mr: "1rem" }}
+          onClick={() => {
+            navigate("/demographic");
+          }}
+        >
+          Start
+        </Button>
+        {/*             <Button
               //component={Link}
               //to="/nimbus"
               sx={{ mr: "1rem" }}
@@ -157,10 +151,9 @@ DashboardProps) => {
               }}
             >
               Nimbus
-            </Button>
-          </Box>
-        </Box>
-      </Grid>
+            </Button> */}
+      </Box>
+
       {/*       <Grid
         item
         xs={false}
@@ -178,7 +171,7 @@ DashboardProps) => {
           style={{ maxWidth: "100%", height: "auto", objectFit: "contain" }}
         />
       </Grid> */}
-    </Grid>
+    </Container>
   );
 };
 export default Dashboard;

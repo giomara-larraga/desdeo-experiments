@@ -44,6 +44,7 @@ export const themeOptions = createTheme({
         dense: {
           height: 42,
           minHeight: 42,
+          flexShrink: 0,
         },
       },
     },
