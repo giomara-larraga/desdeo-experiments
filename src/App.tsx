@@ -199,7 +199,7 @@ function App() {
                   isLoggedIn={isLoggedIn}
                   loggedAs={loggedAs}
                   tokens={tokens}
-                  problemGroup={groupId}
+                  problemGroup={problemGroup}
                   //setCurrentPage={setCurrentPage}
                 />
               }

@@ -33,6 +33,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormLabel from "@mui/material/FormLabel/FormLabel";
+import { useNavigate } from "react-router-dom";
 //import { HorizontalBars } from "desdeo-components";
 const drawerWidth = 550;
 interface NimbusMethodProps {
@@ -42,11 +43,7 @@ interface NimbusMethodProps {
   apiUrl: string;
   problemGroup: number;
 }
-interface LogProps {
-  id: number;
-  entry_type: string;
-  data: string;
-  info: string;
+interface ArchiveProps {
   decision_variables: string;
   objective_values: string;
 }
@@ -71,6 +68,8 @@ function NimbusMethod({
   const [helpMessage, SetHelpMessage] = useState<string>(
     "Method not started yet."
   );
+  const [initialSolution, SetInitialSolution] = useState<number[]>([]);
+  const [fetchedInitial, SetFetchedInitial] = useState<boolean>(false);
   const [preferredPoint, SetPreferredPoint] = useState<number[]>([]);
   const [fetchedInfo, SetFetchedInfo] = useState<boolean>(false);
   const [loading, SetLoading] = useState<boolean>(false);
@@ -87,7 +86,7 @@ function NimbusMethod({
     useState<boolean>(false);
   const [cont, SetCont] = useState<boolean>(true);
   const [finalVariables, SetFinalVariables] = useState<number[]>([]);
-
+  const navigate = useNavigate();
   // fetch current problem info
   useEffect(() => {
     /*if (!methodCreated) {
@@ -95,12 +94,6 @@ function NimbusMethod({
       console.log("useEffect: method not defined");
       return;
     }*/
-    if (activeProblemInfo === null) {
-      // no active problem, do nothing
-      console.log("useEffect: active problem is null");
-      return;
-    }
-
     const fetchProblemInfo = async () => {
       try {
         const res = await fetch(`${apiUrl}/problem/access`, {
@@ -115,17 +108,19 @@ function NimbusMethod({
         if (res.status == 200) {
           // ok!
           const body = await res.json();
-          SetActiveProblemInfo({
-            problemId: body.problem_id,
-            problemName: body.problem_name,
-            problemType: body.problem_type,
-            objectiveNames: body.objective_names,
-            variableNames: body.variable_names,
-            nObjectives: body.n_objectives,
-            ideal: body.ideal,
-            nadir: body.nadir,
-            minimize: body.minimize,
-          });
+          if (activeProblemInfo === undefined) {
+            SetActiveProblemInfo({
+              problemId: body.problem_id,
+              problemName: body.problem_name,
+              problemType: body.problem_type,
+              objectiveNames: body.objective_names,
+              variableNames: body.variable_names,
+              nObjectives: body.n_objectives,
+              ideal: body.ideal,
+              nadir: body.nadir,
+              minimize: body.minimize,
+            });
+          }
           SetClassifications(body.objective_names.map(() => "="));
           SetClassificationLevels(body.objective_names.map(() => 0.0));
           SetFetchedInfo(true);
@@ -145,7 +140,10 @@ function NimbusMethod({
 
   // start the method
   useEffect(() => {
-    if (activeProblemInfo === undefined) {
+    if (!fetchedInfo) {
+      return;
+    }
+    if (activeProblemInfo === null || activeProblemInfo === undefined) {
       // no active problem, do nothing
       console.log("Active problem not defined yet.");
       return;
@@ -180,18 +178,16 @@ function NimbusMethod({
     };
 
     startMethod();
-  }, [activeProblemInfo, methodStarted]);
+  }, [activeProblemInfo, methodStarted, fetchedInfo]);
 
-  const saveLog = async (data: LogProps) => {
+  const toQuestionnaire = async () => {
     const log = {
-      entry_type: data.entry_type,
-      data: data.data,
-      info: data.info,
-      decision_variables: data.decision_variables,
-      objective_values: data.objective_values,
+      method: "NIMBUS",
+      variables: finalVariables.join(","),
+      objectives: preferredPoint.join(","),
     };
     try {
-      const res = await fetch(`${apiUrl}/log/create`, {
+      const res = await fetch(`${apiUrl}/archive`, {
         method: "POST",
         headers: {
           "Content-type": "application/json",
@@ -202,13 +198,39 @@ function NimbusMethod({
 
       if (res.status == 201) {
         // OK
-        console.log("OK");
+        console.log("OK", log);
       }
     } catch (e) {
       console.log(e);
       // Do nothing
     }
+    navigate("/postquestionnaire");
   };
+  /*const saveLog = async (data: ArchiveProps) => {
+    const log = {
+      method: "NIMBUS",
+      variables: data.decision_variables,
+      objectives: data.objective_values,
+    };
+    try {
+      const res = await fetch(`${apiUrl}/archive`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${tokens.access}`,
+        },
+        body: JSON.stringify(log),
+      });
+
+      if (res.status == 201) {
+        // OK
+        console.log("OK", log);
+      }
+    } catch (e) {
+      console.log(e);
+      // Do nothing
+    }
+  };*/
 
   const iterate = async () => {
     // Attempt to iterate
@@ -225,6 +247,7 @@ function NimbusMethod({
         }
         try {
           console.log(`iterating with levels ${classificationLevels}`);
+          console.log(activeProblemInfo?.ideal, activeProblemInfo?.nadir);
           const res = await fetch(`${apiUrl}/method/control`, {
             method: "POST",
             headers: {
@@ -428,15 +451,13 @@ function NimbusMethod({
               SetPreferredPoint(response.objective);
               SetFinalVariables(response.solution);
               SetHelpMessage("Stopped. Showing final solution reached.");
-              saveLog({
-                id: 0,
-                entry_type: "Final solution",
-                info: activeProblemInfo!.problemName,
-                data: "NIMBUS",
+              /*saveLog({
                 decision_variables: response.solution.join(","),
                 objective_values: preferredPoint.join(","),
-              });
+              });*/
               SetNimbusState("stop");
+              //navigate("/postquestionnaire");
+
               break;
             }
           } else {
@@ -452,6 +473,16 @@ function NimbusMethod({
           break;
         }
       }
+      /*case "stop": {
+        saveLog({
+          decision_variables: finalVariables.join(","),
+          objective_values: preferredPoint.join(","),
+        });
+        //SetNimbusState("stop");
+        navigate("/postquestionnaire");
+        break;
+      }*/
+
       default: {
         console.log("Default case");
         break;
@@ -576,468 +607,751 @@ function NimbusMethod({
   return (
     <Box sx={{ display: "flex", width: "-webkit-fill-available" }}>
       <Toolbar />
-      <Box
-        component="nav"
-        sx={{
-          width: { sm: drawerWidth },
-          flexShrink: { sm: 0 },
-        }}
-      >
-        <Drawer
-          sx={{
-            flexShrink: 0,
-            "& .MuiDrawer-paper": {
-              width: drawerWidth,
-              boxSizing: "border-box",
-            },
-          }}
-          variant="permanent"
-          anchor="left"
-          PaperProps={{ elevation: 9 }}
-        >
-          <Toolbar />
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}></Box>
-          {nimbusState === "not started" && <div>Method not started yet</div>}
-          {nimbusState === "classification" && (
-            <>
-              <Box sx={{ padding: "1rem" }}>
-                <Typography
-                  color={"primary"}
-                  sx={{
-                    fontSize: "1.25rem",
-                    fontWeight: "bold",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  Classification
-                </Typography>
-                <Typography sx={{ marginBottom: "1rem" }}>
-                  Select the number of solutions you want to generate and
-                  classify the objective functions according to your prefereces.
-                </Typography>
-                <Typography>{`Help: ${helpMessage}`}</Typography>
-                <Form>
-                  <Form.Group as={Row}>
-                    <Form.Label column sm="12">
-                      Desired number of solutions
-                    </Form.Label>
-                    <Col sm={12}>
-                      <Form.Check
-                        inline
-                        label="1"
-                        type="radio"
-                        value={1}
-                        checked={numberOfSolutions === 1 ? true : false}
-                        onChange={() => SetNumberOfSolutions(1)}
-                      />
-                      <Form.Check
-                        inline
-                        label="2"
-                        type="radio"
-                        value={2}
-                        checked={numberOfSolutions === 2 ? true : false}
-                        onChange={() => SetNumberOfSolutions(2)}
-                      />
-                      <Form.Check
-                        inline
-                        label="3"
-                        type="radio"
-                        value={3}
-                        checked={numberOfSolutions === 3 ? true : false}
-                        onChange={() => SetNumberOfSolutions(3)}
-                      />
-                      <Form.Check
-                        inline
-                        label="4"
-                        type="radio"
-                        value={4}
-                        checked={numberOfSolutions === 4 ? true : false}
-                        onChange={() => SetNumberOfSolutions(4)}
-                      />
-                    </Col>
-                  </Form.Group>
-                </Form>
-                <ClassificationsInputForm
-                  setClassifications={SetClassifications}
-                  setClassificationLevels={SetClassificationLevels}
-                  classifications={classifications}
-                  classificationLevels={classificationLevels}
-                  currentPoint={preferredPoint}
-                  nObjectives={activeProblemInfo.nObjectives}
-                  objectiveNames={activeProblemInfo.objectiveNames}
-                  ideal={activeProblemInfo.ideal}
-                  nadir={activeProblemInfo.nadir}
-                  directions={activeProblemInfo.minimize}
-                />
-                {!loading && (
-                  <Button
-                    size={"large"}
-                    onClick={iterate}
-                    variant={"contained"}
-                    disabled={
-                      nimbusState === "classification" && !classificationOk
-                    }
-                  >
-                    {nimbusState === "classification" &&
-                      classificationOk &&
-                      "Iterate"}
-                    {nimbusState === "classification" &&
-                      !classificationOk &&
-                      "Check the classifications"}
-                  </Button>
-                )}
-                {loading && (
-                  <Button disabled={true} size={"large"} variant={"contained"}>
-                    {"Working... "}
-                    <ReactLoading
-                      type={"bubbles"}
-                      color={"#ffffff"}
-                      className={"loading-icon"}
-                      height={28}
-                      width={32}
-                    />
-                  </Button>
-                )}
-                <HorizontalBars
-                  objectiveData={ToTrueValues(
-                    ParseSolutions([preferredPoint], activeProblemInfo)
-                  )}
-                  referencePoint={classificationLevels.map((v, i) =>
-                    activeProblemInfo.minimize[i] === 1 ? v : -v
-                  )}
-                  currentPoint={preferredPoint.map((v, i) =>
-                    activeProblemInfo.minimize[i] === 1 ? v : -v
-                  )}
-                  setReferencePoint={inferClassifications} // the reference point is passed in its true form to the callback
-                />
-              </Box>
-            </>
-          )}
-          {nimbusState === "archive" && (
-            <Box sx={{ padding: "1rem" }}>
-              <Typography
-                color={"primary"}
-                sx={{
-                  fontSize: "1.25rem",
-                  fontWeight: "bold",
-                  marginBottom: "1rem",
-                }}
-              >
-                Archive solutions
-              </Typography>
-              <Typography>
-                Select the solutions you want to save. You can click the desired
-                solutions from the table or from the plot.
-              </Typography>
-              {!loading && (
-                <Button size={"large"} onClick={iterate} variant={"contained"}>
-                  {nimbusState === "archive" &&
-                    selectedIndices.length > 0 &&
-                    "Save"}
-                  {nimbusState === "archive" &&
-                    selectedIndices.length === 0 &&
-                    "Continue"}
-                </Button>
+      {nimbusState !== "stop" && (
+        <>
+          <Box
+            component="nav"
+            sx={{
+              width: { sm: drawerWidth },
+              flexShrink: { sm: 0 },
+            }}
+          >
+            <Drawer
+              sx={{
+                flexShrink: 0,
+                "& .MuiDrawer-paper": {
+                  width: drawerWidth,
+                  boxSizing: "border-box",
+                },
+              }}
+              variant="permanent"
+              anchor="left"
+              PaperProps={{ elevation: 9 }}
+            >
+              <Toolbar />
+              <Box sx={{ borderBottom: 1, borderColor: "divider" }}></Box>
+              {nimbusState === "not started" && (
+                <div>Method not started yet</div>
               )}
-            </Box>
-          )}
-          {nimbusState === "intermediate" && (
-            <>
-              <Box sx={{ padding: "1rem" }}>
-                <Typography
-                  color={"primary"}
-                  sx={{
-                    fontSize: "1.25rem",
-                    fontWeight: "bold",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  Generate intermediate solutions
-                </Typography>
-                <Typography sx={{ marginBottom: "1rem" }}>
-                  You can generate solutions between any two solutions given by
-                  the method. The number of intermediate solutions should not be
-                  greater than 20.
-                </Typography>
-                <Form>
-                  <Form.Group as={Row}>
-                    <Form.Label column sm={8} style={{ marginBottom: "1rem" }}>
-                      {"Would you like to see intermediate solutions?"}
-                    </Form.Label>
-                    <Col sm={3}>
-                      <Form.Check
-                        id="intermediate-switch"
-                        type="switch"
-                        label={
-                          computeIntermediate ? (
-                            <>
-                              {"no/"}
-                              <b>{"yes"}</b>
-                            </>
-                          ) : (
-                            <>
-                              <b>{"no"}</b>
-                              {"/yes"}
-                            </>
-                          )
-                        }
-                        checked={computeIntermediate}
-                        onChange={() =>
-                          SetComputeIntermediate(!computeIntermediate)
-                        }
-                      ></Form.Check>
-                    </Col>
-                    <Form.Label column sm={8} style={{ marginBottom: "1rem" }}>
-                      {"Number of intermediate solutions:"}
-                    </Form.Label>
-                    <Col sm={3}>
-                      <Form.Control
-                        type="number"
-                        readOnly={!computeIntermediate}
-                        defaultValue={1}
-                        onChange={(v) => {
-                          const input = v.target.value;
-                          const parsed = parseInt(input);
-                          if (!Number.isNaN(parsed)) {
-                            if (parsed > 0 && parsed <= 20) {
-                              SetNumberOfSolutions(parsed);
-                              SetHelpMessage(
-                                `Number of intermediate solutions to be computed in the next iteration set to ${parsed}`
-                              );
-                            } else {
-                              SetHelpMessage(
-                                "The number of solutions should be more than 0, but less than 20."
-                              );
-                            }
-                          }
-                        }}
-                      ></Form.Control>
-                    </Col>
-                    <Col sm={1} />
-                  </Form.Group>
-                </Form>
-                {!loading && (
-                  <Button
-                    size={"large"}
-                    onClick={iterate}
-                    variant={"contained"}
-                    disabled={
-                      nimbusState === "intermediate" &&
-                      computeIntermediate &&
-                      selectedIndices.length !== 2
-                    }
-                  >
-                    {nimbusState === "intermediate" &&
-                      computeIntermediate &&
-                      selectedIndices.length === 2 &&
-                      "Compute"}
-                    {nimbusState === "intermediate" &&
-                      computeIntermediate &&
-                      selectedIndices.length !== 2 &&
-                      "Select two solutions first"}
-                    {nimbusState === "intermediate" &&
-                      !computeIntermediate &&
-                      "Continue"}
-                  </Button>
-                )}
-                {loading && (
-                  <Button disabled={true} size={"large"} variant={"contained"}>
-                    {"Working... "}
-                    <ReactLoading
-                      type={"bubbles"}
-                      color={"#ffffff"}
-                      className={"loading-icon"}
-                      height={28}
-                      width={32}
+              {nimbusState === "classification" && (
+                <>
+                  <Box sx={{ padding: "1rem" }}>
+                    <Typography
+                      color={"primary"}
+                      sx={{
+                        fontSize: "1.25rem",
+                        fontWeight: "bold",
+                        marginBottom: "1rem",
+                      }}
+                    >
+                      Classification {initialSolution[2]}
+                    </Typography>
+                    <Typography sx={{ marginBottom: "1rem" }}>
+                      Select the number of solutions you want to generate and
+                      classify the objective functions according to your
+                      preferences.
+                    </Typography>
+                    <Typography>{`Help: ${helpMessage}`}</Typography>
+                    <Form>
+                      <Form.Group as={Row}>
+                        <Form.Label column sm="12">
+                          Desired number of solutions
+                        </Form.Label>
+                        <Col sm={12}>
+                          <Form.Check
+                            inline
+                            label="1"
+                            type="radio"
+                            value={1}
+                            checked={numberOfSolutions === 1 ? true : false}
+                            onChange={() => SetNumberOfSolutions(1)}
+                          />
+                          <Form.Check
+                            inline
+                            label="2"
+                            type="radio"
+                            value={2}
+                            checked={numberOfSolutions === 2 ? true : false}
+                            onChange={() => SetNumberOfSolutions(2)}
+                          />
+                          <Form.Check
+                            inline
+                            label="3"
+                            type="radio"
+                            value={3}
+                            checked={numberOfSolutions === 3 ? true : false}
+                            onChange={() => SetNumberOfSolutions(3)}
+                          />
+                          <Form.Check
+                            inline
+                            label="4"
+                            type="radio"
+                            value={4}
+                            checked={numberOfSolutions === 4 ? true : false}
+                            onChange={() => SetNumberOfSolutions(4)}
+                          />
+                        </Col>
+                      </Form.Group>
+                    </Form>
+                    <ClassificationsInputForm
+                      setClassifications={SetClassifications}
+                      setClassificationLevels={SetClassificationLevels}
+                      classifications={classifications}
+                      classificationLevels={classificationLevels}
+                      currentPoint={preferredPoint}
+                      nObjectives={activeProblemInfo.nObjectives}
+                      objectiveNames={activeProblemInfo.objectiveNames}
+                      ideal={activeProblemInfo.ideal}
+                      nadir={activeProblemInfo.nadir}
+                      directions={activeProblemInfo.minimize}
                     />
-                  </Button>
-                )}
-              </Box>
-            </>
-          )}
-          {nimbusState === "select preferred" && (
-            <>
-              <Box sx={{ padding: "1rem" }}>
-                <Typography
-                  color={"primary"}
-                  sx={{
-                    fontSize: "1.25rem",
-                    fontWeight: "bold",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  Select the most preferred solution
-                </Typography>
-                <Typography sx={{ marginBottom: "1rem" }}>
-                  Select the most preferred solution. Then indicate if you want
-                  to continue with the process or to stop.
-                </Typography>
-                <Form>
-                  <Form.Group as={Row}>
-                    <Form.Label column sm={8}>
-                      {
-                        "Would you like to continue to classification of the selected solution's objectives or to stop?"
-                      }
-                    </Form.Label>
-                    <Col sm={3}>
-                      <Form.Check
-                        className={"mt-3"}
-                        id="stop-switch"
-                        type="switch"
-                        label={
-                          cont ? (
-                            <>
-                              {"stop/"}
-                              <b>{"continue"}</b>
-                            </>
-                          ) : (
-                            <>
-                              <b>{"stop"}</b>
-                              {"/continue"}
-                            </>
-                          )
+                    {!loading && (
+                      <Button
+                        size={"large"}
+                        onClick={iterate}
+                        variant={"contained"}
+                        disabled={
+                          nimbusState === "classification" && !classificationOk
                         }
-                        checked={cont}
-                        onChange={() => SetCont(!cont)}
-                      ></Form.Check>
-                    </Col>
-                  </Form.Group>
-                </Form>
-                {!loading && (
-                  <Button
-                    size={"large"}
-                    onClick={iterate}
-                    variant={"contained"}
-                    disabled={
-                      nimbusState === "select preferred" &&
-                      selectedIndices.length !== 1
-                    }
+                      >
+                        {nimbusState === "classification" &&
+                          classificationOk &&
+                          "Iterate"}
+                        {nimbusState === "classification" &&
+                          !classificationOk &&
+                          "Check the classifications"}
+                      </Button>
+                    )}
+                    {loading && (
+                      <Button
+                        disabled={true}
+                        size={"large"}
+                        variant={"contained"}
+                      >
+                        {"Working... "}
+                        <ReactLoading
+                          type={"bubbles"}
+                          color={"#ffffff"}
+                          className={"loading-icon"}
+                          height={28}
+                          width={32}
+                        />
+                      </Button>
+                    )}
+                    <HorizontalBars
+                      objectiveData={ToTrueValues(
+                        ParseSolutions([preferredPoint], activeProblemInfo)
+                      )}
+                      referencePoint={classificationLevels.map((v, i) =>
+                        activeProblemInfo.minimize[i] === 1 ? v : -v
+                      )}
+                      currentPoint={preferredPoint.map((v, i) =>
+                        activeProblemInfo.minimize[i] === 1 ? v : -v
+                      )}
+                      setReferencePoint={inferClassifications} // the reference point is passed in its true form to the callback
+                    />
+                  </Box>
+                </>
+              )}
+              {nimbusState === "archive" && (
+                <Box sx={{ padding: "1rem" }}>
+                  <Typography
+                    color={"primary"}
+                    sx={{
+                      fontSize: "1.25rem",
+                      fontWeight: "bold",
+                      marginBottom: "1rem",
+                    }}
                   >
-                    {nimbusState === "select preferred" &&
-                      cont &&
-                      selectedIndices.length === 1 &&
-                      "Continue"}
-                    {nimbusState === "select preferred" &&
-                      cont &&
-                      selectedIndices.length !== 1 &&
-                      "Select a solution first"}
-                    {nimbusState === "select preferred" &&
-                      !cont &&
-                      selectedIndices.length === 1 &&
-                      "Stop"}
-                    {nimbusState === "select preferred" &&
-                      !cont &&
-                      selectedIndices.length !== 1 &&
-                      "Select a solution first"}
-                  </Button>
+                    Archive solutions
+                  </Typography>
+                  <Typography>
+                    Select the solutions you want to save. You can click the
+                    desired solutions from the table or from the plot.
+                  </Typography>
+                  {!loading && (
+                    <Button
+                      size={"large"}
+                      onClick={iterate}
+                      variant={"contained"}
+                    >
+                      {nimbusState === "archive" &&
+                        selectedIndices.length > 0 &&
+                        "Save"}
+                      {nimbusState === "archive" &&
+                        selectedIndices.length === 0 &&
+                        "Continue"}
+                    </Button>
+                  )}
+                </Box>
+              )}
+              {nimbusState === "intermediate" && (
+                <>
+                  <Box sx={{ padding: "1rem" }}>
+                    <Typography
+                      color={"primary"}
+                      sx={{
+                        fontSize: "1.25rem",
+                        fontWeight: "bold",
+                        marginBottom: "1rem",
+                      }}
+                    >
+                      Generate intermediate solutions
+                    </Typography>
+                    <Typography sx={{ marginBottom: "1rem" }}>
+                      You can generate solutions between any two solutions given
+                      by the method. The number of intermediate solutions should
+                      not be greater than 20.
+                    </Typography>
+                    <Form>
+                      <Form.Group as={Row}>
+                        <Form.Label
+                          column
+                          sm={8}
+                          style={{ marginBottom: "1rem" }}
+                        >
+                          {"Would you like to see intermediate solutions?"}
+                        </Form.Label>
+                        <Col sm={3}>
+                          <Form.Check
+                            id="intermediate-switch"
+                            type="switch"
+                            label={
+                              computeIntermediate ? (
+                                <>
+                                  {"no/"}
+                                  <b>{"yes"}</b>
+                                </>
+                              ) : (
+                                <>
+                                  <b>{"no"}</b>
+                                  {"/yes"}
+                                </>
+                              )
+                            }
+                            checked={computeIntermediate}
+                            onChange={() =>
+                              SetComputeIntermediate(!computeIntermediate)
+                            }
+                          ></Form.Check>
+                        </Col>
+                        <Form.Label
+                          column
+                          sm={8}
+                          style={{ marginBottom: "1rem" }}
+                        >
+                          {"Number of intermediate solutions:"}
+                        </Form.Label>
+                        <Col sm={3}>
+                          <Form.Control
+                            type="number"
+                            readOnly={!computeIntermediate}
+                            defaultValue={1}
+                            onChange={(v) => {
+                              const input = v.target.value;
+                              const parsed = parseInt(input);
+                              if (!Number.isNaN(parsed)) {
+                                if (parsed > 0 && parsed <= 20) {
+                                  SetNumberOfSolutions(parsed);
+                                  SetHelpMessage(
+                                    `Number of intermediate solutions to be computed in the next iteration set to ${parsed}`
+                                  );
+                                } else {
+                                  SetHelpMessage(
+                                    "The number of solutions should be more than 0, but less than 20."
+                                  );
+                                }
+                              }
+                            }}
+                          ></Form.Control>
+                        </Col>
+                        <Col sm={1} />
+                      </Form.Group>
+                    </Form>
+                    {!loading && (
+                      <Button
+                        size={"large"}
+                        onClick={iterate}
+                        variant={"contained"}
+                        disabled={
+                          nimbusState === "intermediate" &&
+                          computeIntermediate &&
+                          selectedIndices.length !== 2
+                        }
+                      >
+                        {nimbusState === "intermediate" &&
+                          computeIntermediate &&
+                          selectedIndices.length === 2 &&
+                          "Compute"}
+                        {nimbusState === "intermediate" &&
+                          computeIntermediate &&
+                          selectedIndices.length !== 2 &&
+                          "Select two solutions first"}
+                        {nimbusState === "intermediate" &&
+                          !computeIntermediate &&
+                          "Continue"}
+                      </Button>
+                    )}
+                    {loading && (
+                      <Button
+                        disabled={true}
+                        size={"large"}
+                        variant={"contained"}
+                      >
+                        {"Working... "}
+                        <ReactLoading
+                          type={"bubbles"}
+                          color={"#ffffff"}
+                          className={"loading-icon"}
+                          height={28}
+                          width={32}
+                        />
+                      </Button>
+                    )}
+                  </Box>
+                </>
+              )}
+              {nimbusState === "select preferred" && (
+                <>
+                  <Box sx={{ padding: "1rem" }}>
+                    <Typography
+                      color={"primary"}
+                      sx={{
+                        fontSize: "1.25rem",
+                        fontWeight: "bold",
+                        marginBottom: "1rem",
+                      }}
+                    >
+                      Select the most preferred solution
+                    </Typography>
+                    <Typography sx={{ marginBottom: "1rem" }}>
+                      Select the most preferred solution. Then indicate if you
+                      want to continue with the process or to stop.
+                    </Typography>
+                    <Form>
+                      <Form.Group as={Row}>
+                        <Form.Label column sm={8}>
+                          {
+                            "Would you like to continue to classification of the selected solution's objectives or to stop?"
+                          }
+                        </Form.Label>
+                        <Col sm={3}>
+                          <Form.Check
+                            className={"mt-3"}
+                            id="stop-switch"
+                            type="switch"
+                            label={
+                              cont ? (
+                                <>
+                                  {"stop/"}
+                                  <b>{"continue"}</b>
+                                </>
+                              ) : (
+                                <>
+                                  <b>{"stop"}</b>
+                                  {"/continue"}
+                                </>
+                              )
+                            }
+                            checked={cont}
+                            onChange={() => SetCont(!cont)}
+                          ></Form.Check>
+                        </Col>
+                      </Form.Group>
+                    </Form>
+                    {!loading && (
+                      <Button
+                        size={"large"}
+                        onClick={iterate}
+                        variant={"contained"}
+                        disabled={
+                          nimbusState === "select preferred" &&
+                          selectedIndices.length !== 1
+                        }
+                      >
+                        {nimbusState === "select preferred" &&
+                          cont &&
+                          selectedIndices.length === 1 &&
+                          "Continue"}
+                        {nimbusState === "select preferred" &&
+                          cont &&
+                          selectedIndices.length !== 1 &&
+                          "Select a solution first"}
+                        {nimbusState === "select preferred" &&
+                          !cont &&
+                          selectedIndices.length === 1 &&
+                          "Stop"}
+                        {nimbusState === "select preferred" &&
+                          !cont &&
+                          selectedIndices.length !== 1 &&
+                          "Select a solution first"}
+                      </Button>
+                    )}
+                  </Box>
+                </>
+              )}
+            </Drawer>
+          </Box>
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 3,
+              width: "100%",
+            }}
+          >
+            <Toolbar />
+            <Container>
+              <>
+                {nimbusState === "classification" && (
+                  <>
+                    <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
+                      <CardContent>
+                        <Typography
+                          color={"primary"}
+                          sx={{ fontWeight: "bold", m: 1 }}
+                        >
+                          Parallel coordinate plot
+                        </Typography>
+
+                        {newSolutions !== undefined && (
+                          <ParallelAxes
+                            objectiveData={ToTrueValues(newSolutions!)}
+                            selectedIndices={selectedIndices}
+                            handleSelection={SetSelectedIndices}
+                          />
+                        )}
+                        {newSolutions === undefined && (
+                          <Card
+                            variant="outlined"
+                            sx={{
+                              backgroundColor: "#eeeeee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <CardContent>
+                              <Typography sx={{ m: 1 }}>
+                                A plot showing a set of solutions will be shown
+                                in this section.
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </CardContent>
+                    </Card>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography
+                          color={"primary"}
+                          sx={{ fontWeight: "bold", m: 1 }}
+                        >
+                          Solutions table
+                        </Typography>
+                        {newSolutions !== undefined && (
+                          <SolutionTableMultiSelect
+                            objectiveData={newSolutions!}
+                            activeIndices={selectedIndices}
+                            setIndices={SetSelectedIndices}
+                            tableTitle={""}
+                          />
+                        )}
+                        {newSolutions === undefined && (
+                          <Card
+                            variant="outlined"
+                            sx={{
+                              backgroundColor: "#eeeeee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <CardContent>
+                              <Typography sx={{ m: 1 }}>
+                                A table showing a set of solutions will be shown
+                                in this section.
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </>
                 )}
-              </Box>
-            </>
-          )}
-        </Drawer>
-      </Box>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: "100%",
-        }}
-      >
-        <Toolbar />
+                {nimbusState === "archive" && (
+                  <>
+                    <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
+                      <CardContent>
+                        <Typography
+                          color={"primary"}
+                          sx={{ fontWeight: "bold", m: 1 }}
+                        >
+                          Parallel coordinate plot
+                        </Typography>
+
+                        {newSolutions !== undefined && (
+                          <ParallelAxes
+                            objectiveData={ToTrueValues(newSolutions!)}
+                            selectedIndices={selectedIndices}
+                            handleSelection={SetSelectedIndices}
+                          />
+                        )}
+                        {newSolutions === undefined && (
+                          <Card
+                            variant="outlined"
+                            sx={{
+                              backgroundColor: "#eeeeee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <CardContent>
+                              <Typography sx={{ m: 1 }}>
+                                A plot showing a set of solutions will be shown
+                                in this section.
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </CardContent>
+                    </Card>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography
+                          color={"primary"}
+                          sx={{ fontWeight: "bold", m: 1 }}
+                        >
+                          Solutions table
+                        </Typography>
+                        {newSolutions !== undefined && (
+                          <SolutionTableMultiSelect
+                            objectiveData={newSolutions!}
+                            activeIndices={selectedIndices}
+                            setIndices={SetSelectedIndices}
+                            tableTitle={""}
+                          />
+                        )}
+                        {newSolutions === undefined && (
+                          <Card
+                            variant="outlined"
+                            sx={{
+                              backgroundColor: "#eeeeee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <CardContent>
+                              <Typography sx={{ m: 1 }}>
+                                A table showing a set of solutions will be shown
+                                in this section.
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+                {nimbusState === "intermediate" && (
+                  <>
+                    <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
+                      <CardContent>
+                        <Typography
+                          color={"primary"}
+                          sx={{ fontWeight: "bold", m: 1 }}
+                        >
+                          Parallel coordinate plot
+                        </Typography>
+
+                        {newSolutions !== undefined && (
+                          <ParallelAxes
+                            objectiveData={ToTrueValues(newSolutions!)}
+                            selectedIndices={selectedIndices}
+                            handleSelection={SetSelectedIndices}
+                          />
+                        )}
+                        {newSolutions === undefined && (
+                          <Card
+                            variant="outlined"
+                            sx={{
+                              backgroundColor: "#eeeeee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <CardContent>
+                              <Typography sx={{ m: 1 }}>
+                                A plot showing a set of solutions will be shown
+                                in this section.
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </CardContent>
+                    </Card>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography
+                          color={"primary"}
+                          sx={{ fontWeight: "bold", m: 1 }}
+                        >
+                          Solutions table
+                        </Typography>
+                        {newSolutions !== undefined && (
+                          <SolutionTableMultiSelect
+                            objectiveData={newSolutions!}
+                            activeIndices={selectedIndices}
+                            setIndices={SetSelectedIndices}
+                            tableTitle={""}
+                          />
+                        )}
+                        {newSolutions === undefined && (
+                          <Card
+                            variant="outlined"
+                            sx={{
+                              backgroundColor: "#eeeeee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <CardContent>
+                              <Typography sx={{ m: 1 }}>
+                                A table showing a set of solutions will be shown
+                                in this section.
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+                {nimbusState === "select preferred" && (
+                  <>
+                    <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
+                      <CardContent>
+                        <Typography
+                          color={"primary"}
+                          sx={{ fontWeight: "bold", m: 1 }}
+                        >
+                          Parallel coordinate plot
+                        </Typography>
+
+                        {newSolutions !== undefined && (
+                          <ParallelAxes
+                            objectiveData={ToTrueValues(newSolutions!)}
+                            selectedIndices={selectedIndices}
+                            handleSelection={SetSelectedIndices}
+                          />
+                        )}
+                        {newSolutions === undefined && (
+                          <Card
+                            variant="outlined"
+                            sx={{
+                              backgroundColor: "#eeeeee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <CardContent>
+                              <Typography sx={{ m: 1 }}>
+                                A plot showing a set of solutions will be shown
+                                in this section.
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </CardContent>
+                    </Card>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography
+                          color={"primary"}
+                          sx={{ fontWeight: "bold", m: 1 }}
+                        >
+                          Solutions table
+                        </Typography>
+                        {newSolutions !== undefined && (
+                          <SolutionTableMultiSelect
+                            objectiveData={newSolutions!}
+                            activeIndices={selectedIndices}
+                            setIndices={SetSelectedIndices}
+                            tableTitle={""}
+                          />
+                        )}
+                        {newSolutions === undefined && (
+                          <Card
+                            variant="outlined"
+                            sx={{
+                              backgroundColor: "#eeeeee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <CardContent>
+                              <Typography sx={{ m: 1 }}>
+                                A table showing a set of solutions will be shown
+                                in this section.
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </>
+            </Container>
+          </Box>
+        </>
+      )}
+      {nimbusState === "stop" && (
         <Container>
-          <>
-            <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
-              <CardContent>
-                <Typography color={"primary"} sx={{ fontWeight: "bold", m: 1 }}>
-                  Parallel coordinate plot
-                </Typography>
-                {newSolutions !== undefined && (
-                  <ParallelAxes
-                    objectiveData={ToTrueValues(newSolutions!)}
-                    selectedIndices={selectedIndices}
-                    handleSelection={SetSelectedIndices}
-                  />
-                )}
-                {newSolutions === undefined && (
-                  <Card
-                    variant="outlined"
-                    sx={{ backgroundColor: "#eeeeee", textAlign: "center" }}
-                  >
-                    <CardContent>
-                      <Typography sx={{ m: 1 }}>
-                        A plot showing a set of solutions will be shown in this
-                        section.
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                )}
-              </CardContent>
-            </Card>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography color={"primary"} sx={{ fontWeight: "bold", m: 1 }}>
-                  Solutions table
-                </Typography>
-                {newSolutions !== undefined && (
-                  <SolutionTableMultiSelect
-                    objectiveData={newSolutions!}
-                    activeIndices={selectedIndices}
-                    setIndices={SetSelectedIndices}
-                    tableTitle={""}
-                  />
-                )}
-                {newSolutions === undefined && (
-                  <Card
-                    variant="outlined"
-                    sx={{ backgroundColor: "#eeeeee", textAlign: "center" }}
-                  >
-                    <CardContent>
-                      <Typography sx={{ m: 1 }}>
-                        A table showing a set of solutions will be shown in this
-                        section.
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                )}
-              </CardContent>
-            </Card>
-          </>
-          {/* {nimbusState === "stop" && (
-            <>
-              <SolutionTable
-                objectiveData={ParseSolutions(
-                  [preferredPoint],
-                  activeProblemInfo
-                )}
-                setIndex={() => console.log("nothing happens...")}
-                selectedIndex={0}
-                tableTitle={"Final objective values"}
-              />
-              <p>{"Final decision variable values:"}</p>
-              <Table striped bordered hover>
-                <thead>
-                  <tr>
-                    {finalVariables.map((_, i) => {
-                      return <th>{`x${i + 1}`}</th>;
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    {finalVariables.map((v) => {
-                      return <td>{`${v.toFixed(4)}`}</td>;
-                    })}
-                  </tr>
-                </tbody>
-              </Table>
-              <Button variant="contained" href="/">
-                {"Back to index"}
-              </Button>
-            </>
-          )} */}
+          <Toolbar />
+          <Typography
+            variant="h5"
+            color={"primary"}
+            sx={{ marginBottom: "2rem" }}
+          >
+            Final solution
+          </Typography>
+          <Typography
+            variant="h6"
+            color={"primary"}
+            sx={{ marginTop: "2rem", marginBottom: "2rem" }}
+          >
+            Objective values:
+          </Typography>
+          <SolutionTable
+            objectiveData={ParseSolutions([preferredPoint], activeProblemInfo)}
+            setIndex={() => console.log("nothing happens...")}
+            selectedIndex={0}
+            tableTitle={""}
+          />
+          <Typography
+            variant="h6"
+            color={"primary"}
+            sx={{ marginTop: "2rem", marginBottom: "2rem" }}
+          >
+            Decision variables:
+          </Typography>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                {finalVariables.map((_, i) => {
+                  return <th>{`x${i + 1}`}</th>;
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                {finalVariables.map((v) => {
+                  return <td>{`${v.toFixed(4)}`}</td>;
+                })}
+              </tr>
+            </tbody>
+          </Table>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={toQuestionnaire}
+            sx={{ marginTop: "2rem" }}
+          >
+            {"Continue"}
+          </Button>
         </Container>
-      </Box>
+      )}
     </Box>
   );
 }

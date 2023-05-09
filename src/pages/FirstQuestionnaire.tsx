@@ -17,6 +17,8 @@ import defaultSurveyConfig from "../types/survey";
 import SurveyComponent from "../components/SurveyComponent";
 import { prequestionnaire } from "../utils/questionnaires";
 import Toolbar from "@mui/material/Toolbar";
+import "../style/custom.scss";
+import { CssBaseline, Typography } from "@mui/material";
 
 interface QuestionInit {
   elements: any[];
@@ -175,9 +177,15 @@ FirstQuestionnaireProps) => {
 
   return (
     <Container className="py-4 main-container">
-      <Row className="mb-3" style={{ textAlign: "center" }}>
-        <h4>Questionnaire</h4>
-      </Row>
+      <CssBaseline />
+      <Toolbar />
+      <Typography
+        variant="h4"
+        color="primary"
+        style={{ marginBottom: "2rem", textAlign: "left" }}
+      >
+        Pre-Solution Process
+      </Typography>
       <Row>
         <p>
           Before start using the method, we need you to answer the following

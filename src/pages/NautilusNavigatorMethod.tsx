@@ -7,7 +7,7 @@ import { NavigationWindow } from "../components/NavigationWindow";
 //import Slider from "@material-ui/core/Slider";
 import "desdeo-components/src/components/Svg.css";
 import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
@@ -107,9 +107,68 @@ function NautilusNavigatorMethod({
     marginTop: 40,
     marginBottom: 0,
   };
-
+  interface ArchiveProps {
+    decision_variables: string;
+    objective_values: string;
+  }
+  const navigate = useNavigate();
   // FUNCTIONS to handle stuff
+  const toNimbus = async () => {
+    try {
+      const methodCreation = {
+        problemGroup: problemGroup,
+        method: "synchronous_nimbus",
+        starting_point: finalObjectives.join(","),
+      };
+      const res = await fetch(`${apiUrl}/method/create`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${tokens.access}`,
+        },
+        body: JSON.stringify(methodCreation),
+      });
 
+      if (res.status === 201) {
+        const body = await res.json();
+        console.log(body);
+        // created!
+      } else {
+        console.log(`Got return code ${res.status}. Could not create method.`);
+        // do nothing
+      }
+    } catch (e) {
+      console.log(e);
+      // Do nothing
+    }
+    navigate("/nimbus");
+    //console.log("to nimbus");
+  };
+  const saveLog = async (data: ArchiveProps) => {
+    const log = {
+      method: "NAUTILUS",
+      variables: data.decision_variables,
+      objectives: data.objective_values,
+    };
+    try {
+      const res = await fetch(`${apiUrl}/archive`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${tokens.access}`,
+        },
+        body: JSON.stringify(log),
+      });
+
+      if (res.status == 201) {
+        // OK
+        console.log("OK", log);
+      }
+    } catch (e) {
+      console.log(e);
+      // Do nothing
+    }
+  };
   // NavigationBars needs stuff converted. Logic, ideal is top, maximizing and upperBound is on top.
   const convertData = (data: NavigationData, minimize: number[]) => {
     return {
@@ -626,7 +685,11 @@ function NautilusNavigatorMethod({
               SetLoading(false);
 
               SetShowFinal(true);
-
+              saveLog({
+                decision_variables: variables.join(","),
+                objective_values: objectives.join(","),
+              });
+              console.log("Final objectives", objectives);
               return;
             }
             // hacky way to make speed matter
@@ -776,15 +839,15 @@ function NautilusNavigatorMethod({
             justifyContent={"center"}
             width={"-webkit-fill-available"}
           >
-            <Link to={"/nimbus"}>
-              <Button
-                variant="contained"
-                size="large"
-                disabled={showFinal ? false : true}
-              >
-                {"Next"}
-              </Button>
-            </Link>
+            {" "}
+            <Button
+              variant="contained"
+              size="large"
+              onClick={toNimbus}
+              disabled={showFinal ? false : true}
+            >
+              {"Next"}
+            </Button>
           </Box>
         </Drawer>
       </Box>

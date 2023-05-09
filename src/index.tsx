@@ -42,8 +42,8 @@ export const themeOptions = createTheme({
     MuiToolbar: {
       styleOverrides: {
         dense: {
-          height: 32,
-          minHeight: 32,
+          height: 42,
+          minHeight: 42,
         },
       },
     },
