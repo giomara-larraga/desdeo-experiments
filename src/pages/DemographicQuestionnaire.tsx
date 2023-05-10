@@ -1,14 +1,14 @@
 import React, { useCallback } from "react";
 import { useEffect, useState } from "react";
-import { Container, Row } from "react-bootstrap";
+//import { Container, Row } from "react-bootstrap";
 //import { useForm, Controller } from "react-hook-form";
 //import { Link } from "react-router-dom";
 import SurveyComponent from "../components/SurveyComponent";
 import { Tokens } from "../types/AppTypes";
 import defaultSurveyConfig from "../types/survey";
 import { useNavigate } from "react-router-dom";
-import "../style/custom.scss";
-import { CssBaseline, Typography } from "@mui/material";
+//import "../style/custom.scss";
+import { CssBaseline, Typography, Container, Box } from "@mui/material";
 import Toolbar from "@mui/material/Toolbar";
 //import ReactDOM from "react-dom";
 //import { json } from "d3";
@@ -161,7 +161,7 @@ const DemographicQuestionnaire = ({
   return (
     <Container className="py-4 main-container">
       <CssBaseline />
-      <Toolbar />
+      <Toolbar variant="dense" />
       <Typography
         variant="h4"
         color="primary"
@@ -169,20 +169,16 @@ const DemographicQuestionnaire = ({
       >
         Demographic Information
       </Typography>
-      <Row>
-        <p>
-          Please answer the following questions to let us learn more about you.
-          The information provided will be used solely for this research
-          project.
-        </p>
-      </Row>
-      <Row className="mb-3">
-        <SurveyComponent
-          data={defaultSurveyConfig.defaultSurveyData}
-          json={questions}
-          onComplete={onSurveyComplete}
-        />
-      </Row>
+      <Typography>
+        Please answer the following questions to let us learn more about you.
+        The information provided will be used solely for this research project.
+      </Typography>
+
+      <SurveyComponent
+        data={defaultSurveyConfig.defaultSurveyData}
+        json={questions}
+        onComplete={onSurveyComplete}
+      />
     </Container>
   );
 };

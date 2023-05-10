@@ -110,9 +110,68 @@ function NautilusNavigatorMethod({
     marginTop: 40,
     marginBottom: 0,
   };
-
+  interface ArchiveProps {
+    decision_variables: string;
+    objective_values: string;
+  }
+  const navigate = useNavigate();
   // FUNCTIONS to handle stuff
+  const toNimbus = async () => {
+    try {
+      const methodCreation = {
+        problemGroup: problemGroup,
+        method: "synchronous_nimbus",
+        starting_point: finalObjectives.join(","),
+      };
+      const res = await fetch(`${apiUrl}/method/create`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${tokens.access}`,
+        },
+        body: JSON.stringify(methodCreation),
+      });
 
+      if (res.status === 201) {
+        const body = await res.json();
+        console.log(body);
+        // created!
+      } else {
+        console.log(`Got return code ${res.status}. Could not create method.`);
+        // do nothing
+      }
+    } catch (e) {
+      console.log(e);
+      // Do nothing
+    }
+    navigate("/nimbus");
+    //console.log("to nimbus");
+  };
+  const saveLog = async (data: ArchiveProps) => {
+    const log = {
+      method: "NAUTILUS",
+      variables: data.decision_variables,
+      objectives: data.objective_values,
+    };
+    try {
+      const res = await fetch(`${apiUrl}/archive`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${tokens.access}`,
+        },
+        body: JSON.stringify(log),
+      });
+
+      if (res.status == 201) {
+        // OK
+        console.log("OK", log);
+      }
+    } catch (e) {
+      console.log(e);
+      // Do nothing
+    }
+  };
   // NavigationBars needs stuff converted. Logic, ideal is top, maximizing and upperBound is on top.
   const convertData = (data: NavigationData, minimize: number[]) => {
     return {
@@ -605,7 +664,11 @@ function NautilusNavigatorMethod({
               SetLoading(false);
 
               SetShowFinal(true);
-
+              saveLog({
+                decision_variables: variables.join(","),
+                objective_values: objectives.join(","),
+              });
+              console.log("Final objectives", objectives);
               return;
             }
             // hacky way to make speed matter
@@ -755,31 +818,14 @@ function NautilusNavigatorMethod({
             justifyContent={"center"}
             width={"-webkit-fill-available"}
           >
-            {showFinal && (
-              <div>
-                {finalObjectives[0].map(
-                  (objectives, i) => objectives * activeProblemInfo!.minimize[i]
-                )}
-              </div>
-            )}
+            {" "}
             <Button
-              //component={Link}
-              //to="/nimbus"
               variant="contained"
-              color="primary"
               size="large"
+              onClick={toNimbus}
               disabled={showFinal ? false : true}
-              onClick={() => {
-                createMethod(
-                  apiUrl,
-                  tokens,
-                  problemGroup,
-                  "synchronous_nimbus"
-                );
-                navigate("/nimbus");
-              }}
             >
-              Next
+              {"Next"}
             </Button>
           </Box>
         </Drawer>

@@ -1,14 +1,6 @@
 import React, { useCallback } from "react";
 import { useEffect, useState } from "react";
-import {
-  Col,
-  Container,
-  Row,
-  Button,
-  Card,
-  Form,
-  ButtonGroup,
-} from "react-bootstrap";
+
 import { useForm, Controller } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { Tokens } from "../types/AppTypes";
@@ -16,8 +8,10 @@ import { useNavigate } from "react-router-dom";
 import defaultSurveyConfig from "../types/survey";
 import SurveyComponent from "../components/SurveyComponent";
 import { prequestionnaire } from "../utils/questionnaires";
-import Toolbar from "@mui/material/Toolbar";
 import { createMethod } from "./nimbus/nimbusHelpers";
+import { Toolbar, Container } from "@mui/material";
+import "../style/custom.scss";
+import { CssBaseline, Typography } from "@mui/material";
 
 interface QuestionInit {
   elements: any[];
@@ -79,6 +73,7 @@ FirstQuestionnaireProps) => {
           const body = await res.json();
           // set questions
           SetQuestions(body);
+          console.log(body);
           //SetFetched(true);
           console.log("Questions fetched successfully!");
         } else {
@@ -103,14 +98,33 @@ FirstQuestionnaireProps) => {
     //setTest("changed into oncomplete");
     //console.log("test", test);
     const data = JSON.parse(JSON.stringify(sender.data));
+
+    var keys = Object.keys(data);
+    var validated_keys = [];
+    var validated_values = [];
+    for (let i = 0; i < keys.length; i++) {
+      const item = parseInt(keys[i]);
+      const value = data[keys[i]];
+
+      if (isNaN(item)) {
+        console.log(value);
+        var inner_keys = Object.keys(value);
+        var inner_values = Object.values(value);
+        for (let j = 0; j < inner_keys.length; j++) {
+          validated_keys.push(inner_keys[j]);
+          validated_values.push(inner_values[j]);
+        }
+      } else {
+        validated_keys.push(keys[i]);
+        validated_values.push(value);
+      }
+    }
     const responses: IAnswer = {
-      key: Object.keys(data),
-      value: Object.values(data),
+      key: validated_keys,
+      value: validated_values,
     };
     console.log("responses", responses);
-    //setAnswers(responses);
 
-    // save responses to database
     const newAnswers = {
       key: responses.key.map((k) => parseInt(k)),
       value: responses.value,
@@ -129,19 +143,16 @@ FirstQuestionnaireProps) => {
       console.log(res);
 
       if (res.status === 200) {
-        // OK
         console.log("saved");
-        //navigate(`/prequestionnaire`);
       }
     } catch (e) {
       console.log(e);
-      // Do nothing
     }
     let methodName;
     let route: string;
 
     if (groupId === 1) {
-      methodName = "nimbus";
+      methodName = "synchronous_nimbus";
       route = "/nimbus";
     } else {
       methodName = "nautilus_navigator";
@@ -149,7 +160,7 @@ FirstQuestionnaireProps) => {
     }
     createMethod(apiUrl, tokens, problemGroup, methodName);
 
-    /*try {
+    /* try {
       const methodCreation = { problemGroup: problemGroup, method: methodName };
       const res = await fetch(`${apiUrl}/method/create`, {
         method: "POST",
@@ -171,28 +182,31 @@ FirstQuestionnaireProps) => {
     } catch (e) {
       console.log(e);
       // Do nothing
-    }*/
+    } */
     navigate(route);
   }, []);
 
   return (
     <Container className="py-4 main-container">
-      <Row className="mb-3" style={{ textAlign: "center" }}>
-        <h4>Questionnaire</h4>
-      </Row>
-      <Row>
-        <p>
-          Before start using the method, we need you to answer the following
-          information.
-        </p>
-      </Row>
-      <Row className="mb-3">
-        <SurveyComponent
-          data={defaultSurveyConfig.defaultSurveyData}
-          json={questions}
-          onComplete={onSurveyComplete}
-        />
-      </Row>
+      <CssBaseline />
+      <Toolbar variant="dense" />
+      <Typography
+        variant="h4"
+        color="primary"
+        style={{ marginBottom: "2rem", textAlign: "left" }}
+      >
+        Pre-Solution Process
+      </Typography>
+      <Typography>
+        Before start using the method, we need you to answer the following
+        information.
+      </Typography>
+
+      <SurveyComponent
+        data={defaultSurveyConfig.defaultSurveyData}
+        json={questions}
+        onComplete={onSurveyComplete}
+      />
     </Container>
   );
 };

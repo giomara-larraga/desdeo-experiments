@@ -16,7 +16,9 @@ import { useNavigate } from "react-router-dom";
 import defaultSurveyConfig from "../types/survey";
 import SurveyComponent from "../components/SurveyComponent";
 import { postquestionnaire } from "../utils/questionnaires";
+import "../style/custom.scss";
 import Toolbar from "@mui/material/Toolbar";
+import { CssBaseline, Typography } from "@mui/material";
 interface QuestionEnd {
   pages: any[];
   /*id: number;
@@ -162,9 +164,15 @@ LastQuestionnaireProps) => {
 
   return (
     <Container className="py-4 main-container">
-      <Row className="mb-3" style={{ textAlign: "center" }}>
-        <h4>Questionnaire</h4>
-      </Row>
+      <CssBaseline />
+      <Toolbar />
+      <Typography
+        variant="h4"
+        color="primary"
+        style={{ marginBottom: "2rem", textAlign: "left" }}
+      >
+        Overall Experience
+      </Typography>
       <Row>
         <p>Please, complete the following questionnaire.</p>
       </Row>

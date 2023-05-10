@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import defaultSurveyConfig from "../types/survey";
 import SurveyComponent from "../components/SurveyComponent";
 //import { switchquestionnaire } from "../utils/questionnaires";
+import "../style/custom.scss";
+import { CssBaseline, Typography } from "@mui/material";
 import Toolbar from "@mui/material/Toolbar";
 interface QuestionSwitch {
   pages: any[];
@@ -156,9 +158,15 @@ SwitchQuestionnaireProps) => {
   }, []);
   return (
     <Container className="py-4 main-container">
-      <Row className="mb-3" style={{ textAlign: "center" }}>
-        <h4>Questionnaire</h4>
-      </Row>
+      <CssBaseline />
+      <Toolbar />
+      <Typography
+        variant="h4"
+        color="primary"
+        style={{ marginBottom: "2rem", textAlign: "left" }}
+      >
+        Satisfaction with the obtained solution
+      </Typography>
       <Row>
         <p>
           Please, complete the following questionnaire related to the steps of

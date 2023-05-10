@@ -26,7 +26,7 @@ function Topbar({
       position="fixed"
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
     >
-      <Toolbar>
+      <Toolbar variant="dense">
         <Typography variant="h6" noWrap component="div">
           DESDEO
         </Typography>
