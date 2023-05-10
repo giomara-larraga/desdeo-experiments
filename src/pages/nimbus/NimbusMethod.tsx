@@ -13,7 +13,7 @@ import { ParseSolutions, ToTrueValues } from "../../utils/DataHandling";
 //import { ParallelAxes } from "desdeo-components";
 import ParallelAxes from "./ParallelAxes";
 //import { HorizontalBars } from "desdeo-components";
-import HorizontalBars from "../../components/HorizontalBars";
+// import HorizontalBars from "../../components/HorizontalBars";
 import SolutionTable from "../../components/SolutionTable";
 import SolutionTableMultiSelect from "../../components/SolutionTableMultiSelect";
 import { Link } from "react-router-dom";
@@ -25,16 +25,17 @@ import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import { CardContent, FormControl, Select } from "@material-ui/core";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import TabPanel from "./TabPanel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormLabel from "@mui/material/FormLabel/FormLabel";
+// import Tabs from "@mui/material/Tabs";
+// import Tab from "@mui/material/Tab";
+// import TabPanel from "./TabPanel";
+// import MenuItem from "@mui/material/MenuItem";
+// import FormControlLabel from "@mui/material/FormControlLabel";
+// import Radio from "@mui/material/Radio";
+// import RadioGroup from "@mui/material/RadioGroup";
+// import FormLabel from "@mui/material/FormLabel/FormLabel";
 import { useNavigate } from "react-router-dom";
-//import { HorizontalBars } from "desdeo-components";
+import HBWindow from "../../components/HBWindow";
+
 const drawerWidth = 550;
 interface NimbusMethodProps {
   isLoggedIn: boolean;
@@ -170,6 +171,8 @@ function NimbusMethod({
           SetClassificationLevels(body.response.objective_values);
           SetHelpMessage("Please classify each of the shown objectives.");
           SetNimbusState("classification");
+          //console.log(body);
+          //console.log(activeProblemInfo);
         }
       } catch (e) {
         console.log("not ok, could not start the method");
@@ -501,7 +504,10 @@ function NimbusMethod({
       }
       SetSelectedIndices(selectedIndices.slice(1));
       return;
-    } else if (nimbusState === "select preferred") {
+    } else if (
+      nimbusState === "select preferred" ||
+      nimbusState === "classification"
+    ) {
       if (selectedIndices.length === 1 || selectedIndices.length === 0) {
         // do nothing
         return;
@@ -512,6 +518,7 @@ function NimbusMethod({
   }, [selectedIndices]);
 
   useEffect(() => {
+    console.log("Classifications changed");
     if (nimbusState === "not started") {
       // do nothing if not started
       return;
@@ -522,6 +529,7 @@ function NimbusMethod({
     const worsen =
       classifications.includes(">=" as Classification) ||
       classifications.includes("0" as Classification);
+    console.log(improve, worsen);
 
     if (!improve) {
       SetHelpMessage(
@@ -540,62 +548,65 @@ function NimbusMethod({
       SetClassificationOk(true);
       return;
     }
-  }, [classifications]);
+  }, [classifications, nimbusState]);
 
-  const inferClassifications = (barSelection: number[]) => {
-    const isDiff = barSelection.map((v, i) => {
-      const res =
-        // The preferred point must be in the original scale to be compared with barSelection
-        Math.abs(v - preferredPoint[i] * activeProblemInfo!.minimize[i]) < 1e-12
-          ? false
-          : true;
-      return res;
-    });
-    const levels = classificationLevels;
-    const classes = barSelection.map((value, i) => {
-      if (!isDiff[i]) {
-        // no change, return old classification
-        return classifications[i];
-      }
-      if (activeProblemInfo?.minimize[i] === 1) {
-        // minimization
-        if (value > preferredPoint[i]) {
-          // selected value is greater than currently preferred (worse)
-          // Worsen until
-          levels[i] = barSelection[i];
-          return ">=" as Classification;
-        } else if (value < preferredPoint[i]) {
-          // selected value is less than currently preferred (better)
-          // improve until
-          levels[i] = barSelection[i];
-          return "<=" as Classification;
-        } else {
-          // no change, keep as it is
-          return classifications[i];
-        }
-      } else if (activeProblemInfo?.minimize[i] === -1) {
-        // maximization
-        // levels must be transformed back to original scale, hence the minus signs
-        if (value > -1 * preferredPoint[i]) {
-          // selected value is greater than currently preferred (better)
-          // improve until
-          levels[i] = -barSelection[i];
-          return "<=" as Classification;
-        } else if (value < -1 * preferredPoint[i]) {
-          // selected value is less than currently preferred (worse)
-          // worsen until
-          levels[i] = -barSelection[i];
-          return ">=" as Classification;
-        } else {
-          // no change, keep as it is
-          return classifications[i];
-        }
+  const inferClassifications = (barData: [number, number]) => {
+    console.log(barData);
+    const value = barData[0];
+    const objIndex = barData[1];
+    const isDiff =
+      Math.abs(
+        value - preferredPoint[objIndex] * activeProblemInfo!.minimize[objIndex]
+      ) < 1e-12
+        ? false
+        : true;
+    const levels = [...classificationLevels];
+    const classes = [...classifications];
+    console.log(nimbusState);
+    console.log(levels);
+    console.log(classes);
+    if (!isDiff) {
+      // no change, return old classification
+    }
+    if (activeProblemInfo?.minimize[objIndex] === 1) {
+      // minimization
+      if (value > preferredPoint[objIndex]) {
+        // selected value is greater than currently preferred (worse)
+        // Worsen until
+        levels[objIndex] = value;
+        classes[objIndex] = ">=";
+      } else if (value < preferredPoint[objIndex]) {
+        // selected value is less than currently preferred (better)
+        // improve until
+        levels[objIndex] = value;
+        classes[objIndex] = "<=";
       } else {
-        // something went wrong, return previous classification
-        console.log("Encountered something strange in inferClassifications...");
-        return classifications[i];
+        // no change, keep as it is
       }
-    });
+    } else if (activeProblemInfo?.minimize[objIndex] === -1) {
+      // maximization
+      // levels must be transformed back to original scale, hence the minus signs
+      if (value > -1 * preferredPoint[objIndex]) {
+        // selected value is greater than currently preferred (better)
+        // improve until
+        levels[objIndex] = -value;
+        classes[objIndex] = "<=";
+      } else if (value < -1 * preferredPoint[objIndex]) {
+        // selected value is less than currently preferred (worse)
+        // worsen until
+        levels[objIndex] = -value;
+        classes[objIndex] = ">=";
+      } else {
+        // no change, keep as it is
+      }
+    } else {
+      // something went wrong, return previous classification
+      console.log("Encountered something strange in inferClassifications...");
+      console.log(classifications[objIndex]);
+    }
+    console.log(levels);
+    console.log(classes);
+
     SetClassificationLevels(levels);
     SetClassifications(classes);
   };
@@ -692,18 +703,6 @@ function NimbusMethod({
                         </Col>
                       </Form.Group>
                     </Form>
-                    <ClassificationsInputForm
-                      setClassifications={SetClassifications}
-                      setClassificationLevels={SetClassificationLevels}
-                      classifications={classifications}
-                      classificationLevels={classificationLevels}
-                      currentPoint={preferredPoint}
-                      nObjectives={activeProblemInfo.nObjectives}
-                      objectiveNames={activeProblemInfo.objectiveNames}
-                      ideal={activeProblemInfo.ideal}
-                      nadir={activeProblemInfo.nadir}
-                      directions={activeProblemInfo.minimize}
-                    />
                     {!loading && (
                       <Button
                         size={"large"}
@@ -737,17 +736,17 @@ function NimbusMethod({
                         />
                       </Button>
                     )}
-                    <HorizontalBars
-                      objectiveData={ToTrueValues(
-                        ParseSolutions([preferredPoint], activeProblemInfo)
-                      )}
+                    <HBWindow
+                      ideal={activeProblemInfo?.ideal}
+                      nadir={activeProblemInfo?.nadir}
+                      directions={activeProblemInfo?.minimize}
+                      setReferencePoint={inferClassifications}
                       referencePoint={classificationLevels.map((v, i) =>
                         activeProblemInfo.minimize[i] === 1 ? v : -v
                       )}
                       currentPoint={preferredPoint.map((v, i) =>
                         activeProblemInfo.minimize[i] === 1 ? v : -v
                       )}
-                      setReferencePoint={inferClassifications} // the reference point is passed in its true form to the callback
                     />
                   </Box>
                 </>

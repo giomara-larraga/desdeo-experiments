@@ -122,6 +122,7 @@ function NautilusNavigatorMethod({
         method: "synchronous_nimbus",
         starting_point: finalObjectives.join(","),
       };
+      console.log(finalObjectives.join(","))
       const res = await fetch(`${apiUrl}/method/create`, {
         method: "POST",
         headers: {

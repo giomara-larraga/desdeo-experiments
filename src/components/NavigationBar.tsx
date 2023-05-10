@@ -819,6 +819,9 @@ export const NavigationBar = ({
           .on("end", function (event) {
             // add line coords to reference data
             let tempstep = Math.floor(xPixelToStepVal()(event.x));
+            if (tempstep < 1) {
+              tempstep = 1;
+            }
             movableStepData[0].x = stepValtoXPixel()(tempstep);
             movableStepData[1].x = stepValtoXPixel()(tempstep);
             movePath();
