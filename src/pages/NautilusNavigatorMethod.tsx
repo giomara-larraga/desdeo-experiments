@@ -114,7 +114,6 @@ function NautilusNavigatorMethod({
     decision_variables: string;
     objective_values: string;
   }
-  const navigate = useNavigate();
   // FUNCTIONS to handle stuff
   const toNimbus = async () => {
     try {
