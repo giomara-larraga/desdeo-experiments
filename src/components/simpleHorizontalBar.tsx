@@ -24,10 +24,10 @@ interface SimpleHorizontalBarProps {
   dimensionsMaybe?: RectDimensions;
 }
 const defaultDimensions = {
-  chartHeight: 200,
+  chartHeight: 150,
   chartWidth: 600,
-  marginLeft: 80,
-  marginRight: 160,
+  marginLeft: 20,
+  marginRight: 20,
   marginTop: 0,
   marginBottom: 0,
 };
@@ -131,7 +131,7 @@ const SimpleHorizontalBar = ({
         dimensions.chartWidth + dimensions.marginLeft + dimensions.marginRight;
 
       const newSelection = select(ref.current)
-        .classed("svg-container", true)
+        .classed("svg-container-hb", true)
         .append("svg")
         .attr("preserveAspectRatio", "xMinYMin meet")
         .attr("viewBox", `0 0 ${renderW} ${renderH}`)
@@ -314,12 +314,10 @@ const SimpleHorizontalBar = ({
         .append("g")
         .attr(
           "transform",
-          `translate(${dimensions.marginLeft}, ${
-            dimensions.marginTop + 1
-          })`
+          `translate(${dimensions.marginLeft}, ${dimensions.marginTop + 1})`
         )
         .call(xAxis())
-        .style("font-size", "20px")
+        .style("font-size", "1.5rem")
         .attr("font-weight", "bold");
     }
   }, [
@@ -488,7 +486,7 @@ const SimpleHorizontalBar = ({
     index,
   ]);
 
-  return <div ref={ref} id="container" className="svg-container"></div>;
+  return <div ref={ref} id="container" className="svg-container-hb"></div>;
 };
 
 export default SimpleHorizontalBar;

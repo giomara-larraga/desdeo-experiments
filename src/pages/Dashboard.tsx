@@ -117,7 +117,7 @@ DashboardProps) => {
         >
           Start
         </Button>
-        <Button
+        {/* <Button
           //component={Link}
           //to="/nautilus"
           sx={{ mr: "1rem" }}
@@ -141,7 +141,7 @@ DashboardProps) => {
           }}
         >
           Nimbus
-        </Button>
+        </Button> */}
       </Box>
 
       {/*       <Grid
