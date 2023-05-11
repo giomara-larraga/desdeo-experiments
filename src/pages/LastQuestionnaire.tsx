@@ -37,7 +37,7 @@ interface LastQuestionnaireProps {
   tokens: Tokens;
   apiUrl: string;
   groupId: number;
-  //setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
+  setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
 interface IAnswer {
@@ -51,16 +51,17 @@ const LastQuestionnaire = ({
   tokens,
   apiUrl,
   groupId,
+  setCurrentPage,
 }: //setCurrentPage,
 LastQuestionnaireProps) => {
-  /*useEffect(() => {
-    setCurrentPage("Questionnaire");
-  }, []);*/
   const [questions, SetQuestions] = useState<QuestionEnd>(QuestionEndDefaults);
   //const [fetched, SetFetched] = useState(false);
   //const { register, handleSubmit, control } = useForm<FormData>();
   //const [answers, SetAnswers] = useState<FormData>({ values: [] });
   const navigate = useNavigate();
+  useEffect(() => {
+    setCurrentPage("Questionnaire");
+  }, []);
   useEffect(() => {
     const fetchQuestions = async () => {
       try {

@@ -39,6 +39,7 @@ interface NautilusNavigatorMethodProps {
   tokens: Tokens;
   apiUrl: string;
   problemGroup: number;
+  setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
 function NautilusNavigatorMethod({
@@ -47,6 +48,7 @@ function NautilusNavigatorMethod({
   tokens,
   apiUrl,
   problemGroup,
+  setCurrentPage,
 }: NautilusNavigatorMethodProps) {
   // holds active problem info, server form
   const [activeProblemInfo, SetActiveProblemInfo] = useState<ProblemInfo>();
@@ -122,7 +124,7 @@ function NautilusNavigatorMethod({
         method: "synchronous_nimbus",
         starting_point: finalObjectives.join(","),
       };
-      console.log(finalObjectives.join(","))
+      console.log(finalObjectives.join(","));
       const res = await fetch(`${apiUrl}/method/create`, {
         method: "POST",
         headers: {
@@ -272,7 +274,9 @@ function NautilusNavigatorMethod({
     );
     console.log(rows);
   }; */
-
+  useEffect(() => {
+    setCurrentPage("Solution Process - Phase 1");
+  }, []);
   // COMPONENT ACTIVITIES
 
   // fetch current problem info
