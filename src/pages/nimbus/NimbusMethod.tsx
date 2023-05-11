@@ -88,6 +88,9 @@ function NimbusMethod({
   const [cont, SetCont] = useState<boolean>(true);
   const [finalVariables, SetFinalVariables] = useState<number[]>([]);
   const navigate = useNavigate();
+
+  const [classificationlevelsOk, SetClassificationlevelsOk] =
+    useState<boolean>(false);
   // fetch current problem info
   useEffect(() => {
     /*if (!methodCreated) {
@@ -124,6 +127,7 @@ function NimbusMethod({
           }
           SetClassifications(body.objective_names.map(() => "="));
           SetClassificationLevels(body.objective_names.map(() => 0.0));
+          SetClassificationlevelsOk(true);
           SetFetchedInfo(true);
         } else {
           //some other code
@@ -234,6 +238,34 @@ function NimbusMethod({
       // Do nothing
     }
   };*/
+
+  const validateLevels = (clasLevels: number[]) => {
+    let isValid = true;
+
+    console.log(clasLevels);
+    if (activeProblemInfo !== undefined && nimbusState === "classification") {
+      //let isValid = true;
+      let trueValues = clasLevels.map((v, i) =>
+        activeProblemInfo.minimize[i] === 1 ? v : -v
+      );
+      for (let index = 0; index < activeProblemInfo?.nObjectives; index++) {
+        if (activeProblemInfo?.minimize[index] === 1) {
+          if (trueValues[index] < activeProblemInfo?.ideal[index]) {
+            isValid = false;
+          } else if (trueValues[index] > activeProblemInfo?.nadir[index]) {
+            isValid = false;
+          }
+        } else {
+          if (trueValues[index] < -activeProblemInfo?.nadir[index]) {
+            isValid = false;
+          } else if (trueValues[index] > -activeProblemInfo?.ideal[index]) {
+            isValid = false;
+          }
+        }
+      }
+    }
+    return isValid;
+  };
 
   const iterate = async () => {
     // Attempt to iterate
@@ -521,6 +553,7 @@ function NimbusMethod({
     console.log("Classifications changed");
     if (nimbusState === "not started") {
       // do nothing if not started
+      console.log("nothing");
       return;
     }
     const improve =
@@ -530,7 +563,8 @@ function NimbusMethod({
       classifications.includes(">=" as Classification) ||
       classifications.includes("0" as Classification);
     console.log(improve, worsen);
-
+    const validLevels = validateLevels(classificationLevels);
+    console.log(validLevels);
     if (!improve) {
       SetHelpMessage(
         "Check classifications: at least one objective should be improved."
@@ -543,12 +577,12 @@ function NimbusMethod({
       );
       SetClassificationOk(false);
       return;
-    } else {
-      SetHelpMessage("Classifications ok!");
-      SetClassificationOk(true);
-      return;
-    }
-  }, [classifications, nimbusState]);
+    } else if (!validLevels) {
+      SetHelpMessage("Check levels!");
+    } else SetHelpMessage("Classifications ok!");
+    SetClassificationOk(true);
+    return;
+  }, [classifications, classificationLevels, nimbusState]);
 
   const inferClassifications = (barData: [number, number]) => {
     console.log(barData);
@@ -662,7 +696,7 @@ function NimbusMethod({
                       preferences.
                     </Typography>
                     <Typography>{`Help: ${helpMessage}`}</Typography>
-                    <Form>
+                    <Form style={{ marginBottom: "1.5rem" }}>
                       <Form.Group as={Row}>
                         <Form.Label column sm="12">
                           Desired number of solutions
@@ -703,6 +737,22 @@ function NimbusMethod({
                         </Col>
                       </Form.Group>
                     </Form>
+                    <HBWindow
+                      ideal={activeProblemInfo?.ideal}
+                      nadir={activeProblemInfo?.nadir}
+                      objectiveNames={activeProblemInfo?.objectiveNames}
+                      directions={activeProblemInfo?.minimize}
+                      setReferencePoint={inferClassifications}
+                      referencePoint={classificationLevels.map((v, i) =>
+                        activeProblemInfo.minimize[i] === 1 ? v : -v
+                      )}
+                      currentPoint={preferredPoint.map((v, i) =>
+                        activeProblemInfo.minimize[i] === 1 ? v : -v
+                      )}
+                      setLevelsOK={SetClassificationlevelsOk}
+                      levelsOK={classificationlevelsOk}
+                      //classifications={classifications}
+                    />
                     {!loading && (
                       <Button
                         size={"large"}
@@ -736,18 +786,6 @@ function NimbusMethod({
                         />
                       </Button>
                     )}
-                    <HBWindow
-                      ideal={activeProblemInfo?.ideal}
-                      nadir={activeProblemInfo?.nadir}
-                      directions={activeProblemInfo?.minimize}
-                      setReferencePoint={inferClassifications}
-                      referencePoint={classificationLevels.map((v, i) =>
-                        activeProblemInfo.minimize[i] === 1 ? v : -v
-                      )}
-                      currentPoint={preferredPoint.map((v, i) =>
-                        activeProblemInfo.minimize[i] === 1 ? v : -v
-                      )}
-                    />
                   </Box>
                 </>
               )}
