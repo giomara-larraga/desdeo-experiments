@@ -84,6 +84,7 @@ function NimbusMethod({
     []
   );
   const [classificationOk, SetClassificationOk] = useState<boolean>(false);
+  const [newSolutionChosen, SetNewSolutionChosen] = useState<boolean>(false);
   const [numberOfSolutions, SetNumberOfSolutions] = useState<number>(1);
   const [newSolutions, SetNewSolutions] = useState<ObjectiveData>();
   const [selectedIndices, SetSelectedIndices] = useState<number[]>([]);
@@ -325,7 +326,7 @@ function NimbusMethod({
 
   const handleSelectionAtClassification = (index: number[]) => {
     console.log(nimbusState);
-    if (index.length === 0) {
+    if (index.length === 0 || preferredRequestSent) {
       return;
     }
     // console.log(index);
@@ -334,9 +335,12 @@ function NimbusMethod({
     // console.log(actualindex);
     SetSelectedIndices([actualindex]);
     SetClassificationLevels(newSolutions!.values[actualindex].value);
-    SetClassifications(newSolutions!.values[actualindex].value.map((i)=>"=" as Classification))
+    SetClassifications(
+      newSolutions!.values[actualindex].value.map((i) => "=" as Classification)
+    );
     SetPreferredPoint(newSolutions!.values[actualindex].value);
     SetClassificationOk(false);
+    SetNewSolutionChosen(true);
     console.log(classificationLevels);
     console.log(classificationOk);
   };
@@ -454,6 +458,8 @@ function NimbusMethod({
           if (res.status === 200) {
             const body = await res.json();
             const response = body.response;
+            console.log("At archive");
+            console.log(response);
 
             // update the solutions to be shown
             const toBeShown = ParseSolutions(
@@ -461,6 +467,7 @@ function NimbusMethod({
               activeProblemInfo!
             );
             SetNewSolutions(toBeShown);
+            SetNewSolutionChosen(false);
 
             // reset the active selection
             SetSelectedIndices([]);
@@ -685,8 +692,11 @@ function NimbusMethod({
       return;
     }
     // Allow only one selected index in the 'classification' state
-    if (selectedIndices.length === 1 || selectedIndices.length === 0) {
+    if (selectedIndices.length === 1) {
       // do nothing
+      return;
+    } else if (selectedIndices.length === 0) {
+      handleSelectionAtClassification([0]);
       return;
     }
     SetSelectedIndices([selectedIndices[1]]);
@@ -700,8 +710,8 @@ function NimbusMethod({
       console.log("nothing");
       return;
     }
-    console.log(classifications)
-    console.log(classificationLevels)
+    console.log(classifications);
+    console.log(classificationLevels);
     const improve =
       classifications.includes("<" as Classification) ||
       classifications.includes("<=" as Classification);
@@ -919,6 +929,21 @@ function NimbusMethod({
                         {nimbusState === "classification" &&
                           !classificationOk &&
                           "Check the classifications"}
+                      </Button>
+                    )}
+                    {!loading && (
+                      <Button
+                        size={"large"}
+                        onClick={() =>
+                          sendPreferredRequest(selectedIndices[0], false)
+                        }
+                        variant={"contained"}
+                        hidden={
+                          !newSolutionChosen || nimbusState !== "classification"
+                        }
+                        sx={{ marginTop: "1rem" }}
+                      >
+                        Select active solution as the final solution
                       </Button>
                     )}
                     {loading && (
@@ -1253,20 +1278,31 @@ function NimbusMethod({
                           />
                         )}
                         {newSolutions === undefined && (
-                          <Card
-                            variant="outlined"
-                            sx={{
-                              backgroundColor: "#eeeeee",
-                              textAlign: "center",
+                          <SolutionTableMultiSelect
+                            objectiveData={{
+                              values: [
+                                {
+                                  selected: false,
+                                  value: preferredPoint.map((v, i) =>
+                                    activeProblemInfo.minimize[i] === 1 ? v : -v
+                                  ),
+                                },
+                              ],
+                              names: activeProblemInfo?.objectiveNames,
+                              directions: activeProblemInfo?.minimize,
+                              ideal: activeProblemInfo?.ideal.map((v, i) =>
+                                activeProblemInfo.minimize[i] === 1 ? v : -v
+                              ),
+                              nadir: activeProblemInfo?.nadir.map((v, i) =>
+                                activeProblemInfo.minimize[i] === 1 ? v : -v
+                              ),
                             }}
-                          >
-                            <CardContent>
-                              <Typography sx={{ m: 1 }}>
-                                A table showing a set of solutions will be shown
-                                in this section.
-                              </Typography>
-                            </CardContent>
-                          </Card>
+                            activeIndices={selectedIndices}
+                            setIndices={(x) => {
+                              console.log(x);
+                            }}
+                            tableTitle={""}
+                          />
                         )}
                       </CardContent>
                     </Card>
