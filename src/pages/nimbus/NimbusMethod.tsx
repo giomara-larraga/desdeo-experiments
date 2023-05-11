@@ -70,7 +70,7 @@ function NimbusMethod({
     "Method not started yet."
   );
   const [initialSolution, SetInitialSolution] = useState<number[]>([]);
-  const [fetchedInitial, SetFetchedInitial] = useState<boolean>(false);
+  // const [fetchedInitial, SetFetchedInitial] = useState<boolean>(false);
   const [preferredPoint, SetPreferredPoint] = useState<number[]>([]);
   const [fetchedInfo, SetFetchedInfo] = useState<boolean>(false);
   const [loading, SetLoading] = useState<boolean>(false);
@@ -93,6 +93,7 @@ function NimbusMethod({
 
   const [classificationlevelsOk, SetClassificationlevelsOk] =
     useState<boolean>(false);
+
   // fetch current problem info
   useEffect(() => {
     /*if (!methodCreated) {
@@ -129,7 +130,7 @@ function NimbusMethod({
           }
           SetClassifications(body.objective_names.map(() => "="));
           SetClassificationLevels(body.objective_names.map(() => 0.0));
-          SetClassificationlevelsOk(true);
+          //SetClassificationlevelsOk(true);
           SetFetchedInfo(true);
         } else {
           //some other code
@@ -317,40 +318,45 @@ function NimbusMethod({
       return;
     }
     // console.log(index);
-    //console.log(newSolutions!.values[index[0]].value);
     const actualindex = index[index.length - 1];
+    console.log(newSolutions!.values[actualindex].value);
     // console.log(actualindex);
     SetSelectedIndices([actualindex]);
     SetClassificationLevels(newSolutions!.values[actualindex].value);
+    SetClassifications(newSolutions!.values[actualindex].value.map((i)=>"=" as Classification))
     SetPreferredPoint(newSolutions!.values[actualindex].value);
     SetClassificationOk(false);
-  const validateLevels = (clasLevels: number[]) => {
-    let isValid = true;
-
-    console.log(clasLevels);
-    if (activeProblemInfo !== undefined && nimbusState === "classification") {
-      //let isValid = true;
-      let trueValues = clasLevels.map((v, i) =>
-        activeProblemInfo.minimize[i] === 1 ? v : -v
-      );
-      for (let index = 0; index < activeProblemInfo?.nObjectives; index++) {
-        if (activeProblemInfo?.minimize[index] === 1) {
-          if (trueValues[index] < activeProblemInfo?.ideal[index]) {
-            isValid = false;
-          } else if (trueValues[index] > activeProblemInfo?.nadir[index]) {
-            isValid = false;
-          }
-        } else {
-          if (trueValues[index] < -activeProblemInfo?.nadir[index]) {
-            isValid = false;
-          } else if (trueValues[index] > -activeProblemInfo?.ideal[index]) {
-            isValid = false;
-          }
-        }
-      }
-    }
-    return isValid;
+    console.log(classificationLevels);
+    console.log(classificationOk);
   };
+
+  // const validateLevels = (clasLevels: number[]) => {
+  //   let isValid = true;
+
+  //   console.log(clasLevels);
+  //   if (activeProblemInfo !== undefined && nimbusState === "classification") {
+  //     //let isValid = true;
+  //     let trueValues = clasLevels.map((v, i) =>
+  //       activeProblemInfo.minimize[i] === 1 ? v : -v
+  //     );
+  //     for (let index = 0; index < activeProblemInfo?.nObjectives; index++) {
+  //       if (activeProblemInfo?.minimize[index] === 1) {
+  //         if (trueValues[index] < activeProblemInfo?.ideal[index]) {
+  //           isValid = false;
+  //         } else if (trueValues[index] > activeProblemInfo?.nadir[index]) {
+  //           isValid = false;
+  //         }
+  //       } else {
+  //         if (trueValues[index] < -activeProblemInfo?.nadir[index]) {
+  //           isValid = false;
+  //         } else if (trueValues[index] > -activeProblemInfo?.ideal[index]) {
+  //           isValid = false;
+  //         }
+  //       }
+  //     }
+  //   }
+  //   return isValid;
+  // };
 
   const iterate = async () => {
     // Attempt to iterate
@@ -368,7 +374,10 @@ function NimbusMethod({
         if (!preferredRequestSent) {
           console.log("sending preferred request");
           console.log(selectedIndices);
-          const preferenceSentResponse = await sendPreferredRequest(selectedIndices[0], true);
+          const preferenceSentResponse = await sendPreferredRequest(
+            selectedIndices[0],
+            true
+          );
           if (preferenceSentResponse === -1) {
             break;
           }
@@ -680,6 +689,8 @@ function NimbusMethod({
       console.log("nothing");
       return;
     }
+    console.log(classifications)
+    console.log(classificationLevels)
     const improve =
       classifications.includes("<" as Classification) ||
       classifications.includes("<=" as Classification);
@@ -687,8 +698,9 @@ function NimbusMethod({
       classifications.includes(">=" as Classification) ||
       classifications.includes("0" as Classification);
     console.log(improve, worsen);
-    const validLevels = validateLevels(classificationLevels);
-    console.log(validLevels);
+    // TODO VALIDATE!
+    // const validLevels = validateLevels(classificationLevels);
+    // console.log(validLevels);
     if (!improve) {
       SetHelpMessage(
         "Check classifications: at least one objective should be improved."
@@ -701,15 +713,18 @@ function NimbusMethod({
       );
       SetClassificationOk(false);
       return;
-    } else if (!validLevels) {
-      SetHelpMessage("Check levels!");
-    } else SetHelpMessage("Classifications ok!");
-    SetClassificationOk(true);
-    return;
+    } else {
+      // if (!validLevels) {
+      // SetHelpMessage("Check levels!");
+      //} else
+      SetHelpMessage("Classifications ok!");
+      SetClassificationOk(true);
+      return;
+    }
   }, [classifications, classificationLevels, nimbusState]);
 
   const inferClassifications = (barData: [number, number]) => {
-    console.log(barData);
+    // console.log(barData);
     const value = barData[0];
     const objIndex = barData[1];
     const isDiff =
@@ -731,12 +746,12 @@ function NimbusMethod({
       if (value > preferredPoint[objIndex]) {
         // selected value is greater than currently preferred (worse)
         // Worsen until
-        levels[objIndex] = value;
+        levels[objIndex] = Math.min(value, activeProblemInfo?.nadir[objIndex]);
         classes[objIndex] = ">=";
       } else if (value < preferredPoint[objIndex]) {
         // selected value is less than currently preferred (better)
         // improve until
-        levels[objIndex] = value;
+        levels[objIndex] = Math.max(value, activeProblemInfo?.ideal[objIndex]);
         classes[objIndex] = "<=";
       } else {
         // no change, keep as it is
@@ -747,12 +762,13 @@ function NimbusMethod({
       if (value > -1 * preferredPoint[objIndex]) {
         // selected value is greater than currently preferred (better)
         // improve until
-        levels[objIndex] = -value;
+        // console.log(-value, activeProblemInfo?.ideal[objIndex]);
+        levels[objIndex] = Math.max(-value, activeProblemInfo?.ideal[objIndex]);
         classes[objIndex] = "<=";
       } else if (value < -1 * preferredPoint[objIndex]) {
         // selected value is less than currently preferred (worse)
         // worsen until
-        levels[objIndex] = -value;
+        levels[objIndex] = Math.min(-value, activeProblemInfo?.nadir[objIndex]);
         classes[objIndex] = ">=";
       } else {
         // no change, keep as it is

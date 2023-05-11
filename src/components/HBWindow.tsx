@@ -149,9 +149,9 @@ export const HBWindow = ({
               </Typography>
             </Grid>
             <Grid item xs={8} sx={{ display: "flex", justifyContent: "right" }}>
-              <Typography color={"gray"}>
+              {/* <Typography color={"gray"}>
                 Previous preference: {currentPoint[i]}
-              </Typography>
+              </Typography> */}
             </Grid>
             <Grid item xs={4}>
               <Box>
@@ -164,12 +164,12 @@ export const HBWindow = ({
                   InputLabelProps={{
                     shrink: true,
                   }}
-                  inputProps={{ maxLength: 5, readOnly: true }}
+                  inputProps={{ maxLength: 5 }}
                   error={!!errorMessages[i]}
                   helperText={errorMessages[i]}
-                  /*onChange={(e) => {
-                    validateAspirationLevel(parseFloat(e.target.value), i);
-                  }}*/
+                  onChange={(e) => {
+                    setReferencePoint([parseFloat(e.target.value), i]);
+                  }}
                 />
               </Box>
             </Grid>
