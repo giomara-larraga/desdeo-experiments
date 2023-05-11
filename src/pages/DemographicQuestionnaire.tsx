@@ -26,7 +26,7 @@ interface DemographicQuestionnaireProps {
   tokens: Tokens;
   apiUrl: string;
   groupId: number;
-  //setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
+  setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
 interface IAnswer {
@@ -69,6 +69,7 @@ const DemographicQuestionnaire = ({
   tokens,
   apiUrl,
   groupId,
+  setCurrentPage,
 }: DemographicQuestionnaireProps) => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<QuestionDemographic>(
@@ -80,9 +81,9 @@ const DemographicQuestionnaire = ({
   //const [answers, setAnswers] = useState<IAnswer>(AnswersDefault);
   //const [test, setTest] = useState("default");
 
-  /*useEffect(() => {
-    setCurrentPage("Demographic information");
-  }, []);*/
+  useEffect(() => {
+    setCurrentPage("Questionnaire");
+  }, []);
 
   useEffect(() => {
     const fetchQuestions = async () => {

@@ -33,7 +33,7 @@ interface FirstQuestionnaireProps {
   apiUrl: string;
   groupId: number;
   problemGroup: number;
-  //setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
+  setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
 interface IAnswer {
@@ -48,6 +48,7 @@ const FirstQuestionnaire = ({
   apiUrl,
   groupId,
   problemGroup,
+  setCurrentPage,
 }: //setCurrentPage,
 FirstQuestionnaireProps) => {
   /*useEffect(() => {
@@ -59,6 +60,9 @@ FirstQuestionnaireProps) => {
   //const { register, handleSubmit, control } = useForm<FormData>();
   //const [answers, SetAnswers] = useState<FormData>({ values: [] });
   const navigate = useNavigate();
+  useEffect(() => {
+    setCurrentPage("Questionnaire");
+  }, []);
   useEffect(() => {
     const fetchQuestions = async () => {
       try {

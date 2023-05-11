@@ -34,7 +34,7 @@ interface SwitchQuestionnaireProps {
   tokens: Tokens;
   apiUrl: string;
   groupId: number;
-  //setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
+  setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
 interface FormData {
@@ -47,11 +47,9 @@ const SwitchQuestionnaire = ({
   tokens,
   apiUrl,
   groupId,
+  setCurrentPage,
 }: //setCurrentPage,
 SwitchQuestionnaireProps) => {
-  /*useEffect(() => {
-    setCurrentPage("Questionnaire");
-  }, []);*/
   const [questions, SetQuestions] = useState<QuestionSwitch>(
     QuestionSwitchDefaults
   );
@@ -59,6 +57,9 @@ SwitchQuestionnaireProps) => {
   //const { register, handleSubmit, control } = useForm<FormData>();
   //const [answers, SetAnswers] = useState<FormData>({ values: [] });
   const navigate = useNavigate();
+  useEffect(() => {
+    setCurrentPage("Questionnaire");
+  }, []);
   useEffect(() => {
     const fetchQuestions = async () => {
       try {

@@ -46,7 +46,7 @@ export default function Layout({
           <Container fluid className="content_container_layout g0">
             <Row className="top_bar_container">
               <Col>
-                <Topbar isLoggedIn={isLoggedIn} loggedAs={loggedAs}></Topbar>
+                <Topbar title={currentPage}></Topbar>
               </Col>
             </Row>
             <Row className="top_bar_container">

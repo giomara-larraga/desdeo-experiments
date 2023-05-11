@@ -19,6 +19,7 @@ interface GeneralProps {
   tokens: Tokens;
   apiUrl: string;
   groupId: number;
+  currentPage: string;
 }
 
 export default function LayoutExperiment({
@@ -27,6 +28,7 @@ export default function LayoutExperiment({
   tokens,
   apiUrl,
   groupId,
+  currentPage,
 }: GeneralProps) {
   if (!isLoggedIn) {
     return <Navigate to={"/"} replace />;
@@ -35,7 +37,7 @@ export default function LayoutExperiment({
       <>
         <Box sx={{ display: "flex" }}>
           <CssBaseline />
-          <Topbar isLoggedIn={isLoggedIn} loggedAs={loggedAs}></Topbar>
+          <Topbar title={currentPage}></Topbar>
           <Outlet></Outlet>
         </Box>
       </>

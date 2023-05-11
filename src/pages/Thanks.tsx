@@ -20,6 +20,7 @@ interface ThanksProps {
   tokens: Tokens;
   apiUrl: string;
   groupId: number;
+  setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 function Thanks({
   isLoggedIn,
@@ -27,8 +28,12 @@ function Thanks({
   tokens,
   apiUrl,
   groupId,
+  setCurrentPage,
 }: //activeProblemId,
 ThanksProps) {
+  useEffect(() => {
+    setCurrentPage("");
+  }, []);
   return (
     <Grid container component="main" sx={{ height: "calc(80vh)" }}>
       <Toolbar />

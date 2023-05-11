@@ -43,6 +43,8 @@ interface NimbusMethodProps {
   tokens: Tokens;
   apiUrl: string;
   problemGroup: number;
+  groupId: number;
+  setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 interface ArchiveProps {
   decision_variables: string;
@@ -63,6 +65,8 @@ function NimbusMethod({
   tokens,
   apiUrl,
   problemGroup,
+  groupId,
+  setCurrentPage,
 }: NimbusMethodProps) {
   const [activeProblemInfo, SetActiveProblemInfo] = useState<ProblemInfo>();
   const [methodStarted, SetMethodStarted] = useState<boolean>(false);
@@ -91,6 +95,14 @@ function NimbusMethod({
 
   const [classificationlevelsOk, SetClassificationlevelsOk] =
     useState<boolean>(false);
+
+  useEffect(() => {
+    if (groupId === 1) {
+      setCurrentPage("Solution Process");
+    } else {
+      setCurrentPage("Solution Process - Part 2");
+    }
+  }, []);
   // fetch current problem info
   useEffect(() => {
     /*if (!methodCreated) {
@@ -582,7 +594,7 @@ function NimbusMethod({
     } else SetHelpMessage("Classifications ok!");
     SetClassificationOk(true);
     return;
-  }, [classifications, classificationLevels, nimbusState]);
+  }, [classifications, nimbusState]);
 
   const inferClassifications = (barData: [number, number]) => {
     console.log(barData);

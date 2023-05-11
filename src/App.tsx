@@ -34,7 +34,7 @@ function App() {
   const [activeProblemId, SetActiveProblemId] = useState<number | null>(2);
   const [tokens, SetTokens] = useState<Tokens>({ access: "", refresh: "" });
   //const [chosenMethod, SetChosenMethod] = useState("");
-  //const [currentPage, setCurrentPage] = useState("");
+  const [currentPage, setCurrentPage] = useState("");
 
   //const API_URL: string = "http://webapiroute-desdeoswitch.rahtiapp.fi/";
   const API_URL: string = "http://127.0.0.1:5000";
@@ -81,7 +81,7 @@ function App() {
                 loggedAs={loggedAs}
                 tokens={tokens}
                 groupId={groupId}
-                //currentPage={currentPage}
+                currentPage={currentPage}
               />
             }
           >
@@ -102,7 +102,7 @@ function App() {
               path="/demographic"
               element={
                 <DemographicQuestionnaire
-                  //setCurrentPage={setCurrentPage}
+                  setCurrentPage={setCurrentPage}
                   isLoggedIn={isLoggedIn}
                   loggedAs={loggedAs}
                   tokens={tokens}
@@ -115,7 +115,7 @@ function App() {
               path="/prequestionnaire"
               element={
                 <FirstQuestionnaire
-                  //setCurrentPage={setCurrentPage}
+                  setCurrentPage={setCurrentPage}
                   isLoggedIn={isLoggedIn}
                   loggedAs={loggedAs}
                   tokens={tokens}
@@ -129,7 +129,7 @@ function App() {
               path="/postquestionnaire"
               element={
                 <LastQuestionnaire
-                  //setCurrentPage={setCurrentPage}
+                  setCurrentPage={setCurrentPage}
                   isLoggedIn={isLoggedIn}
                   loggedAs={loggedAs}
                   tokens={tokens}
@@ -142,7 +142,7 @@ function App() {
               path="/switchquestionnaire"
               element={
                 <SwitchQuestionnaire
-                  //setCurrentPage={setCurrentPage}
+                  setCurrentPage={setCurrentPage}
                   isLoggedIn={isLoggedIn}
                   loggedAs={loggedAs}
                   tokens={tokens}
@@ -161,7 +161,7 @@ function App() {
                   loggedAs={loggedAs}
                   tokens={tokens}
                   problemGroup={problemGroup}
-                  //setCurrentPage={setCurrentPage}
+                  setCurrentPage={setCurrentPage}
                 />
               }
             />
@@ -175,7 +175,7 @@ function App() {
                   loggedAs={loggedAs}
                   tokens={tokens}
                   groupId={groupId}
-                  //setCurrentPage={setCurrentPage}
+                  setCurrentPage={setCurrentPage}
                 />
               }
             />
@@ -188,7 +188,7 @@ function App() {
                 loggedAs={loggedAs}
                 tokens={tokens}
                 groupId={groupId}
-                //currentPage={currentPage}
+                currentPage={currentPage}
               />
             }
           >
@@ -200,8 +200,9 @@ function App() {
                   isLoggedIn={isLoggedIn}
                   loggedAs={loggedAs}
                   tokens={tokens}
+                  groupId={groupId}
                   problemGroup={problemGroup}
-                  //setCurrentPage={setCurrentPage}
+                  setCurrentPage={setCurrentPage}
                 />
               }
             />
