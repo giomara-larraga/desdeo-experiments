@@ -1,12 +1,11 @@
-import React from "react";
+// import React from "react";
 import { useEffect, useState, useCallback } from "react";
 import {
   ProblemInfo,
   ObjectiveData,
-  ObjectiveDatum,
+  // ObjectiveDatum,
 } from "../../types/ProblemTypes";
 import { Tokens } from "../../types/AppTypes";
-import ClassificationsInputForm from "../../components/ClassificationsInputForm";
 import { Row, Col, Form, Table } from "react-bootstrap";
 import ReactLoading from "react-loading";
 import { ParseSolutions, ToTrueValues } from "../../utils/DataHandling";
@@ -16,7 +15,7 @@ import ParallelAxes from "./ParallelAxes";
 // import HorizontalBars from "../../components/HorizontalBars";
 import SolutionTable from "../../components/SolutionTable";
 import SolutionTableMultiSelect from "../../components/SolutionTableMultiSelect";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import Toolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -35,6 +34,7 @@ import { CardContent, FormControl, Select } from "@material-ui/core";
 // import FormLabel from "@mui/material/FormLabel/FormLabel";
 import { useNavigate } from "react-router-dom";
 import HBWindow from "../../components/HBWindow";
+import { index } from "d3-array";
 
 const drawerWidth = 550;
 interface NimbusMethodProps {
@@ -53,8 +53,8 @@ type NimbusState =
   | "not started"
   | "classification"
   | "archive"
-  | "intermediate"
-  | "select preferred"
+  // | "intermediate"
+  // | "select preferred"
   | "stop";
 
 function NimbusMethod({
@@ -83,8 +83,10 @@ function NimbusMethod({
   const [numberOfSolutions, SetNumberOfSolutions] = useState<number>(1);
   const [newSolutions, SetNewSolutions] = useState<ObjectiveData>();
   const [selectedIndices, SetSelectedIndices] = useState<number[]>([]);
-  const [computeIntermediate, SetComputeIntermediate] =
-    useState<boolean>(false);
+  // const [computeIntermediate, SetComputeIntermediate] =
+  //   useState<boolean>(false);
+  const [preferredRequestSent, SetPreferredRequestSent] =
+    useState<boolean>(true);
   const [cont, SetCont] = useState<boolean>(true);
   const [finalVariables, SetFinalVariables] = useState<number[]>([]);
   const navigate = useNavigate();
@@ -106,7 +108,7 @@ function NimbusMethod({
           body: JSON.stringify({ problemGroup: problemGroup }),
         });
 
-        if (res.status == 200) {
+        if (res.status === 200) {
           // ok!
           const body = await res.json();
           if (activeProblemInfo === undefined) {
@@ -235,6 +237,91 @@ function NimbusMethod({
     }
   };*/
 
+  const sendPreferredRequest = async (
+    index: number,
+    continueIterations: Boolean
+  ) => {
+    console.log("sendPreferredRequest");
+    console.log(index);
+    try {
+      const res = await fetch(`${apiUrl}/method/control`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${tokens.access}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          response: {
+            index: index,
+            continue: continueIterations,
+          },
+        }),
+      });
+
+      if (res.status === 200) {
+        // Ok
+        const body = await res.json();
+        const response = body.response;
+
+        if (continueIterations) {
+          // continue iterating
+          SetPreferredPoint([...response.objective_values]); // avoid aliasing
+          SetClassificationLevels(response.objective_values);
+          SetClassifications(
+            response.objective_values.map(() => "=" as Classification)
+          );
+
+          SetSelectedIndices([]);
+          console.log("Henlo");
+          return 0;
+          // SetHelpMessage("Please classify each of the shown objectives.");
+          // SetNimbusState("classification");
+          // break;
+        } else {
+          // stop iterating
+          console.log(response);
+          SetPreferredPoint(response.objective);
+          SetFinalVariables(response.solution);
+          SetHelpMessage("Stopped. Showing final solution reached.");
+          /*saveLog({
+                decision_variables: response.solution.join(","),
+                objective_values: preferredPoint.join(","),
+              });*/
+          SetNimbusState("stop");
+          return 0;
+          //navigate("/postquestionnaire");
+        }
+      } else {
+        // not ok
+        console.log(`Got response code ${res.status}`);
+        return -1;
+        // do nothing
+        // break;
+      }
+    } catch (e) {
+      console.log("Could not iterate NIMBUS");
+      console.log(e);
+      return -1;
+      // do nothing
+      // break;
+    }
+  };
+
+  const handleSelectionAtClassification = (index: number[]) => {
+    console.log(nimbusState);
+    if (index.length === 0) {
+      return;
+    }
+    // console.log(index);
+    //console.log(newSolutions!.values[index[0]].value);
+    const actualindex = index[index.length - 1];
+    // console.log(actualindex);
+    SetSelectedIndices([actualindex]);
+    SetClassificationLevels(newSolutions!.values[actualindex].value);
+    SetPreferredPoint(newSolutions!.values[actualindex].value);
+    SetClassificationOk(false);
+  };
+
   const iterate = async () => {
     // Attempt to iterate
     SetLoading(true);
@@ -248,7 +335,16 @@ function NimbusMethod({
           );
           break;
         }
+        if (!preferredRequestSent) {
+          console.log("sending preferred request");
+          console.log(selectedIndices);
+          const preferenceSentResponse = await sendPreferredRequest(selectedIndices[0], true);
+          if (preferenceSentResponse === -1) {
+            break;
+          }
+        }
         try {
+          SetPreferredRequestSent(false);
           console.log(`iterating with levels ${classificationLevels}`);
           console.log(activeProblemInfo?.ideal, activeProblemInfo?.nadir);
           const res = await fetch(`${apiUrl}/method/control`, {
@@ -322,10 +418,47 @@ function NimbusMethod({
             // reset the number of solutions
             SetNumberOfSolutions(1);
 
+            // Run the "intermediate" step without any indices selected
+            try {
+              const res = await fetch(`${apiUrl}/method/control`, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${tokens.access}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  response: {
+                    indices: [],
+                    number_of_desired_solutions: 0,
+                  },
+                }),
+              });
+
+              if (res.status === 200) {
+                // ok
+                SetSelectedIndices([]);
+                SetNumberOfSolutions(1);
+                // SetHelpMessage(
+                //   "Please select the solution you prefer the most from the shown solution."
+                // );
+                // SetNimbusState("select preferred");
+              } else {
+                // not ok
+                console.log(`Got response code ${res.status}`);
+                // do nothing
+                break;
+              }
+            } catch (e) {
+              console.log("Could not iterate NIMBUS");
+              console.log(e);
+              // do nothing
+              break;
+            }
+
             SetHelpMessage(
               "Would you like to compute intermediate solutions between two previously computed solutions?"
             );
-            SetNimbusState("intermediate");
+            SetNimbusState("classification");
             break;
           } else {
             // not ok
@@ -340,142 +473,142 @@ function NimbusMethod({
           break;
         }
       }
-      case "intermediate": {
-        if (computeIntermediate && selectedIndices.length !== 2) {
-          SetHelpMessage(
-            "Please select two on the shown solutions between which you would like to see intermediate solutions."
-          );
-          // do nothing
-          break;
-        }
-        try {
-          const res = await fetch(`${apiUrl}/method/control`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${tokens.access}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              response: {
-                indices: computeIntermediate ? selectedIndices : [],
-                number_of_desired_solutions: computeIntermediate
-                  ? numberOfSolutions
-                  : 0,
-              },
-            }),
-          });
+      // case "intermediate": {
+      //   if (computeIntermediate && selectedIndices.length !== 2) {
+      //     SetHelpMessage(
+      //       "Please select two on the shown solutions between which you would like to see intermediate solutions."
+      //     );
+      //     // do nothing
+      //     break;
+      //   }
+      //   try {
+      //     const res = await fetch(`${apiUrl}/method/control`, {
+      //       method: "POST",
+      //       headers: {
+      //         Authorization: `Bearer ${tokens.access}`,
+      //         "Content-Type": "application/json",
+      //       },
+      //       body: JSON.stringify({
+      //         response: {
+      //           indices: computeIntermediate ? selectedIndices : [],
+      //           number_of_desired_solutions: computeIntermediate
+      //             ? numberOfSolutions
+      //             : 0,
+      //         },
+      //       }),
+      //     });
 
-          if (res.status === 200) {
-            // ok
-            const body = await res.json();
-            // const response = JSON.parse(body.response);
-            const response = body.response;
+      //     if (res.status === 200) {
+      //       // ok
+      //       const body = await res.json();
+      //       // const response = JSON.parse(body.response);
+      //       const response = body.response;
 
-            if (computeIntermediate) {
-              // update solutions to be shown
-              const toBeShown = ParseSolutions(
-                response.objectives,
-                activeProblemInfo!
-              );
-              SetNewSolutions(toBeShown);
+      //       if (computeIntermediate) {
+      //         // update solutions to be shown
+      //         const toBeShown = ParseSolutions(
+      //           response.objectives,
+      //           activeProblemInfo!
+      //         );
+      //         SetNewSolutions(toBeShown);
 
-              // reset and ask to save next
-              SetComputeIntermediate(false);
-              SetSelectedIndices([]);
-              SetNumberOfSolutions(1);
-              SetHelpMessage(
-                "Would you like to save any of the shown solutions for later viewing?"
-              );
-              SetNimbusState("archive");
-            } else {
-              SetComputeIntermediate(false);
-              SetSelectedIndices([]);
-              SetNumberOfSolutions(1);
-              SetHelpMessage(
-                "Please select the solution you prefer the most from the shown solution."
-              );
-              SetNimbusState("select preferred");
-            }
-            break;
-          } else {
-            // not ok
-            console.log(`Got response code ${res.status}`);
-            // do nothing
-            break;
-          }
-        } catch (e) {
-          console.log("Could not iterate NIMBUS");
-          console.log(e);
-          // do nothing
-          break;
-        }
-      }
-      case "select preferred": {
-        if (selectedIndices.length === 0) {
-          SetHelpMessage("Please select a preferred solution first.");
-          // do nothing;
-          break;
-        }
-        try {
-          const res = await fetch(`${apiUrl}/method/control`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${tokens.access}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              response: {
-                index: selectedIndices[0],
-                continue: cont,
-              },
-            }),
-          });
+      //         // reset and ask to save next
+      //         SetComputeIntermediate(false);
+      //         SetSelectedIndices([]);
+      //         SetNumberOfSolutions(1);
+      //         SetHelpMessage(
+      //           "Would you like to save any of the shown solutions for later viewing?"
+      //         );
+      //         SetNimbusState("archive");
+      //       } else {
+      //         SetComputeIntermediate(false);
+      //         SetSelectedIndices([]);
+      //         SetNumberOfSolutions(1);
+      //         SetHelpMessage(
+      //           "Please select the solution you prefer the most from the shown solution."
+      //         );
+      //         SetNimbusState("select preferred");
+      //       }
+      //       break;
+      //     } else {
+      //       // not ok
+      //       console.log(`Got response code ${res.status}`);
+      //       // do nothing
+      //       break;
+      //     }
+      //   } catch (e) {
+      //     console.log("Could not iterate NIMBUS");
+      //     console.log(e);
+      //     // do nothing
+      //     break;
+      //   }
+      // }
+      // case "select preferred": {
+      //   if (selectedIndices.length === 0) {
+      //     SetHelpMessage("Please select a preferred solution first.");
+      //     // do nothing;
+      //     break;
+      //   }
+      //   try {
+      //     const res = await fetch(`${apiUrl}/method/control`, {
+      //       method: "POST",
+      //       headers: {
+      //         Authorization: `Bearer ${tokens.access}`,
+      //         "Content-Type": "application/json",
+      //       },
+      //       body: JSON.stringify({
+      //         response: {
+      //           index: selectedIndices[0],
+      //           continue: cont,
+      //         },
+      //       }),
+      //     });
 
-          if (res.status === 200) {
-            // Ok
-            const body = await res.json();
-            const response = body.response;
+      //     if (res.status === 200) {
+      //       // Ok
+      //       const body = await res.json();
+      //       const response = body.response;
 
-            if (cont) {
-              // continue iterating
-              SetPreferredPoint([...response.objective_values]); // avoid aliasing
-              SetClassificationLevels(response.objective_values);
-              SetClassifications(
-                response.objective_values.map(() => "=" as Classification)
-              );
+      //       if (cont) {
+      //         // continue iterating
+      //         SetPreferredPoint([...response.objective_values]); // avoid aliasing
+      //         SetClassificationLevels(response.objective_values);
+      //         SetClassifications(
+      //           response.objective_values.map(() => "=" as Classification)
+      //         );
 
-              SetSelectedIndices([]);
-              SetHelpMessage("Please classify each of the shown objectives.");
-              SetNimbusState("classification");
-              break;
-            } else {
-              // stop iterating
-              console.log(response);
-              SetPreferredPoint(response.objective);
-              SetFinalVariables(response.solution);
-              SetHelpMessage("Stopped. Showing final solution reached.");
-              /*saveLog({
-                decision_variables: response.solution.join(","),
-                objective_values: preferredPoint.join(","),
-              });*/
-              SetNimbusState("stop");
-              //navigate("/postquestionnaire");
+      //         SetSelectedIndices([]);
+      //         SetHelpMessage("Please classify each of the shown objectives.");
+      //         SetNimbusState("classification");
+      //         break;
+      //       } else {
+      //         // stop iterating
+      //         console.log(response);
+      //         SetPreferredPoint(response.objective);
+      //         SetFinalVariables(response.solution);
+      //         SetHelpMessage("Stopped. Showing final solution reached.");
+      //         /*saveLog({
+      //           decision_variables: response.solution.join(","),
+      //           objective_values: preferredPoint.join(","),
+      //         });*/
+      //         SetNimbusState("stop");
+      //         //navigate("/postquestionnaire");
 
-              break;
-            }
-          } else {
-            // not ok
-            console.log(`Got response code ${res.status}`);
-            // do nothing
-            break;
-          }
-        } catch (e) {
-          console.log("Could not iterate NIMBUS");
-          console.log(e);
-          // do nothing
-          break;
-        }
-      }
+      //         break;
+      //       }
+      //     } else {
+      //       // not ok
+      //       console.log(`Got response code ${res.status}`);
+      //       // do nothing
+      //       break;
+      //     }
+      //   } catch (e) {
+      //     console.log("Could not iterate NIMBUS");
+      //     console.log(e);
+      //     // do nothing
+      //     break;
+      //   }
+      // }
       /*case "stop": {
         saveLog({
           decision_variables: finalVariables.join(","),
@@ -497,25 +630,18 @@ function NimbusMethod({
   // only allow two selected indices at any given time in the 'intermediate' state, and one index at any given time in the
   //
   useEffect(() => {
-    if (nimbusState === "intermediate") {
-      if (selectedIndices.length < 3) {
-        // do nothing
-        return;
-      }
-      SetSelectedIndices(selectedIndices.slice(1));
-      return;
-    } else if (
-      nimbusState === "select preferred" ||
-      nimbusState === "classification"
-    ) {
-      if (selectedIndices.length === 1 || selectedIndices.length === 0) {
-        // do nothing
-        return;
-      }
-      SetSelectedIndices([selectedIndices[1]]);
+    // Allow any number of selected indices in the 'archive' state
+    if (nimbusState === "archive") {
       return;
     }
-  }, [selectedIndices]);
+    // Allow only one selected index in the 'classification' state
+    if (selectedIndices.length === 1 || selectedIndices.length === 0) {
+      // do nothing
+      return;
+    }
+    SetSelectedIndices([selectedIndices[1]]);
+    return;
+  }, [nimbusState, selectedIndices]);
 
   useEffect(() => {
     console.log("Classifications changed");
@@ -783,7 +909,7 @@ function NimbusMethod({
                   )}
                 </Box>
               )}
-              {nimbusState === "intermediate" && (
+              {/* {nimbusState === "intermediate" && (
                 <>
                   <Box sx={{ padding: "1rem" }}>
                     <Typography
@@ -987,7 +1113,7 @@ function NimbusMethod({
                     )}
                   </Box>
                 </>
-              )}
+              )} */}
             </Drawer>
           </Box>
           <Box
@@ -1016,24 +1142,34 @@ function NimbusMethod({
                           <ParallelAxes
                             objectiveData={ToTrueValues(newSolutions!)}
                             selectedIndices={selectedIndices}
-                            handleSelection={SetSelectedIndices}
+                            handleSelection={handleSelectionAtClassification}
                           />
                         )}
                         {newSolutions === undefined && (
-                          <Card
-                            variant="outlined"
-                            sx={{
-                              backgroundColor: "#eeeeee",
-                              textAlign: "center",
+                          <ParallelAxes
+                            objectiveData={{
+                              values: [
+                                {
+                                  selected: false,
+                                  value: preferredPoint.map((v, i) =>
+                                    activeProblemInfo.minimize[i] === 1 ? v : -v
+                                  ),
+                                },
+                              ],
+                              names: activeProblemInfo?.objectiveNames,
+                              directions: activeProblemInfo?.minimize,
+                              ideal: activeProblemInfo?.ideal.map((v, i) =>
+                                activeProblemInfo.minimize[i] === 1 ? v : -v
+                              ),
+                              nadir: activeProblemInfo?.nadir.map((v, i) =>
+                                activeProblemInfo.minimize[i] === 1 ? v : -v
+                              ),
                             }}
-                          >
-                            <CardContent>
-                              <Typography sx={{ m: 1 }}>
-                                A plot showing a set of solutions will be shown
-                                in this section.
-                              </Typography>
-                            </CardContent>
-                          </Card>
+                            selectedIndices={selectedIndices}
+                            handleSelection={(x) => {
+                              console.log(x);
+                            }}
+                          />
                         )}
                       </CardContent>
                     </Card>
@@ -1049,7 +1185,7 @@ function NimbusMethod({
                           <SolutionTableMultiSelect
                             objectiveData={newSolutions!}
                             activeIndices={selectedIndices}
-                            setIndices={SetSelectedIndices}
+                            setIndices={handleSelectionAtClassification}
                             tableTitle={""}
                           />
                         )}
@@ -1145,7 +1281,7 @@ function NimbusMethod({
                     </Card>
                   </>
                 )}
-                {nimbusState === "intermediate" && (
+                {/* {nimbusState === "intermediate" && (
                   <>
                     <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
                       <CardContent>
@@ -1288,7 +1424,7 @@ function NimbusMethod({
                       </CardContent>
                     </Card>
                   </>
-                )}
+                )} */}
               </>
             </Container>
           </Box>

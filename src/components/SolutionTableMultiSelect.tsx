@@ -12,7 +12,7 @@ import { ObjectiveData } from "../types/ProblemTypes";
 interface SolutionTableMultiSelectProps {
   objectiveData: ObjectiveData;
   activeIndices: number[];
-  setIndices: React.Dispatch<React.SetStateAction<number[]>>;
+  setIndices: (x: number[]) => void;
   tableTitle: string;
 }
 
