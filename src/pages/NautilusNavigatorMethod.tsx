@@ -1,13 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { ProblemInfo, NavigationData } from "../types/ProblemTypes";
 import { Tokens } from "../types/AppTypes";
-import { Row, Col, ProgressBar } from "react-bootstrap";
+import { Row, Col } from "react-bootstrap";
 import ReactLoading from "react-loading";
 import { NavigationWindow } from "../components/NavigationWindow";
 //import Slider from "@material-ui/core/Slider";
 import "desdeo-components/src/components/Svg.css";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
@@ -17,6 +17,7 @@ import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Toolbar from "@mui/material/Toolbar";
 import Slider from "@mui/material/Slider";
+import { createMethod } from "./nimbus/nimbusHelpers";
 
 const drawerWidth = 300;
 // TODO: should be imported, and need to update the NavigationData type in NavigationBars /types
@@ -66,6 +67,8 @@ function NautilusNavigatorMethod({
   const itestateRef = useRef<boolean>();
   itestateRef.current = iterateNavi;
 
+  const navigate = useNavigate();
+
   // track dataArch change during iterate
   const dRef = useRef<Array<NavigationData>>();
   dRef.current = dataArchive;
@@ -111,7 +114,6 @@ function NautilusNavigatorMethod({
     decision_variables: string;
     objective_values: string;
   }
-  const navigate = useNavigate();
   // FUNCTIONS to handle stuff
   const toNimbus = async () => {
     try {
@@ -120,6 +122,7 @@ function NautilusNavigatorMethod({
         method: "synchronous_nimbus",
         starting_point: finalObjectives.join(","),
       };
+      console.log(finalObjectives.join(","))
       const res = await fetch(`${apiUrl}/method/create`, {
         method: "POST",
         headers: {
@@ -189,37 +192,6 @@ function NautilusNavigatorMethod({
     };
   };
 
-  // updates the ref/boundary points with the InputForm
-  const updatePoint = (point: number[], refPoint: boolean) => {
-    if (refPoint === true) {
-      const newRefPoint = convertedData!.referencePoints.map(
-        (d, i) => (d[currentStep] = point[i])
-      );
-      SetReferencePoint(newRefPoint);
-      dataArchive![currentStep - 1].referencePoints.map(
-        (d, i) => (d[currentStep] = -point[i])
-      );
-    } else {
-      const newBound = convertedData!.boundaries.map(
-        (d, i) => (d[currentStep] = point[i])
-      );
-      SetBoundaryPoint(newBound);
-      dataArchive![currentStep - 1].boundaries.map(
-        (d, i) => (d[currentStep] = -point[i])
-      );
-    }
-    /*     // need to create new object
-    const newData: NavigationData = {
-      upperBounds: convertedData!.upperBounds,
-      lowerBounds: convertedData!.lowerBounds,
-      referencePoints: convertedData!.referencePoints,
-      boundaries: convertedData!.boundaries,
-      totalSteps: convertedData!.totalSteps,
-      stepsTaken: convertedData!.stepsTaken,
-    };
-    SetConvertData(newData); */
-  };
-
   // TODO: make tests
   const popLast = (dataArchive: any[]) => {
     dataArchive[dataArchive.length - 1].upperBounds.map((d: number[]) => {
@@ -249,6 +221,8 @@ function NautilusNavigatorMethod({
 
   // TODO: basic idea works, to be done better.
   const goBack = (step: number) => {
+    console.log("here!");
+    console.log(dataArchive);
     // need to stop iteration if going back
     if (itestateRef.current === true) {
       SetIterateNavi(false);
@@ -258,17 +232,18 @@ function NautilusNavigatorMethod({
       console.log("cant go back to the future");
       return;
     }
-    dataArchive!.splice(step, dataArchive!.length - 1);
+    console.log(step);
+    dataArchive!.splice(step); //, dataArchive!.length - 1);
 
     const newConData = convertData(
-      dataArchive![step - 1],
+      dataArchive![dataArchive!.length - 1],
       activeProblemInfo!.minimize
     );
     // Update distance traveled
     SetDistanceTraveled(
-      dataArchive![step - 1].distance === undefined
+      dataArchive![dataArchive!.length - 1].distance === undefined
         ? 0
-        : dataArchive![step - 1].distance!
+        : dataArchive![dataArchive!.length - 1].distance!
     );
     SetConvertData(newConData);
     // update referencePoints
@@ -279,6 +254,8 @@ function NautilusNavigatorMethod({
     const updatedBound = newConData!.boundaries.flatMap((d: number[]) => [
       d[newConData!.boundaries[0].length - 1],
     ]);
+    console.log("After");
+    console.log(dataArchive);
     SetBoundaryPoint(updatedBound);
     //SetDataArchive(dataArchive)
     SetCurrentStep(step);
@@ -405,7 +382,7 @@ function NautilusNavigatorMethod({
               return [nadir[i]].concat(nadir[i]);
             }),
             totalSteps: 40, // this has to be 100, since step 1 is the first step according to the server.
-            stepsTaken: body.response.step_number - 1,
+            stepsTaken: body.response.step_number,
             //stepsTaken: 0,
             distance: body.response.distance, // check for possible float errors
             reachableIdx: body.response.reachable_idx,
@@ -553,6 +530,8 @@ function NautilusNavigatorMethod({
             const body = await res.json();
             const response = body.response;
             //console.log("vastaus", response);
+            console.log("body");
+            console.log(body);
 
             // TODO:
             const dataArchive = dRef.current;

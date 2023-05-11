@@ -31,6 +31,8 @@ export const NavigationWindow = ({
   handleStep,
   dimensionsMaybe,
 }: NavigationWindowProps) => {
+  console.log(objectiveData);
+  
   var singleObjectiveDataArray: NavigationDataSingleObjective[] = [];
   const [newStep, handleNewStep] = useState<number>();
 

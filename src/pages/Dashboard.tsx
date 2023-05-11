@@ -117,41 +117,31 @@ DashboardProps) => {
         >
           Start
         </Button>
-        {/*             <Button
-              //component={Link}
-              //to="/nimbus"
-              sx={{ mr: "1rem" }}
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                createMethod(
-                  apiUrl,
-                  tokens,
-                  problemGroup,
-                  "nautilus_navigator"
-                );
-                navigate("/nautilus");
-              }}
-            >
-              Nautilus
-            </Button>
-            <Button
-              //component={Link}
-              //to="/nimbus"
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                createMethod(
-                  apiUrl,
-                  tokens,
-                  problemGroup,
-                  "synchronous_nimbus"
-                );
-                navigate("/nimbus");
-              }}
-            >
-              Nimbus
-            </Button> */}
+        <Button
+          //component={Link}
+          //to="/nautilus"
+          sx={{ mr: "1rem" }}
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            createMethod(apiUrl, tokens, problemGroup, "nautilus_navigator");
+            navigate("/nautilus");
+          }}
+        >
+          Nautilus
+        </Button>
+        <Button
+          //component={Link}
+          //to="/nimbus"
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            createMethod(apiUrl, tokens, problemGroup, "synchronous_nimbus");
+            navigate("/nimbus");
+          }}
+        >
+          Nimbus
+        </Button>
       </Box>
 
       {/*       <Grid

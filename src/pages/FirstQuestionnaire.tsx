@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import defaultSurveyConfig from "../types/survey";
 import SurveyComponent from "../components/SurveyComponent";
 import { prequestionnaire } from "../utils/questionnaires";
+import { createMethod } from "./nimbus/nimbusHelpers";
 import { Toolbar, Container } from "@mui/material";
 import "../style/custom.scss";
 import { CssBaseline, Typography } from "@mui/material";
@@ -157,8 +158,9 @@ FirstQuestionnaireProps) => {
       methodName = "nautilus_navigator";
       route = "/nautilus";
     }
+    createMethod(apiUrl, tokens, problemGroup, methodName);
 
-    try {
+    /* try {
       const methodCreation = { problemGroup: problemGroup, method: methodName };
       const res = await fetch(`${apiUrl}/method/create`, {
         method: "POST",
@@ -180,7 +182,7 @@ FirstQuestionnaireProps) => {
     } catch (e) {
       console.log(e);
       // Do nothing
-    }
+    } */
     navigate(route);
   }, []);
 

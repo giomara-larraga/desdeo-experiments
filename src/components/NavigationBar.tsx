@@ -255,7 +255,7 @@ export const NavigationBar = ({
       setTooltip(Tooltip);
     } else {
       // clear the svg of its children
-      console.log("svg clear!");
+      //console.log("svg clear!");
       selection.selectAll("*").remove();
 
       // chart where to add stuff
@@ -452,8 +452,8 @@ export const NavigationBar = ({
   const updateBound = useCallback(
     (boundvalue: number, referencePoint?: number) => {
       if (referencePoint) {
-        console.log(boundvalue);
-        console.log(referencePoint);
+        //console.log(boundvalue);
+        //console.log(referencePoint);
         if (boundvalue * minOrMax < referencePoint * minOrMax) {
           boundvalue = referencePoint;
         }
@@ -757,14 +757,14 @@ export const NavigationBar = ({
     // );
 
     let movableStepData: PointData[] = [
-      { x: stepValtoXPixel()(newstep), y: 0 }, // now needs some data to work. x coord will always be the step coord
-      { x: stepValtoXPixel()(newstep), y: plotHeight }, //. y will change so it doenst matter here
+      { x: stepValtoXPixel()(newstep - 1), y: 0 }, // now needs some data to work. x coord will always be the step coord
+      { x: stepValtoXPixel()(newstep - 1), y: plotHeight }, //. y will change so it doenst matter here
     ];
 
     // movableLineData object
     let StepData: PointData[] = [
-      { x: stepValtoXPixel()(step), y: 0 }, // now needs some data to work. x coord will always be the step coord
-      { x: stepValtoXPixel()(step), y: plotHeight }, //. y will change so it doenst matter here
+      { x: stepValtoXPixel()(step - 1), y: 0 }, // now needs some data to work. x coord will always be the step coord
+      { x: stepValtoXPixel()(step - 1), y: plotHeight }, //. y will change so it doenst matter here
     ];
 
     const movePath = () => {
@@ -819,10 +819,13 @@ export const NavigationBar = ({
           .on("end", function (event) {
             // add line coords to reference data
             let tempstep = Math.floor(xPixelToStepVal()(event.x));
+            if (tempstep < 1) {
+              tempstep = 1;
+            }
             movableStepData[0].x = stepValtoXPixel()(tempstep);
             movableStepData[1].x = stepValtoXPixel()(tempstep);
             movePath();
-            handleNewStep(tempstep);
+            handleNewStep(tempstep + 1);
           })
       );
   });
