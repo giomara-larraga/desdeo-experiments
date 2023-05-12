@@ -829,7 +829,7 @@ function NautilusNavigatorMethod({
               onClick={toNimbus}
               disabled={showFinal ? false : true}
             >
-              {"Next"}
+              {"Show solution and Proceed to Phase 2"}
             </Button>
           </Box>
         </Drawer>

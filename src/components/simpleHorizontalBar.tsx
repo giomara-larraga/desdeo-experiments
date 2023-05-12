@@ -73,7 +73,7 @@ const SimpleHorizontalBar = ({
   //   );
   const [prefPointerLoc, setPrefPointerLoc] = useState<number>(referencePoint);
   const [infoPointerLoc, setInfoPointerLoc] = useState<number>(referencePoint);
-  const [posNegMiddle, setPosNegMiddle] = useState<number>();
+  // const [posNegMiddle, setPosNegMiddle] = useState<number>();
   const [dimensions] = useState(
     dimensionsMaybe ? dimensionsMaybe! : defaultDimensions
   );
@@ -84,10 +84,9 @@ const SimpleHorizontalBar = ({
     setPrefPointerLoc(referencePoint);
     setInfoPointerLoc(referencePoint);
   }, [referencePoint]);
+  // console.log("referencePoint: ", referencePoint); 
 
-  useEffect(() => {
-    setPosNegMiddle(currentPoint);
-  }, [currentPoint]);
+
 
   // create an array of linear scales to scale each objective being maximized
   const xs = useCallback(() => {

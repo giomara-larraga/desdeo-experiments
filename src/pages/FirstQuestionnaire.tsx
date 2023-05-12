@@ -162,7 +162,7 @@ FirstQuestionnaireProps) => {
       methodName = "nautilus_navigator";
       route = "/nautilus";
     }
-    createMethod(apiUrl, tokens, problemGroup, methodName);
+    await createMethod(apiUrl, tokens, problemGroup, methodName);
 
     /* try {
       const methodCreation = { problemGroup: problemGroup, method: methodName };

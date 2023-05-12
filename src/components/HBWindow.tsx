@@ -50,7 +50,7 @@ export const HBWindow = ({
   const numObj = ideal.length;
 
   // console.log(objectiveData);
-  const colors = [
+  const colors_sup = [
     "#A6B1E1",
     "#EAB0D9",
     "#CBE2B0",
@@ -62,7 +62,7 @@ export const HBWindow = ({
     "#CAF7E3",
     "#FFB6B9",
   ];
-  const colors_sup = [
+  const colors = [
     "#A6B1E150",
     "#EAB0D950",
     "#CBE2B050",
@@ -149,27 +149,27 @@ export const HBWindow = ({
               </Typography>
             </Grid>
             <Grid item xs={8} sx={{ display: "flex", justifyContent: "right" }}>
-              <Typography color={"gray"}>
+              {/* <Typography color={"gray"}>
                 Previous preference: {currentPoint[i]}
-              </Typography>
+              </Typography> */}
             </Grid>
             <Grid item xs={4}>
               <Box>
                 <TextField
                   id="outlined-number"
-                  label="Aspiration level:"
+                  label="Level:"
                   type="number"
                   //defaultValue={referencePoint[i].toFixed(4)}
                   value={referencePoint[i].toFixed(4)}
                   InputLabelProps={{
                     shrink: true,
                   }}
-                  inputProps={{ maxLength: 5, readOnly: true }}
+                  inputProps={{ maxLength: 5 }}
                   error={!!errorMessages[i]}
                   helperText={errorMessages[i]}
-                  /*onChange={(e) => {
-                    validateAspirationLevel(parseFloat(e.target.value), i);
-                  }}*/
+                  onChange={(e) => {
+                    setReferencePoint([parseFloat(e.target.value), i]);
+                  }}
                 />
               </Box>
             </Grid>
