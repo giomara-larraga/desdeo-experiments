@@ -50,7 +50,7 @@ export const HBWindow = ({
   const numObj = ideal.length;
 
   // console.log(objectiveData);
-  const colors = [
+  const colors_sup = [
     "#A6B1E1",
     "#EAB0D9",
     "#CBE2B0",
@@ -62,7 +62,7 @@ export const HBWindow = ({
     "#CAF7E3",
     "#FFB6B9",
   ];
-  const colors_sup = [
+  const colors = [
     "#A6B1E150",
     "#EAB0D950",
     "#CBE2B050",
@@ -157,7 +157,7 @@ export const HBWindow = ({
               <Box>
                 <TextField
                   id="outlined-number"
-                  label="Aspiration level:"
+                  label="Level:"
                   type="number"
                   //defaultValue={referencePoint[i].toFixed(4)}
                   value={referencePoint[i].toFixed(4)}

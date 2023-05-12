@@ -103,7 +103,7 @@ function NimbusMethod({
     if (groupId === 1) {
       setCurrentPage("Solution Process");
     } else {
-      setCurrentPage("Solution Process - Part 2");
+      setCurrentPage("Solution Process - Phase 2");
     }
   }, []);
   // fetch current problem info
@@ -943,7 +943,7 @@ function NimbusMethod({
                         }
                         sx={{ marginTop: "1rem" }}
                       >
-                        Select active solution as the final solution
+                        Save selected solution as the final solution
                       </Button>
                     )}
                     {loading && (
