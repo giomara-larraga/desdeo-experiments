@@ -12,9 +12,12 @@ import Container from "@mui/material/Container";
 import { CardContent, FormControl, Select } from "@material-ui/core";
 import { Grid, TextField } from "@mui/material";
 import { Controller } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Classification } from "../pages/nimbus/nimbusTypes";
-
+import IconButton from "@mui/material/IconButton";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import Link from "@mui/material/Link";
 interface HBWindowProps {
   ideal: number[];
   nadir: number[];
@@ -25,8 +28,8 @@ interface HBWindowProps {
     | ((x: [number, number]) => void);
   referencePoint: number[];
   currentPoint: number[];
-  setLevelsOK: React.Dispatch<React.SetStateAction<boolean>>;
-  levelsOK: boolean;
+  //setLevelsOK: React.Dispatch<React.SetStateAction<boolean>>;
+  //levelsOK: boolean;
   //classifications: Classification[];
   dimensionsMaybe?: RectDimensions;
 }
@@ -44,9 +47,9 @@ export const HBWindow = ({
   referencePoint,
   currentPoint,
   dimensionsMaybe,
-  setLevelsOK,
-  levelsOK,
-}: HBWindowProps) => {
+}: //setLevelsOK,
+//levelsOK,
+HBWindowProps) => {
   const numObj = ideal.length;
 
   // console.log(objectiveData);
@@ -75,16 +78,23 @@ export const HBWindow = ({
     "#FFB6B950",
   ];
 
-  const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
+  //const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
+  const [prevPreference, setPrevPreference] = useState(currentPoint);
+
+  //const prevPreference = currentPoint;
   //const [isValid, setIsValid] = useState<boolean>(true);
   //const [inputRP, setInputRP] = useState<number[]>([]);
 
-  function setErrorMessagePosition(errorText: string, i: number) {
+  function setPreviousValue(value: number, index: number) {
+    setReferencePoint([value, index]);
+    return;
+  }
+  /*function setErrorMessagePosition(errorText: string, i: number) {
     const updated = { ...errorMessages, [i]: errorText };
     setErrorMessages(updated);
-  }
+  }*/
 
-  function validateAspirationLevel(value: number, index: number) {
+  /*function validateAspirationLevel(value: number, index: number) {
     // validation logic that defines is true or false
     let isValid = true;
     setErrorMessagePosition("", index);
@@ -136,24 +146,37 @@ export const HBWindow = ({
 
     // return is optional
     return isValid;
-  }
+  }*/
 
   return (
     <div className="navigation-window">
       {Array.from({ length: numObj }, (_, i) => i).map((i) => {
         return (
-          <Grid container spacing={2} sx={{ marginBottom: "1.5rem" }}>
+          <Grid container spacing={1} sx={{ marginBottom: "1.5rem" }}>
             <Grid item xs={4}>
               <Typography sx={{ fontWeight: "bold" }}>
-                {objectiveNames[i]}
+                {objectiveNames[i] +
+                  " (" +
+                  (directions[i] > 0 ? "min" : "max") +
+                  ")"}
               </Typography>
             </Grid>
             <Grid item xs={8} sx={{ display: "flex", justifyContent: "right" }}>
-              {/* <Typography color={"gray"}>
-                Previous preference: {currentPoint[i]}
-              </Typography> */}
+              {/*               <IconButton
+                color="primary"
+                aria-label="upload picture"
+                component="label"
+                size="small"
+                onClick={() => {
+                  console.log(prevPreference);
+                  setReferencePoint([prevPreference[i], i]);
+                  console.log(referencePoint[i]);
+                }}
+              >
+                Previous preference
+              </IconButton> */}
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <Box>
                 <TextField
                   id="outlined-number"
@@ -165,27 +188,77 @@ export const HBWindow = ({
                     shrink: true,
                   }}
                   inputProps={{ maxLength: 5 }}
-                  error={!!errorMessages[i]}
-                  helperText={errorMessages[i]}
+                  //error={!!errorMessages[i]}
+                  //helperText={errorMessages[i]}
                   onChange={(e) => {
                     setReferencePoint([parseFloat(e.target.value), i]);
                   }}
                 />
               </Box>
             </Grid>
-            <Grid item xs={8}>
-              <SimpleHorizontalBar
-                ideal={ideal[i]}
-                nadir={nadir[i]}
-                direction={directions[i]}
-                index={i}
-                setReferencePoint={setReferencePoint}
-                referencePoint={referencePoint[i]}
-                currentPoint={currentPoint[i]}
-                color={colors[i]}
-                color_sup={colors_sup[i]}
-                dimensionsMaybe={dimensionsMaybe}
-              ></SimpleHorizontalBar>
+            <Grid item xs={9} spacing={0}>
+              <Grid container spacing={0}>
+                <Grid
+                  item
+                  xs="auto"
+                  sx={{ display: "flex", justifyContent: "flex-end" }}
+                >
+                  <IconButton
+                    color="primary"
+                    aria-label="upload picture"
+                    component="label"
+                    size="small"
+                    onClick={() => {
+                      if (directions[i] === 1) {
+                        setReferencePoint([nadir[i], i]);
+                      } else {
+                        setReferencePoint([-nadir[i], i]);
+                      }
+                    }}
+                  >
+                    <ArrowBackIosIcon />
+                  </IconButton>
+                </Grid>
+                <Grid
+                  item
+                  xs={10}
+                  sx={{ display: "flex", justifyContent: "center" }}
+                >
+                  <SimpleHorizontalBar
+                    ideal={ideal[i]}
+                    nadir={nadir[i]}
+                    direction={directions[i]}
+                    index={i}
+                    setReferencePoint={setReferencePoint}
+                    referencePoint={referencePoint[i]}
+                    currentPoint={currentPoint[i]}
+                    color={colors[i]}
+                    color_sup={colors_sup[i]}
+                    dimensionsMaybe={dimensionsMaybe}
+                  ></SimpleHorizontalBar>
+                </Grid>
+                <Grid
+                  item
+                  xs="auto"
+                  sx={{ display: "flex", justifyContent: "flex-start" }}
+                >
+                  <IconButton
+                    color="primary"
+                    aria-label="upload picture"
+                    component="label"
+                    size="small"
+                    onClick={() => {
+                      if (directions[i] === 1) {
+                        setReferencePoint([ideal[i], i]);
+                      } else {
+                        setReferencePoint([-ideal[i], i]);
+                      }
+                    }}
+                  >
+                    <ArrowForwardIosIcon />
+                  </IconButton>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         );

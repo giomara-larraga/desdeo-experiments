@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { ProblemInfo, NavigationData } from "../types/ProblemTypes";
 import { Tokens } from "../types/AppTypes";
-import { Row, Col } from "react-bootstrap";
+import { Row, Col, Table } from "react-bootstrap";
 import ReactLoading from "react-loading";
 import { NavigationWindow } from "../components/NavigationWindow";
 //import Slider from "@material-ui/core/Slider";
@@ -18,7 +18,8 @@ import Drawer from "@mui/material/Drawer";
 import Toolbar from "@mui/material/Toolbar";
 import Slider from "@mui/material/Slider";
 import { createMethod } from "./nimbus/nimbusHelpers";
-
+import SolutionTable from "../components/SolutionTable";
+import { ParseSolutions } from "../utils/DataHandling";
 const drawerWidth = 300;
 // TODO: should be imported, and need to update the NavigationData type in NavigationBars /types
 // Test with 7 maximizable objectives.. only possible to test the drawing I guess..
@@ -96,6 +97,7 @@ function NautilusNavigatorMethod({
 
   const [satisfied, SetSatisfied] = useState<boolean>(false);
   const [showFinal, SetShowFinal] = useState<boolean>(false);
+  const [showSolution, SetShowSolution] = useState<boolean>(false);
   //const [alternatives, SetAlternatives] = useState<ObjectiveData>();
   //const [finalObjectives, SetFinalObjectives] = useState<number[]>([]);
 
@@ -117,6 +119,10 @@ function NautilusNavigatorMethod({
     objective_values: string;
   }
   // FUNCTIONS to handle stuff
+
+  const toShowSolution = () => {
+    SetShowSolution(true);
+  };
   const toNimbus = async () => {
     try {
       const methodCreation = {
@@ -695,213 +701,278 @@ function NautilusNavigatorMethod({
   return (
     <Box sx={{ display: "flex", width: "-webkit-fill-available" }}>
       <Toolbar />
-      <Box
-        component="nav"
-        sx={{
-          width: { sm: drawerWidth },
-          flexShrink: { sm: 0 },
-          padding: "1rem",
-          overflow: "hidden",
-        }}
-      >
-        <Drawer
-          sx={{
-            flexShrink: 0,
-            "& .MuiDrawer-paper": {
-              width: drawerWidth,
-              boxSizing: "border-box",
-            },
-            padding: "1rem",
-            overflow: "hidden",
-          }}
-          variant="permanent"
-          anchor="left"
-          PaperProps={{ elevation: 9 }}
-        >
-          <Toolbar />
-          <Typography
-            sx={{
-              alignSelf: "center",
-              fontWeight: "lightbold",
-              marginTop: "1rem",
-            }}
-          >
-            Progress:
-          </Typography>
-          <Typography
-            variant="h5"
-            sx={{
-              alignSelf: "center",
-              fontWeight: "bold",
-              marginBottom: "1rem",
-            }}
-            color={"primary"}
-          >{`${Math.round(distanceTraveled)}%`}</Typography>
-
-          <Typography sx={{ marginLeft: 2 }}>Navigation Speed</Typography>
-
-          <Slider
-            sx={{ marginLeft: "2rem", width: "80%" }}
-            value={speed}
-            onChange={(_, val) => {
-              SetSpeed(val as number);
-            }}
-            aria-labelledby="discrete-slider"
-            valueLabelDisplay="off"
-            step={1}
-            marks={[
-              {
-                value: 1,
-                label: "Slow",
-              },
-              {
-                value: 2,
-                label: "",
-              },
-              {
-                value: 3,
-                label: "",
-              },
-              {
-                value: 4,
-                label: "",
-              },
-              {
-                value: 5,
-                label: "Fast",
-              },
-            ]}
-            min={1}
-            max={5}
-          />
+      {!showSolution && (
+        <>
           <Box
-            justifyContent={"center"}
-            display={"flex"}
-            sx={{ marginTop: "2rem" }}
+            component="nav"
+            sx={{
+              width: { sm: drawerWidth },
+              flexShrink: { sm: 0 },
+              padding: "1rem",
+              overflow: "hidden",
+            }}
           >
-            <Button
-              disabled={!loading && !iterateNavi && !showFinal ? false : true}
-              variant="contained"
-              size={"large"}
-              onClick={toggleIteration}
-              sx={{ marginRight: "1rem" }}
+            <Drawer
+              sx={{
+                flexShrink: 0,
+                "& .MuiDrawer-paper": {
+                  width: drawerWidth,
+                  boxSizing: "border-box",
+                },
+                padding: "1rem",
+                overflow: "hidden",
+              }}
+              variant="permanent"
+              anchor="left"
+              PaperProps={{ elevation: 9 }}
             >
-              Start
-            </Button>
-            <Button
-              size={"large"}
-              variant="contained"
-              disabled={loading ? false : true}
-              onClick={toggleIteration}
-            >
-              Stop
-            </Button>
-          </Box>
+              <Toolbar />
+              <Typography
+                sx={{
+                  alignSelf: "center",
+                  fontWeight: "lightbold",
+                  marginTop: "1rem",
+                }}
+              >
+                Progress:
+              </Typography>
+              <Typography
+                variant="h5"
+                sx={{
+                  alignSelf: "center",
+                  fontWeight: "bold",
+                  marginBottom: "1rem",
+                }}
+                color={"primary"}
+              >{`${Math.round(distanceTraveled)}%`}</Typography>
 
-          {/* {!loading && !iterateNavi && (
+              <Typography sx={{ marginLeft: 2 }}>Navigation Speed</Typography>
+
+              <Slider
+                sx={{ marginLeft: "2rem", width: "80%" }}
+                value={speed}
+                onChange={(_, val) => {
+                  SetSpeed(val as number);
+                }}
+                aria-labelledby="discrete-slider"
+                valueLabelDisplay="off"
+                step={1}
+                marks={[
+                  {
+                    value: 1,
+                    label: "Slow",
+                  },
+                  {
+                    value: 2,
+                    label: "",
+                  },
+                  {
+                    value: 3,
+                    label: "",
+                  },
+                  {
+                    value: 4,
+                    label: "",
+                  },
+                  {
+                    value: 5,
+                    label: "Fast",
+                  },
+                ]}
+                min={1}
+                max={5}
+              />
+              <Box
+                justifyContent={"center"}
+                display={"flex"}
+                sx={{ marginTop: "2rem" }}
+              >
+                <Button
+                  disabled={
+                    !loading && !iterateNavi && !showFinal ? false : true
+                  }
+                  variant="contained"
+                  size={"large"}
+                  onClick={toggleIteration}
+                  sx={{ marginRight: "1rem" }}
+                >
+                  Start
+                </Button>
+                <Button
+                  size={"large"}
+                  variant="contained"
+                  disabled={loading ? false : true}
+                  onClick={toggleIteration}
+                >
+                  Stop
+                </Button>
+              </Box>
+
+              {/* {!loading && !iterateNavi && (
             <Button disabled={false} size={"large"} onClick={toggleIteration}>
               Start Navigation
             </Button>
           )} */}
-          {loading && (
-            <Button disabled={true} size={"large"} variant={"outlined"}>
-              {"Working... "}
-              <ReactLoading
-                type={"bubbles"}
-                color={"#ffffff"}
-                className={"loading-icon"}
-                height={28}
-                width={32}
-              />
-            </Button>
-          )}
-          <Box
-            position="absolute"
-            bottom="0px"
-            display={"flex"}
-            justifyContent={"center"}
-            width={"-webkit-fill-available"}
-          >
-            {" "}
-            <Button
-              variant="contained"
-              size="large"
-              onClick={toNimbus}
-              disabled={showFinal ? false : true}
-            >
-              {"Show solution and Proceed to Phase 2"}
-            </Button>
+              {loading && (
+                <Button disabled={true} size={"large"} variant={"outlined"}>
+                  {"Working... "}
+                  <ReactLoading
+                    type={"bubbles"}
+                    color={"#ffffff"}
+                    className={"loading-icon"}
+                    height={28}
+                    width={32}
+                  />
+                </Button>
+              )}
+              <Box
+                position="absolute"
+                bottom="0px"
+                display={"flex"}
+                justifyContent={"center"}
+                width={"-webkit-fill-available"}
+              >
+                {" "}
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={toShowSolution}
+                  disabled={showFinal ? false : true}
+                >
+                  {"Show solution and Proceed to Phase 2"}
+                </Button>
+              </Box>
+            </Drawer>
           </Box>
-        </Drawer>
-      </Box>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: "100%",
-        }}
-      >
-        <Toolbar />
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 3,
+              width: "100%",
+            }}
+          >
+            <Toolbar />
+            <Container>
+              {!satisfied && (
+                <>
+                  <Row>
+                    <Col>
+                      {fetchedInfo && (
+                        <div style={{ width: "800px" }}>
+                          {/* console.log("ennen piirtoa archive", dataArchive) */}
+                          {/*console.log("ennen piirtoa conv data", convertedData) */}
+                          <NavigationWindow
+                            objectiveData={{
+                              ...convertedData!,
+                              ...{
+                                objectiveNames:
+                                  activeProblemInfo!.objectiveNames,
+                                nadir: activeProblemInfo!.nadir.map((v, i) =>
+                                  activeProblemInfo!.minimize[i] === 1 ? v : -v
+                                ),
+                                ideal: activeProblemInfo!.ideal.map((v, i) =>
+                                  activeProblemInfo!.minimize[i] === 1 ? v : -v
+                                ),
+                                minimize: activeProblemInfo!.minimize,
+                              },
+                            }}
+                            handleReferenceValue={(
+                              refData: [number, number]
+                            ) => {
+                              let refe = referencePoint;
+                              refe[refData[1]] = refData[0];
+                              SetReferencePoint(refe);
+                            }}
+                            handleBoundValue={(boundData: [number, number]) => {
+                              let boundy = boundaryPoint;
+                              boundy[boundData[1]] = boundData[0];
+                              SetBoundaryPoint(boundy);
+                            }}
+                            handleStep={(s: number) => {
+                              // if iteration have to stop iteration first
+                              if (itestateRef.current === true) {
+                                SetIterateNavi(false);
+                              }
+                              //console.log("ASKEL", s)
+                              // checks for step being correct etc..
+                              if (s > currentStep) {
+                                // do nothing
+                                console.log("cant step to the future");
+                              }
+                              if (s < 1) {
+                                console.log("not possible value");
+                              }
+                              SetCurrentStep(s);
+                              goBack(s);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </Col>
+                  </Row>
+                </>
+              )}
+            </Container>
+          </Box>
+        </>
+      )}
+      {showSolution && (
         <Container>
-          {!satisfied && (
-            <>
-              <Row>
-                <Col>
-                  {fetchedInfo && (
-                    <div style={{ width: "800px" }}>
-                      {/* console.log("ennen piirtoa archive", dataArchive) */}
-                      {/*console.log("ennen piirtoa conv data", convertedData) */}
-                      <NavigationWindow
-                        objectiveData={{
-                          ...convertedData!,
-                          ...{
-                            objectiveNames: activeProblemInfo!.objectiveNames,
-                            nadir: activeProblemInfo!.nadir.map((v, i) =>
-                              activeProblemInfo!.minimize[i] === 1 ? v : -v
-                            ),
-                            ideal: activeProblemInfo!.ideal.map((v, i) =>
-                              activeProblemInfo!.minimize[i] === 1 ? v : -v
-                            ),
-                            minimize: activeProblemInfo!.minimize,
-                          },
-                        }}
-                        handleReferenceValue={(refData: [number, number]) => {
-                          let refe = referencePoint;
-                          refe[refData[1]] = refData[0];
-                          SetReferencePoint(refe);
-                        }}
-                        handleBoundValue={(boundData: [number, number]) => {
-                          let boundy = boundaryPoint;
-                          boundy[boundData[1]] = boundData[0];
-                          SetBoundaryPoint(boundy);
-                        }}
-                        handleStep={(s: number) => {
-                          // if iteration have to stop iteration first
-                          if (itestateRef.current === true) {
-                            SetIterateNavi(false);
-                          }
-                          //console.log("ASKEL", s)
-                          // checks for step being correct etc..
-                          if (s > currentStep) {
-                            // do nothing
-                            console.log("cant step to the future");
-                          }
-                          if (s < 1) {
-                            console.log("not possible value");
-                          }
-                          SetCurrentStep(s);
-                          goBack(s);
-                        }}
-                      />
-                    </div>
-                  )}
-                </Col>
-              </Row>
-            </>
-          )}
+          <Toolbar />
+          <Typography
+            variant="h5"
+            color={"primary"}
+            sx={{ marginBottom: "2rem" }}
+          >
+            Final solution
+          </Typography>
+          <Typography
+            variant="h6"
+            color={"primary"}
+            sx={{ marginTop: "2rem", marginBottom: "2rem" }}
+          >
+            Objective values:
+          </Typography>
+          <SolutionTable
+            objectiveData={ParseSolutions(finalObjectives, activeProblemInfo!)}
+            setIndex={() => console.log("nothing happens...")}
+            selectedIndex={0}
+            tableTitle={""}
+          />
+          <Typography
+            variant="h6"
+            color={"primary"}
+            sx={{ marginTop: "2rem", marginBottom: "2rem" }}
+          >
+            Decision variables:
+          </Typography>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                {finalVariables[0].map((_, i) => {
+                  return <th>{`x${i + 1}`}</th>;
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                {finalVariables[0].map((v) => {
+                  return <td>{`${v.toFixed(4)}`}</td>;
+                })}
+              </tr>
+            </tbody>
+          </Table>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={toNimbus}
+            sx={{ marginTop: "2rem" }}
+          >
+            {"Continue to Phase 2"}
+          </Button>
         </Container>
-      </Box>
+      )}
     </Box>
   );
 }

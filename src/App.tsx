@@ -37,7 +37,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState("");
 
   const API_URL: string = "http://webapiroute-desdeoswitch.rahtiapp.fi/";
-  // const API_URL: string = "http://127.0.0.1:5000";
+  //const API_URL: string = "http://127.0.0.1:5000";
 
   // useEffect(() => {
   //   if (groupId === -1) {

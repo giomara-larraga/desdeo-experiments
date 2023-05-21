@@ -8,6 +8,7 @@ import "./Svg.css";
 import { ObjectiveDataSingleObjective } from "../types/ProblemTypes";
 import { RectDimensions } from "../types/ComponentTypes";
 import { type } from "os";
+import { symbol } from "d3-shape";
 
 interface SimpleHorizontalBarProps {
   ideal: number;
@@ -25,7 +26,7 @@ interface SimpleHorizontalBarProps {
 }
 const defaultDimensions = {
   chartHeight: 150,
-  chartWidth: 600,
+  chartWidth: 700,
   marginLeft: 20,
   marginRight: 20,
   marginTop: 0,
@@ -84,9 +85,7 @@ const SimpleHorizontalBar = ({
     setPrefPointerLoc(referencePoint);
     setInfoPointerLoc(referencePoint);
   }, [referencePoint]);
-  // console.log("referencePoint: ", referencePoint); 
-
-
+  // console.log("referencePoint: ", referencePoint);
 
   // create an array of linear scales to scale each objective being maximized
   const xs = useCallback(() => {
@@ -271,30 +270,30 @@ const SimpleHorizontalBar = ({
         .attr("stroke", "black")
         .attr("fill", "none");
 
-      // enter
-      //   .append("text")
-      //   .attr("class", "infoLabel")
-      //   .attr("fill", "black")
-      //   .attr("text-anchor", () => {
-      //     const midPoints = xs().map((x, _) => {
-      //       return (x.domain()[0] + x.domain()[1]) / 2;
-      //     });
-      //     if (d.value >= midPoints[i]) {
-      //       return "end";
-      //     } else {
-      //       return "start";
-      //     }
-      //   })
-      //   .attr("transform", (d, i) => {
-      //     return `translate(${
-      //       d.direction === -1
-      //         ? xs()[i](d.value) + dimensions.marginLeft
-      //         : xs_rev()[i](d.value) + dimensions.marginLeft
-      //     }, ${(y()(d.name) as number) + y().bandwidth() / 2})`;
-      //   })
-      //   .text((d) => `${d.value}`)
-      //   .attr("font-size", "16px")
-      //   .attr("font-weight", "light");
+      /*       enter
+        .append("text")
+        .attr("class", "infoLabel")
+        .attr("fill", "black")
+        .attr("text-anchor", () => {
+          const midPoints = xs().map((x, _) => {
+            return (x.domain()[0] + x.domain()[1]) / 2;
+          });
+          if (d.value >= midPoints[i]) {
+            return "end";
+          } else {
+            return "start";
+          }
+        })
+        .attr("transform", (d, i) => {
+          return `translate(${
+            d.direction === -1
+              ? xs()[i](d.value) + dimensions.marginLeft
+              : xs_rev()[i](d.value) + dimensions.marginLeft
+          }, ${(y()(d.name) as number) + y().bandwidth() / 2})`;
+        })
+        .text((d) => `${d.value}`)
+        .attr("font-size", "16px")
+        .attr("font-weight", "light"); */
 
       // draw a transparent overlay on top of each bar to work as an event detector
       enter
@@ -308,6 +307,20 @@ const SimpleHorizontalBar = ({
         .attr("fill", "yellow")
         .attr("opacity", 0.0);
 
+      /*  enter
+        .append("path")
+        .attr("class", "pointerCurrentPreference")
+        .attr("d", symbol())
+        .attr("transform", "translate(25,25)")
+        .attr("x", () => {
+          if (direction === -1) {
+            return xs()(currentPoint) + dimensions.marginLeft;
+          } else {
+            return xs_rev()(currentPoint) + dimensions.marginLeft;
+          }
+        })
+        .attr("y", 0);
+ */
       // Position the x-axises
 
       selection

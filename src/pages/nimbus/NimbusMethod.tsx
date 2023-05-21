@@ -1,21 +1,16 @@
-// import React from "react";
-import { useEffect, useState, useCallback } from "react";
-import {
-  ProblemInfo,
-  ObjectiveData,
-  // ObjectiveDatum,
-} from "../../types/ProblemTypes";
+import { useEffect, useState } from "react";
+import { ProblemInfo, ObjectiveData } from "../../types/ProblemTypes";
 import { Tokens } from "../../types/AppTypes";
+import ClassificationsInputForm from "../../components/ClassificationsInputForm";
 import { Row, Col, Form, Table } from "react-bootstrap";
 import ReactLoading from "react-loading";
 import { ParseSolutions, ToTrueValues } from "../../utils/DataHandling";
-//import { ParallelAxes } from "desdeo-components";
+import { HorizontalBars } from "desdeo-components";
 import ParallelAxes from "./ParallelAxes";
-//import { HorizontalBars } from "desdeo-components";
-// import HorizontalBars from "../../components/HorizontalBars";
 import SolutionTable from "../../components/SolutionTable";
+import SolutionTableNimbus from "../../components/SolutionTableNimbus";
 import SolutionTableMultiSelect from "../../components/SolutionTableMultiSelect";
-// import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Toolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -23,20 +18,9 @@ import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
-import { CardContent, FormControl, Select } from "@material-ui/core";
-// import Tabs from "@mui/material/Tabs";
-// import Tab from "@mui/material/Tab";
-// import TabPanel from "./TabPanel";
-// import MenuItem from "@mui/material/MenuItem";
-// import FormControlLabel from "@mui/material/FormControlLabel";
-// import Radio from "@mui/material/Radio";
-// import RadioGroup from "@mui/material/RadioGroup";
-// import FormLabel from "@mui/material/FormLabel/FormLabel";
-import { useNavigate } from "react-router-dom";
 import HBWindow from "../../components/HBWindow";
-import { index } from "d3-array";
 
-const drawerWidth = 550;
+import { CardContent, FormControl, Select } from "@material-ui/core";
 interface NimbusMethodProps {
   isLoggedIn: boolean;
   loggedAs: string;
@@ -46,17 +30,15 @@ interface NimbusMethodProps {
   groupId: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
-interface ArchiveProps {
-  decision_variables: string;
-  objective_values: string;
-}
+
 type Classification = "<" | "<=" | ">=" | "=" | "0";
 type NimbusState =
   | "not started"
   | "classification"
   | "archive"
-  // | "intermediate"
-  // | "select preferred"
+  | "classify preferred"
+  | "stop with preferred"
+  | "select preferred"
   | "stop";
 
 function NimbusMethod({
@@ -73,32 +55,30 @@ function NimbusMethod({
   const [helpMessage, SetHelpMessage] = useState<string>(
     "Method not started yet."
   );
-  const [initialSolution, SetInitialSolution] = useState<number[]>([]);
-  // const [fetchedInitial, SetFetchedInitial] = useState<boolean>(false);
   const [preferredPoint, SetPreferredPoint] = useState<number[]>([]);
   const [fetchedInfo, SetFetchedInfo] = useState<boolean>(false);
   const [loading, SetLoading] = useState<boolean>(false);
-  const [nimbusState, SetNimbusState] = useState<NimbusState>("not started");
+  const [currentState, SetCurrentState] = useState<NimbusState>("not started");
   const [classifications, SetClassifications] = useState<Classification[]>([]);
   const [classificationLevels, SetClassificationLevels] = useState<number[]>(
     []
   );
   const [classificationOk, SetClassificationOk] = useState<boolean>(false);
-  const [newSolutionChosen, SetNewSolutionChosen] = useState<boolean>(false);
   const [numberOfSolutions, SetNumberOfSolutions] = useState<number>(1);
   const [newSolutions, SetNewSolutions] = useState<ObjectiveData>();
+  const [archivedSolutions, SetArchivedSolutions] = useState<ObjectiveData>();
   const [selectedIndices, SetSelectedIndices] = useState<number[]>([]);
-  // const [computeIntermediate, SetComputeIntermediate] =
-  //   useState<boolean>(false);
-  const [preferredRequestSent, SetPreferredRequestSent] =
-    useState<boolean>(true);
-  const [cont, SetCont] = useState<boolean>(true);
+  const [selectedIndexArchive, SetSelectedIndexArchive] = useState<number>(-1);
+  const [nSolutionsInArchive, SetNSolutionsInArchive] = useState<number>(0);
   const [finalVariables, SetFinalVariables] = useState<number[]>([]);
+  const [nIteration, SetNIteration] = useState<number>(0);
+  const [
+    solutionsArchivedAfterClassification,
+    SetSolutionsArchivedAfterClassification,
+  ] = useState<boolean>(false);
+  const [newSolutionTableOffset, SetNewSolutionTableOffset] =
+    useState<number>(0);
   const navigate = useNavigate();
-
-  const [classificationlevelsOk, SetClassificationlevelsOk] =
-    useState<boolean>(false);
-
   useEffect(() => {
     if (groupId === 1) {
       setCurrentPage("Solution Process");
@@ -106,13 +86,7 @@ function NimbusMethod({
       setCurrentPage("Solution Process - Phase 2");
     }
   }, []);
-  // fetch current problem info
   useEffect(() => {
-    /*if (!methodCreated) {
-      // method not defined yet, do nothing
-      console.log("useEffect: method not defined");
-      return;
-    }*/
     const fetchProblemInfo = async () => {
       try {
         const res = await fetch(`${apiUrl}/problem/access`, {
@@ -157,7 +131,6 @@ function NimbusMethod({
 
     fetchProblemInfo();
   }, []);
-
   // start the method
   useEffect(() => {
     if (!fetchedInfo) {
@@ -189,7 +162,7 @@ function NimbusMethod({
           SetPreferredPoint([...body.response.objective_values]); // make copy to avoid aliasing
           SetClassificationLevels(body.response.objective_values);
           SetHelpMessage("Please classify each of the shown objectives.");
-          SetNimbusState("classification");
+          SetCurrentState("classification");
           //console.log(body);
           //console.log(activeProblemInfo);
         }
@@ -201,184 +174,13 @@ function NimbusMethod({
 
     startMethod();
   }, [activeProblemInfo, methodStarted, fetchedInfo]);
-
-  const toQuestionnaire = async () => {
-    const log = {
-      method: "NIMBUS",
-      variables: finalVariables.join(","),
-      objectives: preferredPoint.join(","),
-    };
-    try {
-      const res = await fetch(`${apiUrl}/archive`, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${tokens.access}`,
-        },
-        body: JSON.stringify(log),
-      });
-
-      if (res.status == 201) {
-        // OK
-        console.log("OK", log);
-      }
-    } catch (e) {
-      console.log(e);
-      // Do nothing
-    }
-    navigate("/postquestionnaire");
-  };
-  /*const saveLog = async (data: ArchiveProps) => {
-    const log = {
-      method: "NIMBUS",
-      variables: data.decision_variables,
-      objectives: data.objective_values,
-    };
-    try {
-      const res = await fetch(`${apiUrl}/archive`, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${tokens.access}`,
-        },
-        body: JSON.stringify(log),
-      });
-
-      if (res.status == 201) {
-        // OK
-        console.log("OK", log);
-      }
-    } catch (e) {
-      console.log(e);
-      // Do nothing
-    }
-  };*/
-
-  const sendPreferredRequest = async (
-    index: number,
-    continueIterations: Boolean
-  ) => {
-    console.log("sendPreferredRequest");
-    console.log(index);
-    try {
-      const res = await fetch(`${apiUrl}/method/control`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${tokens.access}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          response: {
-            index: index,
-            continue: continueIterations,
-          },
-        }),
-      });
-
-      if (res.status === 200) {
-        // Ok
-        const body = await res.json();
-        const response = body.response;
-
-        if (continueIterations) {
-          // continue iterating
-          SetPreferredPoint([...response.objective_values]); // avoid aliasing
-          SetClassificationLevels(response.objective_values);
-          SetClassifications(
-            response.objective_values.map(() => "=" as Classification)
-          );
-
-          SetSelectedIndices([]);
-          console.log("Henlo");
-          return 0;
-          // SetHelpMessage("Please classify each of the shown objectives.");
-          // SetNimbusState("classification");
-          // break;
-        } else {
-          // stop iterating
-          console.log(response);
-          SetPreferredPoint(response.objective);
-          SetFinalVariables(response.solution);
-          SetHelpMessage("Stopped. Showing final solution reached.");
-          /*saveLog({
-                decision_variables: response.solution.join(","),
-                objective_values: preferredPoint.join(","),
-              });*/
-          SetNimbusState("stop");
-          return 0;
-          //navigate("/postquestionnaire");
-        }
-      } else {
-        // not ok
-        console.log(`Got response code ${res.status}`);
-        return -1;
-        // do nothing
-        // break;
-      }
-    } catch (e) {
-      console.log("Could not iterate NIMBUS");
-      console.log(e);
-      return -1;
-      // do nothing
-      // break;
-    }
-  };
-
-  const handleSelectionAtClassification = (index: number[]) => {
-    console.log(nimbusState);
-    if (index.length === 0 || preferredRequestSent) {
-      return;
-    }
-    // console.log(index);
-    const actualindex = index[index.length - 1];
-    console.log(newSolutions!.values[actualindex].value);
-    // console.log(actualindex);
-    SetSelectedIndices([actualindex]);
-    SetClassificationLevels(newSolutions!.values[actualindex].value);
-    SetClassifications(
-      newSolutions!.values[actualindex].value.map((i) => "=" as Classification)
-    );
-    SetPreferredPoint(newSolutions!.values[actualindex].value);
-    SetClassificationOk(false);
-    SetNewSolutionChosen(true);
-    console.log(classificationLevels);
-    console.log(classificationOk);
-  };
-
-  // const validateLevels = (clasLevels: number[]) => {
-  //   let isValid = true;
-
-  //   console.log(clasLevels);
-  //   if (activeProblemInfo !== undefined && nimbusState === "classification") {
-  //     //let isValid = true;
-  //     let trueValues = clasLevels.map((v, i) =>
-  //       activeProblemInfo.minimize[i] === 1 ? v : -v
-  //     );
-  //     for (let index = 0; index < activeProblemInfo?.nObjectives; index++) {
-  //       if (activeProblemInfo?.minimize[index] === 1) {
-  //         if (trueValues[index] < activeProblemInfo?.ideal[index]) {
-  //           isValid = false;
-  //         } else if (trueValues[index] > activeProblemInfo?.nadir[index]) {
-  //           isValid = false;
-  //         }
-  //       } else {
-  //         if (trueValues[index] < -activeProblemInfo?.nadir[index]) {
-  //           isValid = false;
-  //         } else if (trueValues[index] > -activeProblemInfo?.ideal[index]) {
-  //           isValid = false;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   return isValid;
-  // };
-
-  const iterate = async () => {
+  const iterate = async (nimbusState: NimbusState = "classification") => {
     // Attempt to iterate
     SetLoading(true);
 
     switch (nimbusState) {
       case "classification": {
+        // CLASSIFICATION!
         if (!classificationOk) {
           // classification not ok, do nothing
           SetHelpMessage(
@@ -386,21 +188,8 @@ function NimbusMethod({
           );
           break;
         }
-        if (!preferredRequestSent) {
-          console.log("sending preferred request");
-          console.log(selectedIndices);
-          const preferenceSentResponse = await sendPreferredRequest(
-            selectedIndices[0],
-            true
-          );
-          if (preferenceSentResponse === -1) {
-            break;
-          }
-        }
         try {
-          SetPreferredRequestSent(false);
           console.log(`iterating with levels ${classificationLevels}`);
-          console.log(activeProblemInfo?.ideal, activeProblemInfo?.nadir);
           const res = await fetch(`${apiUrl}/method/control`, {
             method: "POST",
             headers: {
@@ -418,15 +207,33 @@ function NimbusMethod({
 
           if (res.status === 200) {
             // ok
+            /*await LogInfoToDB(
+              tokens,
+              apiUrl,
+              "Preference",
+              `{"Current solution": ${JSON.stringify(
+                preferredPoint
+              )}, "Iteration": ${nIteration}, "Classification": ${JSON.stringify(
+                classifications
+              )}, "Levels": ${JSON.stringify(
+                classificationLevels
+              )}, "Number of new solutions": ${JSON.stringify(
+                numberOfSolutions
+              )}}`,
+              "User provided classifications in NIMBUS."
+            );*/
             const body = await res.json();
             const response = body.response;
             SetNewSolutions(
               ParseSolutions(response.objectives, activeProblemInfo!)
             );
             SetHelpMessage(
-              "Select the solutions you would like to be saved for later viewing."
+              "Select new solutions to be saved to an archive, or select the currently preferred solution for classification or to stop with."
             );
-            SetNimbusState("archive");
+
+            SetCurrentState("archive");
+            SetSolutionsArchivedAfterClassification(false);
+            SetSelectedIndexArchive(-1);
             break;
           } else {
             // not ok
@@ -442,6 +249,7 @@ function NimbusMethod({
         }
       }
       case "archive": {
+        // ARCHIVE SOLUTIONS -> SELECT PREFERRED
         try {
           const res = await fetch(`${apiUrl}/method/control`, {
             method: "POST",
@@ -458,26 +266,37 @@ function NimbusMethod({
           if (res.status === 200) {
             const body = await res.json();
             const response = body.response;
-            console.log("At archive");
-            console.log(response);
+
+            const chosenNew =
+              newSolutions !== undefined
+                ? selectedIndices.map((i) => newSolutions.values[i].value)
+                : [];
+
+            /*await LogInfoToDB(
+              tokens,
+              apiUrl,
+              "Info",
+              `{"Solutions chosen": ${JSON.stringify(
+                chosenNew
+              )}, "Iteration": ${nIteration},}`,
+              "Solutions chosen by the user to be saved to the archive in NIMBUS."
+            );*/
 
             // update the solutions to be shown
             const toBeShown = ParseSolutions(
-              response.objectives,
+              response.objectives.slice(
+                nSolutionsInArchive,
+                nSolutionsInArchive + numberOfSolutions
+              ),
               activeProblemInfo!
             );
             SetNewSolutions(toBeShown);
-            SetNewSolutionChosen(false);
 
-            // reset the active selection
-            SetSelectedIndices([]);
-
-            // reset the number of solutions
-            SetNumberOfSolutions(1);
-
-            // Run the "intermediate" step without any indices selected
+            SetHelpMessage("CHANGE ME!!!!");
+            // SetNimbusState("intermediate");
+            // SKIP INTERMEDIATE STEP
             try {
-              const res = await fetch(`${apiUrl}/method/control`, {
+              const resArchive = await fetch(`${apiUrl}/method/control`, {
                 method: "POST",
                 headers: {
                   Authorization: `Bearer ${tokens.access}`,
@@ -491,14 +310,38 @@ function NimbusMethod({
                 }),
               });
 
-              if (res.status === 200) {
+              if (resArchive.status === 200) {
                 // ok
+                const bodyArchive = await resArchive.json();
+                const responseArchive = bodyArchive.response;
+
+                if (selectedIndices.length === 0) {
+                  // do nothing
+                } else {
+                  // pick archived solutions
+                  SetArchivedSolutions(
+                    ParseSolutions(
+                      responseArchive.objectives.slice(
+                        0,
+                        nSolutionsInArchive + selectedIndices.length
+                      ),
+                      activeProblemInfo!
+                    )
+                  );
+                }
+
+                SetHelpMessage(
+                  "Please select the solution you prefer the most from the shown solutions. You must select only one solution to continue."
+                );
+                SetCurrentState("select preferred");
+                SetSolutionsArchivedAfterClassification(true);
+                // how many solutions are in the archive
+                SetNSolutionsInArchive(
+                  nSolutionsInArchive + selectedIndices.length
+                );
+                // reset the active selection
                 SetSelectedIndices([]);
-                SetNumberOfSolutions(1);
-                // SetHelpMessage(
-                //   "Please select the solution you prefer the most from the shown solution."
-                // );
-                // SetNimbusState("select preferred");
+                break;
               } else {
                 // not ok
                 console.log(`Got response code ${res.status}`);
@@ -511,12 +354,6 @@ function NimbusMethod({
               // do nothing
               break;
             }
-
-            SetHelpMessage(
-              "Would you like to compute intermediate solutions between two previously computed solutions?"
-            );
-            SetNimbusState("classification");
-            break;
           } else {
             // not ok
             console.log(`Got response code ${res.status}`);
@@ -530,152 +367,157 @@ function NimbusMethod({
           break;
         }
       }
-      // case "intermediate": {
-      //   if (computeIntermediate && selectedIndices.length !== 2) {
-      //     SetHelpMessage(
-      //       "Please select two on the shown solutions between which you would like to see intermediate solutions."
-      //     );
-      //     // do nothing
-      //     break;
-      //   }
-      //   try {
-      //     const res = await fetch(`${apiUrl}/method/control`, {
-      //       method: "POST",
-      //       headers: {
-      //         Authorization: `Bearer ${tokens.access}`,
-      //         "Content-Type": "application/json",
-      //       },
-      //       body: JSON.stringify({
-      //         response: {
-      //           indices: computeIntermediate ? selectedIndices : [],
-      //           number_of_desired_solutions: computeIntermediate
-      //             ? numberOfSolutions
-      //             : 0,
-      //         },
-      //       }),
-      //     });
+      case "classify preferred":
+      case "stop with preferred": {
+        // SELECT PREFERRED -> STOP or CLASSIFICATION
+        console.log("Selected index archive");
+        console.log(selectedIndexArchive);
+        console.log("Selected indices");
+        console.log(selectedIndices);
 
-      //     if (res.status === 200) {
-      //       // ok
-      //       const body = await res.json();
-      //       // const response = JSON.parse(body.response);
-      //       const response = body.response;
+        let index: number = 0;
 
-      //       if (computeIntermediate) {
-      //         // update solutions to be shown
-      //         const toBeShown = ParseSolutions(
-      //           response.objectives,
-      //           activeProblemInfo!
-      //         );
-      //         SetNewSolutions(toBeShown);
+        if (selectedIndices.length === 0 && selectedIndexArchive === -1) {
+          SetHelpMessage("Please select a preferred solution first.");
+          // do nothing;
+          break;
+        } else if (selectedIndices.length > 0) {
+          index = selectedIndices[0] + newSolutionTableOffset;
+        } else if (selectedIndexArchive !== -1) {
+          index = selectedIndexArchive;
+        } else {
+          SetHelpMessage("Invalid selection.");
+          // do nothin;
+          break;
+        }
+        try {
+          if (!solutionsArchivedAfterClassification) {
+            // archive and intermediate steps need to be skipped, henche, empty indices
+            const skipRes = await fetch(`${apiUrl}/method/control`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${tokens.access}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                response: {
+                  indices: [],
+                },
+              }),
+            });
 
-      //         // reset and ask to save next
-      //         SetComputeIntermediate(false);
-      //         SetSelectedIndices([]);
-      //         SetNumberOfSolutions(1);
-      //         SetHelpMessage(
-      //           "Would you like to save any of the shown solutions for later viewing?"
-      //         );
-      //         SetNimbusState("archive");
-      //       } else {
-      //         SetComputeIntermediate(false);
-      //         SetSelectedIndices([]);
-      //         SetNumberOfSolutions(1);
-      //         SetHelpMessage(
-      //           "Please select the solution you prefer the most from the shown solution."
-      //         );
-      //         SetNimbusState("select preferred");
-      //       }
-      //       break;
-      //     } else {
-      //       // not ok
-      //       console.log(`Got response code ${res.status}`);
-      //       // do nothing
-      //       break;
-      //     }
-      //   } catch (e) {
-      //     console.log("Could not iterate NIMBUS");
-      //     console.log(e);
-      //     // do nothing
-      //     break;
-      //   }
-      // }
-      // case "select preferred": {
-      //   if (selectedIndices.length === 0) {
-      //     SetHelpMessage("Please select a preferred solution first.");
-      //     // do nothing;
-      //     break;
-      //   }
-      //   try {
-      //     const res = await fetch(`${apiUrl}/method/control`, {
-      //       method: "POST",
-      //       headers: {
-      //         Authorization: `Bearer ${tokens.access}`,
-      //         "Content-Type": "application/json",
-      //       },
-      //       body: JSON.stringify({
-      //         response: {
-      //           index: selectedIndices[0],
-      //           continue: cont,
-      //         },
-      //       }),
-      //     });
+            if (skipRes.status === 200) {
+              // ok
+            } else {
+              console.log(
+                `Could not skip archive, response code ${skipRes.status}`
+              );
+              // do nothing
+              break;
+            }
 
-      //     if (res.status === 200) {
-      //       // Ok
-      //       const body = await res.json();
-      //       const response = body.response;
+            const resInt = await fetch(`${apiUrl}/method/control`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${tokens.access}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                response: {
+                  indices: [],
+                  number_of_desired_solutions: 0,
+                },
+              }),
+            });
 
-      //       if (cont) {
-      //         // continue iterating
-      //         SetPreferredPoint([...response.objective_values]); // avoid aliasing
-      //         SetClassificationLevels(response.objective_values);
-      //         SetClassifications(
-      //           response.objective_values.map(() => "=" as Classification)
-      //         );
+            if (resInt.status === 200) {
+              // ok
+            } else {
+              console.log(
+                `Could not skip intermediate solutions, response code ${skipRes.status}`
+              );
+              // do nothing
+              break;
+            }
+          }
 
-      //         SetSelectedIndices([]);
-      //         SetHelpMessage("Please classify each of the shown objectives.");
-      //         SetNimbusState("classification");
-      //         break;
-      //       } else {
-      //         // stop iterating
-      //         console.log(response);
-      //         SetPreferredPoint(response.objective);
-      //         SetFinalVariables(response.solution);
-      //         SetHelpMessage("Stopped. Showing final solution reached.");
-      //         /*saveLog({
-      //           decision_variables: response.solution.join(","),
-      //           objective_values: preferredPoint.join(","),
-      //         });*/
-      //         SetNimbusState("stop");
-      //         //navigate("/postquestionnaire");
+          // else, continue normally
+          const res = await fetch(`${apiUrl}/method/control`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${tokens.access}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              response: {
+                index: index,
+                continue: nimbusState === "classify preferred",
+              },
+            }),
+          });
 
-      //         break;
-      //       }
-      //     } else {
-      //       // not ok
-      //       console.log(`Got response code ${res.status}`);
-      //       // do nothing
-      //       break;
-      //     }
-      //   } catch (e) {
-      //     console.log("Could not iterate NIMBUS");
-      //     console.log(e);
-      //     // do nothing
-      //     break;
-      //   }
-      // }
-      /*case "stop": {
-        saveLog({
-          decision_variables: finalVariables.join(","),
-          objective_values: preferredPoint.join(","),
-        });
-        //SetNimbusState("stop");
-        navigate("/postquestionnaire");
-        break;
-      }*/
+          if (res.status === 200) {
+            // Ok
+            const body = await res.json();
+            const response = body.response;
 
+            if (nimbusState === "classify preferred") {
+              // continue iterating
+              /*await LogInfoToDB(
+                tokens,
+                apiUrl,
+                "Preference",
+                `{"Preferred solution": ${JSON.stringify(
+                  response.objective_values
+                )}, "Iteration": ${nIteration},}`,
+                "User chose a new preferred solution in NIMBUS."
+              );*/
+
+              SetPreferredPoint([...response.objective_values]); // avoid aliasing
+              SetClassificationLevels(response.objective_values);
+              SetClassifications(
+                response.objective_values.map(() => "=" as Classification)
+              );
+
+              SetSelectedIndices([]);
+              SetHelpMessage("Please classify each of the shown objectives.");
+              SetCurrentState("classification");
+              SetNIteration(nIteration + 1);
+              // reset the number of solutions
+              // SetNumberOfSolutions(1);
+              // update new solution table offset
+              SetNewSolutionTableOffset(nSolutionsInArchive);
+              break;
+            } else {
+              // stop iterating
+              /*await LogInfoToDB(
+                tokens,
+                apiUrl,
+                "Final solution",
+                `{"Objective values": ${JSON.stringify(
+                  response.objective
+                )}, "Variable values": ${JSON.stringify(response.solution)},}`,
+                "User reached the final solution in NIMBUS."
+              );*/
+              SetPreferredPoint(response.objective);
+              SetFinalVariables(response.solution);
+              SetHelpMessage("Stopped. Showing final solution reached.");
+              SetCurrentState("stop");
+              break;
+            }
+          } else {
+            // not ok
+            console.log(`Got response code ${res.status}`);
+            // do nothing
+            break;
+          }
+        } catch (e) {
+          console.log("Could not iterate NIMBUS");
+          console.log(e);
+          // do nothing
+          break;
+        }
+      }
       default: {
         console.log("Default case");
         break;
@@ -684,44 +526,18 @@ function NimbusMethod({
     SetLoading(false);
   };
 
-  // only allow two selected indices at any given time in the 'intermediate' state, and one index at any given time in the
-  //
   useEffect(() => {
-    // Allow any number of selected indices in the 'archive' state
-    if (nimbusState === "archive") {
-      return;
-    }
-    // Allow only one selected index in the 'classification' state
-    if (selectedIndices.length === 1) {
-      // do nothing
-      return;
-    } else if (selectedIndices.length === 0) {
-      handleSelectionAtClassification([0]);
-      return;
-    }
-    SetSelectedIndices([selectedIndices[1]]);
-    return;
-  }, [nimbusState, selectedIndices]);
-
-  useEffect(() => {
-    console.log("Classifications changed");
-    if (nimbusState === "not started") {
+    if (currentState === "not started") {
       // do nothing if not started
-      console.log("nothing");
       return;
     }
-    console.log(classifications);
-    console.log(classificationLevels);
     const improve =
       classifications.includes("<" as Classification) ||
       classifications.includes("<=" as Classification);
     const worsen =
       classifications.includes(">=" as Classification) ||
       classifications.includes("0" as Classification);
-    console.log(improve, worsen);
-    // TODO VALIDATE!
-    // const validLevels = validateLevels(classificationLevels);
-    // console.log(validLevels);
+
     if (!improve) {
       SetHelpMessage(
         "Check classifications: at least one objective should be improved."
@@ -735,15 +551,69 @@ function NimbusMethod({
       SetClassificationOk(false);
       return;
     } else {
-      // if (!validLevels) {
-      // SetHelpMessage("Check levels!");
-      //} else
       SetHelpMessage("Classifications ok!");
       SetClassificationOk(true);
       return;
     }
-  }, [classifications, classificationLevels, nimbusState]);
+  }, [classifications]);
 
+  /*const inferClassifications = (barSelection: number[]) => {
+    const isDiff = barSelection.map((v, i) => {
+      const res =
+        // The preferred point must be in the original scale to be compared with barSelection
+        Math.abs(v - preferredPoint[i] * activeProblemInfo!.minimize[i]) < 1e-12
+          ? false
+          : true;
+      return res;
+    });
+    const levels = classificationLevels;
+    const classes = barSelection.map((value, i) => {
+      if (!isDiff[i]) {
+        // no change, return old classification
+        return classifications[i];
+      }
+      if (activeProblemInfo?.minimize[i] === 1) {
+        // minimization
+        if (value > preferredPoint[i]) {
+          // selected value is greater than currently preferred (worse)
+          // Worsen until
+          levels[i] = barSelection[i];
+          return ">=" as Classification;
+        } else if (value < preferredPoint[i]) {
+          // selected value is less than currently preferred (better)
+          // improve until
+          levels[i] = barSelection[i];
+          return "<=" as Classification;
+        } else {
+          // no change, keep as it is
+          return classifications[i];
+        }
+      } else if (activeProblemInfo?.minimize[i] === -1) {
+        // maximization
+        // levels must be transformed back to original scale, hence the minus signs
+        if (value > -1 * preferredPoint[i]) {
+          // selected value is greater than currently preferred (better)
+          // improve until
+          levels[i] = -barSelection[i];
+          return "<=" as Classification;
+        } else if (value < -1 * preferredPoint[i]) {
+          // selected value is less than currently preferred (worse)
+          // worsen until
+          levels[i] = -barSelection[i];
+          return ">=" as Classification;
+        } else {
+          // no change, keep as it is
+          return classifications[i];
+        }
+      } else {
+        // something went wrong, return previous classification
+        console.log("Encountered something strange in inferClassifications...");
+        return classifications[i];
+      }
+    });
+    SetClassificationLevels(levels);
+    SetClassifications(classes);
+  };*/
   const inferClassifications = (barData: [number, number]) => {
     // console.log(barData);
     const value = barData[0];
@@ -756,7 +626,7 @@ function NimbusMethod({
         : true;
     const levels = [...classificationLevels];
     const classes = [...classifications];
-    console.log(nimbusState);
+    console.log(currentState);
     console.log(levels);
     console.log(classes);
     if (!isDiff) {
@@ -805,7 +675,32 @@ function NimbusMethod({
     SetClassificationLevels(levels);
     SetClassifications(classes);
   };
+  const toQuestionnaire = async () => {
+    const log = {
+      method: "NIMBUS",
+      variables: finalVariables.join(","),
+      objectives: preferredPoint.join(","),
+    };
+    try {
+      const res = await fetch(`${apiUrl}/archive`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${tokens.access}`,
+        },
+        body: JSON.stringify(log),
+      });
 
+      if (res.status == 201) {
+        // OK
+        console.log("OK", log);
+      }
+    } catch (e) {
+      console.log(e);
+      // Do nothing
+    }
+    navigate("/postquestionnaire");
+  };
   if (activeProblemInfo === undefined) {
     return <>Please define a method first.</>;
   }
@@ -813,20 +708,21 @@ function NimbusMethod({
   return (
     <Box sx={{ display: "flex", width: "-webkit-fill-available" }}>
       <Toolbar variant="dense" />
-      {nimbusState !== "stop" && (
+      {currentState !== "stop" && (
         <>
           <Box
             component="nav"
             sx={{
-              width: { sm: drawerWidth },
+              width: { sm: 650 },
               flexShrink: { sm: 0 },
             }}
           >
+            {" "}
             <Drawer
               sx={{
                 flexShrink: 0,
                 "& .MuiDrawer-paper": {
-                  width: drawerWidth,
+                  width: 650,
                   boxSizing: "border-box",
                 },
               }}
@@ -835,10 +731,10 @@ function NimbusMethod({
               PaperProps={{ elevation: 9 }}
             >
               <Toolbar variant="dense" />
-              {nimbusState === "not started" && (
+              {currentState === "not started" && (
                 <div>Method not started yet</div>
               )}
-              {nimbusState === "classification" && (
+              {currentState === "classification" && (
                 <>
                   <Box sx={{ padding: "1rem" }}>
                     <Typography
@@ -849,12 +745,7 @@ function NimbusMethod({
                         marginBottom: "1rem",
                       }}
                     >
-                      Classification {initialSolution[2]}
-                    </Typography>
-                    <Typography sx={{ marginBottom: "1rem" }}>
-                      Select the number of solutions you want to generate and
-                      classify the objective functions according to your
-                      preferences.
+                      Classification
                     </Typography>
                     <Typography>{`Help: ${helpMessage}`}</Typography>
                     <Form style={{ marginBottom: "1.5rem" }}>
@@ -910,40 +801,22 @@ function NimbusMethod({
                       currentPoint={preferredPoint.map((v, i) =>
                         activeProblemInfo.minimize[i] === 1 ? v : -v
                       )}
-                      setLevelsOK={SetClassificationlevelsOk}
-                      levelsOK={classificationlevelsOk}
+                      //setLevelsOK={SetClassificationlevelsOk}
+                      //levelsOK={classificationlevelsOk}
+
                       //classifications={classifications}
                     />
                     {!loading && (
                       <Button
                         size={"large"}
-                        onClick={iterate}
+                        onClick={() => {
+                          iterate("classification");
+                        }}
                         variant={"contained"}
-                        disabled={
-                          nimbusState === "classification" && !classificationOk
-                        }
+                        disabled={!classificationOk}
+                        color={classificationOk ? "primary" : "error"}
                       >
-                        {nimbusState === "classification" &&
-                          classificationOk &&
-                          "Iterate"}
-                        {nimbusState === "classification" &&
-                          !classificationOk &&
-                          "Check the classifications"}
-                      </Button>
-                    )}
-                    {!loading && (
-                      <Button
-                        size={"large"}
-                        onClick={() =>
-                          sendPreferredRequest(selectedIndices[0], false)
-                        }
-                        variant={"contained"}
-                        hidden={
-                          !newSolutionChosen || nimbusState !== "classification"
-                        }
-                        sx={{ marginTop: "1rem" }}
-                      >
-                        Save selected solution as the final solution
+                        Iterate
                       </Button>
                     )}
                     {loading && (
@@ -965,7 +838,7 @@ function NimbusMethod({
                   </Box>
                 </>
               )}
-              {nimbusState === "archive" && (
+              {currentState === "archive" && (
                 <Box sx={{ padding: "1rem" }}>
                   <Typography
                     color={"primary"}
@@ -978,613 +851,359 @@ function NimbusMethod({
                     Archive solutions
                   </Typography>
                   <Typography sx={{ marginBottom: "1rem" }}>
-                    Select the solutions you want to save. You can click the
-                    desired solutions from the table or from the plot.
+                    The solutions obtained by the method are shown on the right
+                    side of the screen. Select the solutions you want to save.
                   </Typography>
-                  {!loading && (
-                    <Button
-                      size={"large"}
-                      onClick={iterate}
-                      variant={"contained"}
-                    >
-                      {nimbusState === "archive" &&
-                        selectedIndices.length > 0 &&
-                        "Save"}
-                      {nimbusState === "archive" &&
-                        selectedIndices.length === 0 &&
-                        "Continue"}
-                    </Button>
-                  )}
+
+                  <Button
+                    size="large"
+                    variant="contained"
+                    onClick={() => iterate("archive")}
+                    disabled={solutionsArchivedAfterClassification}
+                  >
+                    {currentState === "archive" &&
+                      selectedIndices.length > 0 &&
+                      "Save"}
+                    {currentState === "archive" &&
+                      selectedIndices.length === 0 &&
+                      "Continue"}
+                  </Button>
                 </Box>
               )}
-              {/* {nimbusState === "intermediate" && (
-                <>
-                  <Box sx={{ padding: "1rem" }}>
-                    <Typography
-                      color={"primary"}
-                      sx={{
-                        fontSize: "1.25rem",
-                        fontWeight: "bold",
-                        marginBottom: "1rem",
-                      }}
-                    >
-                      Generate intermediate solutions
-                    </Typography>
-                    <Typography sx={{ marginBottom: "1rem" }}>
-                      You can generate solutions between any two solutions given
-                      by the method. The number of intermediate solutions should
-                      not be greater than 20.
-                    </Typography>
-                    <Form>
-                      <Form.Group as={Row}>
-                        <Form.Label
-                          column
-                          sm={8}
-                          style={{ marginBottom: "1rem" }}
-                        >
-                          {"Would you like to see intermediate solutions?"}
-                        </Form.Label>
-                        <Col sm={3}>
-                          <Form.Check
-                            id="intermediate-switch"
-                            type="switch"
-                            label={
-                              computeIntermediate ? (
-                                <>
-                                  {"no/"}
-                                  <b>{"yes"}</b>
-                                </>
-                              ) : (
-                                <>
-                                  <b>{"no"}</b>
-                                  {"/yes"}
-                                </>
-                              )
-                            }
-                            checked={computeIntermediate}
-                            onChange={() =>
-                              SetComputeIntermediate(!computeIntermediate)
-                            }
-                          ></Form.Check>
-                        </Col>
-                        <Form.Label
-                          column
-                          sm={8}
-                          style={{ marginBottom: "1rem" }}
-                        >
-                          {"Number of intermediate solutions:"}
-                        </Form.Label>
-                        <Col sm={3}>
-                          <Form.Control
-                            type="number"
-                            readOnly={!computeIntermediate}
-                            defaultValue={1}
-                            onChange={(v) => {
-                              const input = v.target.value;
-                              const parsed = parseInt(input);
-                              if (!Number.isNaN(parsed)) {
-                                if (parsed > 0 && parsed <= 20) {
-                                  SetNumberOfSolutions(parsed);
-                                  SetHelpMessage(
-                                    `Number of intermediate solutions to be computed in the next iteration set to ${parsed}`
-                                  );
-                                } else {
-                                  SetHelpMessage(
-                                    "The number of solutions should be more than 0, but less than 20."
-                                  );
-                                }
-                              }
-                            }}
-                          ></Form.Control>
-                        </Col>
-                        <Col sm={1} />
-                      </Form.Group>
-                    </Form>
-                    {!loading && (
-                      <Button
-                        size={"large"}
-                        onClick={iterate}
-                        variant={"contained"}
-                        disabled={
-                          nimbusState === "intermediate" &&
-                          computeIntermediate &&
-                          selectedIndices.length !== 2
-                        }
-                      >
-                        {nimbusState === "intermediate" &&
-                          computeIntermediate &&
-                          selectedIndices.length === 2 &&
-                          "Compute"}
-                        {nimbusState === "intermediate" &&
-                          computeIntermediate &&
-                          selectedIndices.length !== 2 &&
-                          "Select two solutions first"}
-                        {nimbusState === "intermediate" &&
-                          !computeIntermediate &&
-                          "Continue"}
-                      </Button>
-                    )}
-                    {loading && (
-                      <Button
-                        disabled={true}
-                        size={"large"}
-                        variant={"contained"}
-                      >
-                        {"Working... "}
-                        <ReactLoading
-                          type={"bubbles"}
-                          color={"#ffffff"}
-                          className={"loading-icon"}
-                          height={28}
-                          width={32}
-                        />
-                      </Button>
-                    )}
-                  </Box>
-                </>
+              {currentState === "select preferred" && (
+                <Box sx={{ padding: "1rem" }}>
+                  <Typography
+                    color={"primary"}
+                    sx={{
+                      fontSize: "1.25rem",
+                      fontWeight: "bold",
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    Select preferred solution
+                  </Typography>
+                  <Typography sx={{ marginBottom: "1rem" }}>
+                    The solutions in the archive are shown on the right. Select
+                    a preferred solution and go to the classification step or
+                    stop the solution process.
+                  </Typography>
+
+                  <Button
+                    size="large"
+                    variant="contained"
+                    sx={{ marginBottom: "1rem" }}
+                    onClick={() => iterate("classify preferred")}
+                    disabled={
+                      (selectedIndexArchive !== -1 &&
+                        selectedIndices.length > 0) ||
+                      (selectedIndexArchive === -1 &&
+                        selectedIndices.length === 0) ||
+                      selectedIndices.length > 1
+                    }
+                  >
+                    {"Classify currently selected solution"}
+                  </Button>
+
+                  <Button
+                    size="large"
+                    variant="contained"
+                    onClick={() => iterate("stop with preferred")}
+                    disabled={
+                      (selectedIndexArchive !== -1 &&
+                        selectedIndices.length > 0) ||
+                      (selectedIndexArchive === -1 &&
+                        selectedIndices.length === 0) ||
+                      selectedIndices.length > 1
+                    }
+                  >
+                    {"Stop with currently selected solution"}
+                  </Button>
+                </Box>
               )}
-              {nimbusState === "select preferred" && (
-                <>
-                  <Box sx={{ padding: "1rem" }}>
-                    <Typography
-                      color={"primary"}
-                      sx={{
-                        fontSize: "1.25rem",
-                        fontWeight: "bold",
-                        marginBottom: "1rem",
-                      }}
-                    >
-                      Select the most preferred solution
-                    </Typography>
-                    <Typography sx={{ marginBottom: "1rem" }}>
-                      Select the most preferred solution. Then indicate if you
-                      want to continue with the process or to stop.
-                    </Typography>
-                    <Form>
-                      <Form.Group as={Row}>
-                        <Form.Label column sm={8}>
-                          {
-                            "Would you like to continue to classification of the selected solution's objectives or to stop?"
-                          }
-                        </Form.Label>
-                        <Col sm={3}>
-                          <Form.Check
-                            className={"mt-3"}
-                            id="stop-switch"
-                            type="switch"
-                            label={
-                              cont ? (
-                                <>
-                                  {"stop/"}
-                                  <b>{"continue"}</b>
-                                </>
-                              ) : (
-                                <>
-                                  <b>{"stop"}</b>
-                                  {"/continue"}
-                                </>
-                              )
-                            }
-                            checked={cont}
-                            onChange={() => SetCont(!cont)}
-                          ></Form.Check>
-                        </Col>
-                      </Form.Group>
-                    </Form>
-                    {!loading && (
-                      <Button
-                        size={"large"}
-                        onClick={iterate}
-                        variant={"contained"}
-                        disabled={
-                          nimbusState === "select preferred" &&
-                          selectedIndices.length !== 1
-                        }
-                      >
-                        {nimbusState === "select preferred" &&
-                          cont &&
-                          selectedIndices.length === 1 &&
-                          "Continue"}
-                        {nimbusState === "select preferred" &&
-                          cont &&
-                          selectedIndices.length !== 1 &&
-                          "Select a solution first"}
-                        {nimbusState === "select preferred" &&
-                          !cont &&
-                          selectedIndices.length === 1 &&
-                          "Stop"}
-                        {nimbusState === "select preferred" &&
-                          !cont &&
-                          selectedIndices.length !== 1 &&
-                          "Select a solution first"}
-                      </Button>
-                    )}
-                  </Box>
-                </>
-              )} */}
             </Drawer>
-          </Box>
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              p: 3,
-              width: "100%",
-            }}
-          >
-            <Toolbar />
-            <Container>
-              <>
-                {nimbusState === "classification" && (
-                  <>
-                    <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
-                      <CardContent>
-                        <Typography
-                          color={"primary"}
-                          sx={{ fontWeight: "bold", m: 1 }}
-                        >
-                          Parallel coordinate plot
-                        </Typography>
-
-                        {newSolutions !== undefined && (
-                          <ParallelAxes
-                            objectiveData={ToTrueValues(newSolutions!)}
-                            selectedIndices={selectedIndices}
-                            handleSelection={handleSelectionAtClassification}
-                          />
-                        )}
-                        {newSolutions === undefined && (
-                          <ParallelAxes
-                            objectiveData={{
-                              values: [
-                                {
-                                  selected: false,
-                                  value: preferredPoint.map((v, i) =>
-                                    activeProblemInfo.minimize[i] === 1 ? v : -v
-                                  ),
-                                },
-                              ],
-                              names: activeProblemInfo?.objectiveNames,
-                              directions: activeProblemInfo?.minimize,
-                              ideal: activeProblemInfo?.ideal.map((v, i) =>
-                                activeProblemInfo.minimize[i] === 1 ? v : -v
-                              ),
-                              nadir: activeProblemInfo?.nadir.map((v, i) =>
-                                activeProblemInfo.minimize[i] === 1 ? v : -v
-                              ),
-                            }}
-                            selectedIndices={selectedIndices}
-                            handleSelection={(x) => {
-                              console.log(x);
-                            }}
-                          />
-                        )}
-                      </CardContent>
-                    </Card>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography
-                          color={"primary"}
-                          sx={{ fontWeight: "bold", m: 1 }}
-                        >
-                          Solutions table
-                        </Typography>
-                        {newSolutions !== undefined && (
-                          <SolutionTableMultiSelect
-                            objectiveData={newSolutions!}
-                            activeIndices={selectedIndices}
-                            setIndices={handleSelectionAtClassification}
-                            tableTitle={""}
-                          />
-                        )}
-                        {newSolutions === undefined && (
-                          <SolutionTableMultiSelect
-                            objectiveData={{
-                              values: [
-                                {
-                                  selected: false,
-                                  value: preferredPoint.map((v, i) =>
-                                    activeProblemInfo.minimize[i] === 1 ? v : -v
-                                  ),
-                                },
-                              ],
-                              names: activeProblemInfo?.objectiveNames,
-                              directions: activeProblemInfo?.minimize,
-                              ideal: activeProblemInfo?.ideal.map((v, i) =>
-                                activeProblemInfo.minimize[i] === 1 ? v : -v
-                              ),
-                              nadir: activeProblemInfo?.nadir.map((v, i) =>
-                                activeProblemInfo.minimize[i] === 1 ? v : -v
-                              ),
-                            }}
-                            activeIndices={selectedIndices}
-                            setIndices={(x) => {
-                              console.log(x);
-                            }}
-                            tableTitle={""}
-                          />
-                        )}
-                      </CardContent>
-                    </Card>
-                  </>
-                )}
-                {nimbusState === "archive" && (
-                  <>
-                    <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
-                      <CardContent>
-                        <Typography
-                          color={"primary"}
-                          sx={{ fontWeight: "bold", m: 1 }}
-                        >
-                          Parallel coordinate plot
-                        </Typography>
-
-                        {newSolutions !== undefined && (
-                          <ParallelAxes
-                            objectiveData={ToTrueValues(newSolutions!)}
-                            selectedIndices={selectedIndices}
-                            handleSelection={SetSelectedIndices}
-                          />
-                        )}
-                        {newSolutions === undefined && (
-                          <Card
-                            variant="outlined"
-                            sx={{
-                              backgroundColor: "#eeeeee",
-                              textAlign: "center",
-                            }}
-                          >
-                            <CardContent>
-                              <Typography sx={{ m: 1 }}>
-                                A plot showing a set of solutions will be shown
-                                in this section.
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        )}
-                      </CardContent>
-                    </Card>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography
-                          color={"primary"}
-                          sx={{ fontWeight: "bold", m: 1 }}
-                        >
-                          Solutions table
-                        </Typography>
-                        {newSolutions !== undefined && (
-                          <SolutionTableMultiSelect
-                            objectiveData={newSolutions!}
-                            activeIndices={selectedIndices}
-                            setIndices={SetSelectedIndices}
-                            tableTitle={""}
-                          />
-                        )}
-                        {newSolutions === undefined && (
-                          <Card
-                            variant="outlined"
-                            sx={{
-                              backgroundColor: "#eeeeee",
-                              textAlign: "center",
-                            }}
-                          >
-                            <CardContent>
-                              <Typography sx={{ m: 1 }}>
-                                A table showing a set of solutions will be shown
-                                in this section.
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </>
-                )}
-                {/* {nimbusState === "intermediate" && (
-                  <>
-                    <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
-                      <CardContent>
-                        <Typography
-                          color={"primary"}
-                          sx={{ fontWeight: "bold", m: 1 }}
-                        >
-                          Parallel coordinate plot
-                        </Typography>
-
-                        {newSolutions !== undefined && (
-                          <ParallelAxes
-                            objectiveData={ToTrueValues(newSolutions!)}
-                            selectedIndices={selectedIndices}
-                            handleSelection={SetSelectedIndices}
-                          />
-                        )}
-                        {newSolutions === undefined && (
-                          <Card
-                            variant="outlined"
-                            sx={{
-                              backgroundColor: "#eeeeee",
-                              textAlign: "center",
-                            }}
-                          >
-                            <CardContent>
-                              <Typography sx={{ m: 1 }}>
-                                A plot showing a set of solutions will be shown
-                                in this section.
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        )}
-                      </CardContent>
-                    </Card>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography
-                          color={"primary"}
-                          sx={{ fontWeight: "bold", m: 1 }}
-                        >
-                          Solutions table
-                        </Typography>
-                        {newSolutions !== undefined && (
-                          <SolutionTableMultiSelect
-                            objectiveData={newSolutions!}
-                            activeIndices={selectedIndices}
-                            setIndices={SetSelectedIndices}
-                            tableTitle={""}
-                          />
-                        )}
-                        {newSolutions === undefined && (
-                          <Card
-                            variant="outlined"
-                            sx={{
-                              backgroundColor: "#eeeeee",
-                              textAlign: "center",
-                            }}
-                          >
-                            <CardContent>
-                              <Typography sx={{ m: 1 }}>
-                                A table showing a set of solutions will be shown
-                                in this section.
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </>
-                )}
-                {nimbusState === "select preferred" && (
-                  <>
-                    <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
-                      <CardContent>
-                        <Typography
-                          color={"primary"}
-                          sx={{ fontWeight: "bold", m: 1 }}
-                        >
-                          Parallel coordinate plot
-                        </Typography>
-
-                        {newSolutions !== undefined && (
-                          <ParallelAxes
-                            objectiveData={ToTrueValues(newSolutions!)}
-                            selectedIndices={selectedIndices}
-                            handleSelection={SetSelectedIndices}
-                          />
-                        )}
-                        {newSolutions === undefined && (
-                          <Card
-                            variant="outlined"
-                            sx={{
-                              backgroundColor: "#eeeeee",
-                              textAlign: "center",
-                            }}
-                          >
-                            <CardContent>
-                              <Typography sx={{ m: 1 }}>
-                                A plot showing a set of solutions will be shown
-                                in this section.
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        )}
-                      </CardContent>
-                    </Card>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography
-                          color={"primary"}
-                          sx={{ fontWeight: "bold", m: 1 }}
-                        >
-                          Solutions table
-                        </Typography>
-                        {newSolutions !== undefined && (
-                          <SolutionTableMultiSelect
-                            objectiveData={newSolutions!}
-                            activeIndices={selectedIndices}
-                            setIndices={SetSelectedIndices}
-                            tableTitle={""}
-                          />
-                        )}
-                        {newSolutions === undefined && (
-                          <Card
-                            variant="outlined"
-                            sx={{
-                              backgroundColor: "#eeeeee",
-                              textAlign: "center",
-                            }}
-                          >
-                            <CardContent>
-                              <Typography sx={{ m: 1 }}>
-                                A table showing a set of solutions will be shown
-                                in this section.
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </>
-                )} */}
-              </>
-            </Container>
           </Box>
         </>
       )}
-      {nimbusState === "stop" && (
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: "100%",
+        }}
+      >
+        <Toolbar />
         <Container>
-          <Toolbar />
-          <Typography
-            variant="h5"
-            color={"primary"}
-            sx={{ marginBottom: "2rem" }}
-          >
-            Final solution
-          </Typography>
-          <Typography
-            variant="h6"
-            color={"primary"}
-            sx={{ marginTop: "2rem", marginBottom: "2rem" }}
-          >
-            Objective values:
-          </Typography>
-          <SolutionTable
-            objectiveData={ParseSolutions([preferredPoint], activeProblemInfo)}
-            setIndex={() => console.log("nothing happens...")}
-            selectedIndex={0}
-            tableTitle={""}
-          />
-          <Typography
-            variant="h6"
-            color={"primary"}
-            sx={{ marginTop: "2rem", marginBottom: "2rem" }}
-          >
-            Decision variables:
-          </Typography>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                {finalVariables.map((_, i) => {
-                  return <th>{`x${i + 1}`}</th>;
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                {finalVariables.map((v) => {
-                  return <td>{`${v.toFixed(4)}`}</td>;
-                })}
-              </tr>
-            </tbody>
-          </Table>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={toQuestionnaire}
-            sx={{ marginTop: "2rem" }}
-          >
-            {"Continue"}
-          </Button>
+          {currentState === "classification" && (
+            <>
+              <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
+                <CardContent>
+                  <Typography
+                    color={"primary"}
+                    sx={{ fontWeight: "bold", m: 1 }}
+                  >
+                    Parallel coordinate plot
+                  </Typography>
+                  {newSolutions === undefined && (
+                    <ParallelAxes
+                      objectiveData={{
+                        values: [
+                          {
+                            selected: false,
+                            value: preferredPoint.map((v, i) =>
+                              activeProblemInfo.minimize[i] === 1 ? v : -v
+                            ),
+                          },
+                        ],
+                        names: activeProblemInfo?.objectiveNames,
+                        directions: activeProblemInfo?.minimize,
+                        ideal: activeProblemInfo?.ideal.map((v, i) =>
+                          activeProblemInfo.minimize[i] === 1 ? v : -v
+                        ),
+                        nadir: activeProblemInfo?.nadir.map((v, i) =>
+                          activeProblemInfo.minimize[i] === 1 ? v : -v
+                        ),
+                      }}
+                      selectedIndices={selectedIndices}
+                      handleSelection={(x) => {
+                        console.log(x);
+                      }}
+                    />
+                  )}
+                  {newSolutions !== undefined && (
+                    <ParallelAxes
+                      objectiveData={ToTrueValues(archivedSolutions!)}
+                      selectedIndices={[selectedIndexArchive]}
+                      handleSelection={(x: number[]) => {
+                        if (x.length === 1) {
+                          SetSelectedIndexArchive(-1);
+                        } else {
+                          SetSelectedIndexArchive(x.pop()!);
+                        }
+                      }}
+                    />
+                  )}
+                  {newSolutions === undefined && nSolutionsInArchive > 0 && (
+                    <ParallelAxes
+                      objectiveData={{
+                        values: [
+                          {
+                            selected: false,
+                            value: preferredPoint.map((v, i) =>
+                              activeProblemInfo.minimize[i] === 1 ? v : -v
+                            ),
+                          },
+                        ],
+                        names: activeProblemInfo?.objectiveNames,
+                        directions: activeProblemInfo?.minimize,
+                        ideal: activeProblemInfo?.ideal.map((v, i) =>
+                          activeProblemInfo.minimize[i] === 1 ? v : -v
+                        ),
+                        nadir: activeProblemInfo?.nadir.map((v, i) =>
+                          activeProblemInfo.minimize[i] === 1 ? v : -v
+                        ),
+                      }}
+                      selectedIndices={selectedIndices}
+                      handleSelection={(x) => {
+                        console.log(x);
+                      }}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+              <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
+                <CardContent>
+                  <Typography
+                    color={"primary"}
+                    sx={{ fontWeight: "bold", m: 1 }}
+                  >
+                    Solutions table
+                  </Typography>
+                  {nSolutionsInArchive > 0 && (
+                    <SolutionTableNimbus
+                      objectiveData={archivedSolutions!}
+                      selectedIndex={selectedIndexArchive}
+                      setIndex={(x: number) => {
+                        SetSelectedIndexArchive(x);
+                      }}
+                      tableTitle={""}
+                    />
+                  )}
+                  {newSolutions === undefined && (
+                    <SolutionTableMultiSelect
+                      objectiveData={{
+                        values: [
+                          {
+                            selected: false,
+                            value: preferredPoint.map((v, i) =>
+                              activeProblemInfo.minimize[i] === 1 ? v : -v
+                            ),
+                          },
+                        ],
+                        names: activeProblemInfo?.objectiveNames,
+                        directions: activeProblemInfo?.minimize,
+                        ideal: activeProblemInfo?.ideal.map((v, i) =>
+                          activeProblemInfo.minimize[i] === 1 ? v : -v
+                        ),
+                        nadir: activeProblemInfo?.nadir.map((v, i) =>
+                          activeProblemInfo.minimize[i] === 1 ? v : -v
+                        ),
+                      }}
+                      activeIndices={selectedIndices}
+                      setIndices={(x) => {
+                        console.log(x);
+                      }}
+                      tableTitle={""}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
+          {currentState === "archive" && (
+            <>
+              <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
+                <CardContent>
+                  <Typography
+                    color={"primary"}
+                    sx={{ fontWeight: "bold", m: 1 }}
+                  >
+                    Parallel coordinate plot
+                  </Typography>
+                  <ParallelAxes
+                    objectiveData={ToTrueValues(newSolutions!)}
+                    selectedIndices={selectedIndices}
+                    handleSelection={SetSelectedIndices}
+                  />
+                </CardContent>
+              </Card>
+              <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
+                <CardContent>
+                  <Typography
+                    color={"primary"}
+                    sx={{ fontWeight: "bold", m: 1 }}
+                  >
+                    Solutions table
+                  </Typography>
+                  <SolutionTableMultiSelect
+                    objectiveData={newSolutions!}
+                    activeIndices={selectedIndices}
+                    setIndices={SetSelectedIndices}
+                    tableTitle={""}
+                  />
+                </CardContent>
+              </Card>
+            </>
+          )}
+          {currentState === "select preferred" && (
+            <>
+              {nSolutionsInArchive > 0 && (
+                <>
+                  <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
+                    <CardContent>
+                      <Typography
+                        color={"primary"}
+                        sx={{ fontWeight: "bold", m: 1 }}
+                      >
+                        Parallel coordinate plot
+                      </Typography>
+                      <ParallelAxes
+                        objectiveData={ToTrueValues(archivedSolutions!)}
+                        selectedIndices={[selectedIndexArchive]}
+                        handleSelection={(x: number[]) => {
+                          if (x.length === 1) {
+                            SetSelectedIndexArchive(-1);
+                          } else {
+                            SetSelectedIndexArchive(x.pop()!);
+                          }
+                        }}
+                      />
+                    </CardContent>
+                  </Card>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Typography
+                        color={"primary"}
+                        sx={{ fontWeight: "bold", m: 1 }}
+                      >
+                        Solutions table
+                      </Typography>
+                      <SolutionTableNimbus
+                        objectiveData={archivedSolutions!}
+                        selectedIndex={selectedIndexArchive}
+                        setIndex={(x: number) => {
+                          SetSelectedIndexArchive(x);
+                        }}
+                        tableTitle={""}
+                      />
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </>
+          )}
+          {currentState === "stop" && (
+            <Container>
+              <Toolbar />
+              <Typography
+                variant="h5"
+                color={"primary"}
+                sx={{ marginBottom: "2rem" }}
+              >
+                Final solution
+              </Typography>
+              <Typography
+                variant="h6"
+                color={"primary"}
+                sx={{ marginTop: "2rem", marginBottom: "2rem" }}
+              >
+                Objective values:
+              </Typography>
+              <SolutionTable
+                objectiveData={ParseSolutions(
+                  [preferredPoint],
+                  activeProblemInfo
+                )}
+                setIndex={() => console.log("nothing happens...")}
+                selectedIndex={0}
+                tableTitle={""}
+              />
+              <Typography
+                variant="h6"
+                color={"primary"}
+                sx={{ marginTop: "2rem", marginBottom: "2rem" }}
+              >
+                Decision variables:
+              </Typography>
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    {finalVariables.map((_, i) => {
+                      return <th>{`x${i + 1}`}</th>;
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {finalVariables.map((v) => {
+                      return <td>{`${v.toFixed(4)}`}</td>;
+                    })}
+                  </tr>
+                </tbody>
+              </Table>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={toQuestionnaire}
+                sx={{ marginTop: "2rem" }}
+              >
+                {"Continue"}
+              </Button>
+            </Container>
+          )}
         </Container>
-      )}
+      </Box>
+      <></>
     </Box>
   );
 }

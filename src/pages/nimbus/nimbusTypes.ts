@@ -15,5 +15,7 @@ export interface NimbusMethodProps {
   tokens: Tokens;
   apiUrl: string;
   problemGroup: number;
+  groupId: number;
+  setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
