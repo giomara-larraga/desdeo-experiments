@@ -182,12 +182,16 @@ HBWindowProps) => {
                   id="outlined-number"
                   label="Level:"
                   type="number"
+                  variant="filled"
                   //defaultValue={referencePoint[i].toFixed(4)}
-                  value={referencePoint[i].toFixed(4)}
+                  value={referencePoint[i].toFixed(3)}
                   InputLabelProps={{
                     shrink: true,
                   }}
-                  inputProps={{ maxLength: 5 }}
+                  inputProps={{
+                    maxLength: 4,
+                    style: { backgroundColor: "white" },
+                  }}
                   //error={!!errorMessages[i]}
                   //helperText={errorMessages[i]}
                   onChange={(e) => {

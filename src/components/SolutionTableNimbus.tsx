@@ -66,7 +66,7 @@ function SolutionTable({
           </thead>
           <tbody>
             <tr className="tableInfo">
-              <td>{"Ideal"}</td>
+              <td>{"Best"}</td>
               {ideal.map((v, i) => {
                 const v_ = objectiveData.directions[i] === 1 ? v : -v;
                 return <td>{`${v_.toPrecision(4)}`}</td>;
@@ -97,7 +97,7 @@ function SolutionTable({
               );
             })}
             <tr className="tableInfo">
-              <td>{"Nadir"}</td>
+              <td>{"Worst"}</td>
               {nadir.map((v, i) => {
                 const v_ = objectiveData.directions[i] === 1 ? v : -v;
                 return <td>{`${v_.toPrecision(4)}`}</td>;

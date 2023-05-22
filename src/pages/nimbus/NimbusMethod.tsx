@@ -859,7 +859,10 @@ function NimbusMethod({
                     size="large"
                     variant="contained"
                     onClick={() => iterate("archive")}
-                    disabled={solutionsArchivedAfterClassification}
+                    disabled={
+                      solutionsArchivedAfterClassification ||
+                      (nSolutionsInArchive == 0 && selectedIndices.length === 0)
+                    }
                   >
                     {currentState === "archive" &&
                       selectedIndices.length > 0 &&
@@ -1035,9 +1038,7 @@ function NimbusMethod({
                         values: [
                           {
                             selected: false,
-                            value: preferredPoint.map((v, i) =>
-                              activeProblemInfo.minimize[i] === 1 ? v : -v
-                            ),
+                            value: preferredPoint,
                           },
                         ],
                         names: activeProblemInfo?.objectiveNames,

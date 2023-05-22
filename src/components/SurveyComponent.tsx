@@ -6,9 +6,10 @@ import "survey-core/survey.min.css";
 //StylesManager.applyTheme("defaultV2");
 //import "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css";
 import "survey-core/defaultV2.min.css";
-
-import { Button, Box } from "@material-ui/core";
+import { Model } from "survey-core";
+import { Box } from "@material-ui/core";
 import "../style/survey.css";
+import Button from "@mui/material/Button";
 
 interface ISurveyComponentProps {
   //css: any;
@@ -23,13 +24,20 @@ const SurveyComponent = ({
   data,
   onComplete,
 }: ISurveyComponentProps) => {
+  const survey = new Model(json);
+
+  survey.showNavigationButtons = true;
+
+  survey.completeText = "Next";
+
   return (
     <Box display="flex" flexDirection="column" width="100%">
       <Survey
-        data={data}
-        json={json}
+        //data={data}
+        //json={json}
         onComplete={onComplete}
         id="surveyElement"
+        model={survey}
       />
     </Box>
   );

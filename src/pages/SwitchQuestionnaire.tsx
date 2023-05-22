@@ -166,7 +166,7 @@ SwitchQuestionnaireProps) => {
         color="primary"
         style={{ marginBottom: "2rem", textAlign: "left" }}
       >
-        Satisfaction with the obtained solution
+        Evaluation of Each Phase of the Solution Process
       </Typography>
       <Row>
         <p>

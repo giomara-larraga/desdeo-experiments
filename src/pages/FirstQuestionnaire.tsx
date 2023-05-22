@@ -12,7 +12,7 @@ import { createMethod } from "./nimbus/nimbusHelpers";
 import { Toolbar, Container } from "@mui/material";
 import "../style/custom.scss";
 import { CssBaseline, Typography } from "@mui/material";
-
+import { createRoot } from "react-dom/client";
 interface QuestionInit {
   elements: any[];
   showQuestionNumbers: boolean;
@@ -54,6 +54,7 @@ FirstQuestionnaireProps) => {
   /*useEffect(() => {
     setCurrentPage("Questionnaire");
   }, []);*/
+
   const [questions, SetQuestions] =
     useState<QuestionInit>(QuestionInitDefaults);
   //const [fetched, SetFetched] = useState(false);

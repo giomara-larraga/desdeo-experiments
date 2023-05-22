@@ -925,7 +925,7 @@ function NautilusNavigatorMethod({
             color={"primary"}
             sx={{ marginBottom: "2rem" }}
           >
-            Final solution
+            Final solution of Phase 1
           </Typography>
           <Typography
             variant="h6"

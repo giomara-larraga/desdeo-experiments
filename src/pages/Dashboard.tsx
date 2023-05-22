@@ -43,7 +43,7 @@ DashboardProps) => {
         color="primary"
         style={{ marginBottom: "2rem", textAlign: "left" }}
       >
-        Welcome to the study
+        Welcome to the Study
       </Typography>
       <Typography paragraph style={{ textAlign: "left" }}>
         During the study, you will have the opportunity to work with

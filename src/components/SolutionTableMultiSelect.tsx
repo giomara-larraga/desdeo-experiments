@@ -46,13 +46,17 @@ function SolutionTableMultiSelect({
       >
         <h4>{tableTitle}</h4>
         <ListGroup>
-          <ListGroup.Item variant="dark">
+          <ListGroup.Item
+            style={{ borderBottomWidth: "1px", borderBlockColor: "#dee2e6" }}
+          >
             <Row>
               {objectiveData.names.map((name, i) => {
                 return (
-                  <Col>{`${name} (${
-                    objectiveData.directions[i] === 1 ? "min" : "max"
-                  })`}</Col>
+                  <Col style={{ fontWeight: "bold" }}>
+                    {`${name} (${
+                      objectiveData.directions[i] === 1 ? "min" : "max"
+                    })`}
+                  </Col>
                 );
               })}
             </Row>
@@ -61,7 +65,7 @@ function SolutionTableMultiSelect({
             return (
               <ListGroup.Item
                 action
-                variant={keys.includes(index) ? "info" : ""}
+                variant={keys.includes(index) ? "info" : "light"}
                 onClick={() => {
                   if (keys.includes(index)) {
                     setIndices(keys.filter((k) => k !== index));

@@ -64,13 +64,7 @@ ThanksProps) {
                 justifyContent: "center",
                 marginTop: "3rem",
               }}
-            >
-              <Link to="/">
-                <Button variant="contained" size="large">
-                  Go back to index
-                </Button>
-              </Link>
-            </Box>
+            ></Box>
           </CardContent>
         </Card>
       </Box>
