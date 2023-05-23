@@ -190,6 +190,7 @@ HBWindowProps) => {
                   }}
                   inputProps={{
                     maxLength: 4,
+                    step: 0.001,
                     style: { backgroundColor: "white" },
                   }}
                   //error={!!errorMessages[i]}

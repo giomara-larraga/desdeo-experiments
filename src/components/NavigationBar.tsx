@@ -269,12 +269,12 @@ export const NavigationBar = ({
       var toptext = "";
       var bottomtext = "";
       if (objectiveData.minimize === 1) {
-        toptext = "Nadir = " + objectiveData.nadir;
-        bottomtext = "Ideal = " + objectiveData.ideal;
+        toptext = "Worst = " + objectiveData.nadir;
+        bottomtext = "Best = " + objectiveData.ideal;
       }
       if (objectiveData.minimize === -1) {
-        bottomtext = "Nadir = " + objectiveData.nadir;
-        toptext = "Ideal = " + objectiveData.ideal;
+        bottomtext = "Worst = " + objectiveData.nadir;
+        toptext = "Best = " + objectiveData.ideal;
       }
       // y axis
       chart
@@ -884,11 +884,12 @@ export const NavigationBar = ({
                     objectiveData.upperReachables.length - 1
                   ]
                 }
-                value={referencePoint}
+                value={referencePoint?.toFixed(4)}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   updateReference(Number(e.target.value));
                 }}
                 type="number"
+                step={0.0001}
                 placeholder="Enter desired value"
               />
             </Col>
@@ -901,9 +902,10 @@ export const NavigationBar = ({
             <Col sm={7}>
               <Form.Control
                 type="number"
+                step={0.0001}
                 placeholder="Enter bound value"
                 defaultValue={bounds[bounds.length - 1]}
-                value={boundValue}
+                value={boundValue?.toFixed(4)}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   updateBound(Number(e.target.value));
                 }}

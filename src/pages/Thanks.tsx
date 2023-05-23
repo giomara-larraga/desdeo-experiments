@@ -55,7 +55,7 @@ ThanksProps) {
               flexDirection: "column",
             }}
           >
-            <Typography variant="h2" sx={{ textAlign: "center" }}>
+            <Typography variant="h4" sx={{ textAlign: "center" }}>
               Thank you for participating in this study.
             </Typography>
             <Box

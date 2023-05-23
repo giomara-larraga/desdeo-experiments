@@ -49,8 +49,8 @@ DashboardProps) => {
         During the study, you will have the opportunity to work with
         state-of-the-art interactive multiobjective optimization methods, and
         contribute to our research by providing valuable insights on their
-        performance and usability. The study take XX minutes to be completed and
-        involves the following steps:
+        performance and usability. The study takes about XX minutes to be
+        completed and involves the following steps:
       </Typography>
 
       <List sx={{ width: "100%" }}>
@@ -83,11 +83,11 @@ DashboardProps) => {
           </ListItemAvatar>
           <ListItemText
             primary=" Interactive Solution Process"
-            secondary="During the solution process, you will use state-of-the-art interactive
-      optimization methods to solve a given problem. You will be asked to provide
+            secondary="During the solution process, you will use state-of-the-art interactive 
+      multiobjective optimization methods to solve a given problem. You will be asked to provide
       feedback on the usability and effectiveness of these methods. Please feel
       free to ask any questions or request any clarifications throughout the
-      process."
+      process by raising your hand."
           />
         </ListItem>
         <ListItem>

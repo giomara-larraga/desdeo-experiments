@@ -728,6 +728,13 @@ function NautilusNavigatorMethod({
             >
               <Toolbar />
               <Typography
+                sx={{ marginLeft: 2, marginRight: 2, marginBottom: 2 }}
+              >
+                Help: Provide your aspiration levels by dragging the blue lines
+                or providing numerical values in the corresponding box. You may
+                also provide bounds not to be exceeded (red lines).
+              </Typography>
+              <Typography
                 sx={{
                   alignSelf: "center",
                   fontWeight: "lightbold",
