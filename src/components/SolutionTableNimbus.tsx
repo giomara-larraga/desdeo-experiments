@@ -41,6 +41,13 @@ function SolutionTable({
   }, [keySwitch]);
 
   useEffect(() => {
+    console.log(objectiveData.values.length);
+    if (objectiveData.values.length === 1) {
+      setIndex(0);
+    }
+  }, [objectiveData]);
+
+  useEffect(() => {
     SetKey(selectedIndex);
   }, [selectedIndex]);
 
