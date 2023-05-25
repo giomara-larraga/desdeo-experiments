@@ -67,6 +67,7 @@ function NautilusNavigatorMethod({
 
   // These have point, could possibly do nicer but works and needed
   const [iterateNavi, SetIterateNavi] = useState<boolean>(false);
+  const [helpMessage, SetHelpMessage] = useState<string>("");
   const itestateRef = useRef<boolean>();
   itestateRef.current = iterateNavi;
 
@@ -285,6 +286,9 @@ function NautilusNavigatorMethod({
   }, []);
   // COMPONENT ACTIVITIES
 
+  useEffect(() => {
+    console.log(referencePoint);
+  }, [referencePoint, boundaryPoint]);
   // fetch current problem info
   useEffect(() => {
     const fetchProblemInfo = async () => {
@@ -518,6 +522,7 @@ function NautilusNavigatorMethod({
         // Guess im ok until this
         try {
           console.log(`Trying to iterate with ${refe}`);
+
           if (resp === undefined) {
             console.log(`Trying to iterate with undefined ${resp}`);
             return;
@@ -732,7 +737,9 @@ function NautilusNavigatorMethod({
               >
                 Help: Provide your aspiration levels by dragging the blue lines
                 or providing numerical values in the corresponding box. You may
-                also provide bounds not to be exceeded (red lines).
+                also provide bounds not to be exceeded (red lines). The
+                numerical values should be between the best and worst reachable
+                values.
               </Typography>
               <Typography
                 sx={{
@@ -888,8 +895,26 @@ function NautilusNavigatorMethod({
                               refData: [number, number]
                             ) => {
                               let refe = referencePoint;
+                              let nadir = activeProblemInfo!.nadir.map((v, i) =>
+                                activeProblemInfo!.minimize[i] === 1 ? v : -v
+                              );
+                              let ideal = activeProblemInfo!.ideal.map((v, i) =>
+                                activeProblemInfo!.minimize[i] === 1 ? v : -v
+                              );
+                              /*if (refData[0] < nadir[refData[1]]) {
+                                console.log("menor que nadir");
+                                refe[refData[1]] = nadir[refData[1]];
+                              } else if (refData[0] > ideal[refData[1]]) {
+                                console.log("mayor que ideal");
+                                refe[refData[1]] = ideal[refData[1]];
+                              } else {
+                                ;
+                              }
+                              console.log(refe);*/
                               refe[refData[1]] = refData[0];
                               SetReferencePoint(refe);
+
+                              console.log(referencePoint);
                             }}
                             handleBoundValue={(boundData: [number, number]) => {
                               let boundy = boundaryPoint;

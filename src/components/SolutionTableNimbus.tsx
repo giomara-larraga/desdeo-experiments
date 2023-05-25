@@ -54,7 +54,7 @@ function SolutionTable({
         <Table hover>
           <thead>
             <tr>
-              <th>{"Candidate"}</th>
+              <th>{"Solution"}</th>
               {objectiveData.names.map((name, i) => {
                 return (
                   <th>{`${name} (${

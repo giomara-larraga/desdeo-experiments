@@ -450,7 +450,15 @@ export const NavigationBar = ({
     useEffect for boundary
     ===================*/
   const updateBound = useCallback(
-    (boundvalue: number, referencePoint?: number) => {
+    (newboundvalue: number, referencePoint?: number) => {
+      let boundvalue = newboundvalue;
+      if (newboundvalue > ideal) {
+        boundvalue = ideal;
+      }
+      if (newboundvalue < nadir) {
+        boundvalue = nadir;
+      }
+
       if (referencePoint) {
         //console.log(boundvalue);
         //console.log(referencePoint);
@@ -458,6 +466,7 @@ export const NavigationBar = ({
           boundvalue = referencePoint;
         }
       }
+
       // if (boundvalue > uReach[uReach.length - 1]) {
       //   boundvalue = uReach[uReach.length - 1];
       // }
@@ -577,14 +586,22 @@ export const NavigationBar = ({
     ===================*/
 
   const updateReference = useCallback(
-    (referencepoint: number) => {
+    (newValue: number) => {
       // if (referencepoint < lReach[lReach.length - 1]) {
       //   referencepoint = lReach[lReach.length - 1];
       // }
       // if (referencepoint > uReach[uReach.length - 1]) {
       //   referencepoint = uReach[uReach.length - 1];
       // }
-
+      let referencepoint = newValue;
+      console.log(referencepoint);
+      console.log(objectiveID);
+      console.log(ideal);
+      if (newValue > ideal) {
+        referencepoint = ideal;
+      } else if (newValue < nadir) {
+        referencepoint = nadir;
+      }
       SetReferencePoint(referencepoint);
       handleReferenceValue([referencepoint, objectiveID]);
       if (!selection) {

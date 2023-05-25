@@ -848,11 +848,13 @@ function NimbusMethod({
                       marginBottom: "1rem",
                     }}
                   >
-                    Archive solutions
+                    Save solutions for further use
                   </Typography>
                   <Typography sx={{ marginBottom: "1rem" }}>
-                    The solutions obtained by the method are shown on the right
-                    side of the screen. Select the solutions you want to save.
+                    Select one or multiple solutions to save. At least one
+                    solution needs to be saved. You can return to the saved
+                    solutions later and use them as starting point in later
+                    iterations.
                   </Typography>
 
                   <Button
@@ -861,15 +863,10 @@ function NimbusMethod({
                     onClick={() => iterate("archive")}
                     disabled={
                       solutionsArchivedAfterClassification ||
-                      (nSolutionsInArchive == 0 && selectedIndices.length === 0)
+                      selectedIndices.length === 0
                     }
                   >
-                    {currentState === "archive" &&
-                      selectedIndices.length > 0 &&
-                      "Save"}
-                    {currentState === "archive" &&
-                      selectedIndices.length === 0 &&
-                      "Continue"}
+                    Save
                   </Button>
                 </Box>
               )}
