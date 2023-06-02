@@ -19,24 +19,24 @@ export const themeOptions = createTheme({
   },
   typography: {
     h1: {
-      fontFamily: "Lato",
+      fontFamily: "Calibri",
     },
     h2: {
-      fontFamily: "Lato",
+      fontFamily: "Calibri",
     },
     h3: {
-      fontFamily: "Lato",
+      fontFamily: "Calibri",
     },
     h4: {
-      fontFamily: "Lato",
+      fontFamily: "Calibri",
     },
     h5: {
-      fontFamily: "Lato",
+      fontFamily: "Calibri",
     },
     h6: {
-      fontFamily: "Lato",
+      fontFamily: "Calibri",
     },
-    fontFamily: "Lato",
+    fontFamily: "Calibri",
   },
   components: {
     MuiToolbar: {
