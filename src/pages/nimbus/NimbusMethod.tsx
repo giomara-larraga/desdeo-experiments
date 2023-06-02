@@ -944,33 +944,33 @@ function NimbusMethod({
                   >
                     Parallel coordinate plot
                   </Typography>
-                  {newSolutions === undefined && (
-                    <ParallelAxes
-                      objectiveData={{
-                        values: [
-                          {
-                            selected: false,
-                            value: preferredPoint.map((v, i) =>
-                              activeProblemInfo.minimize[i] === 1 ? v : -v
-                            ),
-                          },
-                        ],
-                        names: activeProblemInfo?.objectiveNames,
-                        directions: activeProblemInfo?.minimize,
-                        ideal: activeProblemInfo?.ideal.map((v, i) =>
-                          activeProblemInfo.minimize[i] === 1 ? v : -v
-                        ),
-                        nadir: activeProblemInfo?.nadir.map((v, i) =>
-                          activeProblemInfo.minimize[i] === 1 ? v : -v
-                        ),
-                      }}
-                      selectedIndices={selectedIndices}
-                      handleSelection={(x) => {
-                        console.log(x);
-                      }}
-                    />
-                  )}
-                  {newSolutions !== undefined && (
+
+                  <ParallelAxes
+                    objectiveData={{
+                      values: [
+                        {
+                          selected: false,
+                          value: preferredPoint.map((v, i) =>
+                            activeProblemInfo.minimize[i] === 1 ? v : -v
+                          ),
+                        },
+                      ],
+                      names: activeProblemInfo?.objectiveNames,
+                      directions: activeProblemInfo?.minimize,
+                      ideal: activeProblemInfo?.ideal.map((v, i) =>
+                        activeProblemInfo.minimize[i] === 1 ? v : -v
+                      ),
+                      nadir: activeProblemInfo?.nadir.map((v, i) =>
+                        activeProblemInfo.minimize[i] === 1 ? v : -v
+                      ),
+                    }}
+                    selectedIndices={selectedIndices}
+                    handleSelection={(x) => {
+                      console.log(x);
+                    }}
+                  />
+
+                  {/* {newSolutions !== undefined && (
                     <ParallelAxes
                       objectiveData={ToTrueValues(archivedSolutions!)}
                       selectedIndices={[selectedIndexArchive]}
@@ -982,8 +982,8 @@ function NimbusMethod({
                         }
                       }}
                     />
-                  )}
-                  {newSolutions === undefined && nSolutionsInArchive > 0 && (
+                  )} */}
+                  {/* {newSolutions === undefined && nSolutionsInArchive > 0 && (
                     <ParallelAxes
                       objectiveData={{
                         values: [
@@ -1008,7 +1008,7 @@ function NimbusMethod({
                         console.log(x);
                       }}
                     />
-                  )}
+                  )} */}
                 </CardContent>
               </Card>
               <Card variant="outlined" sx={{ marginBottom: "1rem" }}>
@@ -1019,7 +1019,7 @@ function NimbusMethod({
                   >
                     Solutions table
                   </Typography>
-                  {nSolutionsInArchive > 0 && (
+                  {/*                   {nSolutionsInArchive > 0 && (
                     <SolutionTableNimbus
                       objectiveData={archivedSolutions!}
                       selectedIndex={selectedIndexArchive}
@@ -1029,31 +1029,31 @@ function NimbusMethod({
                       tableTitle={""}
                     />
                   )}
-                  {newSolutions === undefined && (
-                    <SolutionTableMultiSelect
-                      objectiveData={{
-                        values: [
-                          {
-                            selected: false,
-                            value: preferredPoint,
-                          },
-                        ],
-                        names: activeProblemInfo?.objectiveNames,
-                        directions: activeProblemInfo?.minimize,
-                        ideal: activeProblemInfo?.ideal.map((v, i) =>
-                          activeProblemInfo.minimize[i] === 1 ? v : -v
-                        ),
-                        nadir: activeProblemInfo?.nadir.map((v, i) =>
-                          activeProblemInfo.minimize[i] === 1 ? v : -v
-                        ),
-                      }}
-                      activeIndices={selectedIndices}
-                      setIndices={(x) => {
-                        console.log(x);
-                      }}
-                      tableTitle={""}
-                    />
-                  )}
+                  {newSolutions === undefined && ( */}
+                  <SolutionTableMultiSelect
+                    objectiveData={{
+                      values: [
+                        {
+                          selected: false,
+                          value: preferredPoint,
+                        },
+                      ],
+                      names: activeProblemInfo?.objectiveNames,
+                      directions: activeProblemInfo?.minimize,
+                      ideal: activeProblemInfo?.ideal.map((v, i) =>
+                        activeProblemInfo.minimize[i] === 1 ? v : -v
+                      ),
+                      nadir: activeProblemInfo?.nadir.map((v, i) =>
+                        activeProblemInfo.minimize[i] === 1 ? v : -v
+                      ),
+                    }}
+                    activeIndices={selectedIndices}
+                    setIndices={(x) => {
+                      console.log(x);
+                    }}
+                    tableTitle={""}
+                  />
+                  {/* )} */}
                 </CardContent>
               </Card>
             </>
