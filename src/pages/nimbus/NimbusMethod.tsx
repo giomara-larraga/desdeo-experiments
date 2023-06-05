@@ -9,7 +9,7 @@ import { HorizontalBars } from "desdeo-components";
 import ParallelAxes from "./ParallelAxes";
 import SolutionTable from "../../components/SolutionTable";
 import SolutionTableNimbus from "../../components/SolutionTableNimbus";
-import SolutionTableMultiSelect from "../../components/SolutionTableMultiSelect";
+import { SolutionTableMultiSelect } from "../../components/SolutionTableMultiSelect";
 import { Link, useNavigate } from "react-router-dom";
 import Toolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
@@ -1019,6 +1019,25 @@ function NimbusMethod({
                   >
                     Solutions table
                   </Typography>
+                  <SolutionTableNimbus
+                    objectiveData={{
+                      values: [
+                        {
+                          selected: false,
+                          value: preferredPoint,
+                        },
+                      ],
+                      names: activeProblemInfo?.objectiveNames,
+                      directions: activeProblemInfo?.minimize,
+                      ideal: activeProblemInfo?.ideal,
+                      nadir: activeProblemInfo?.nadir,
+                    }}
+                    selectedIndex={-1}
+                    setIndex={(x: number) => {
+                      SetSelectedIndexArchive(x);
+                    }}
+                    tableTitle={""}
+                  />
                   {/*                   {nSolutionsInArchive > 0 && (
                     <SolutionTableNimbus
                       objectiveData={archivedSolutions!}
@@ -1030,7 +1049,7 @@ function NimbusMethod({
                     />
                   )}
                   {newSolutions === undefined && ( */}
-                  <SolutionTableMultiSelect
+                  {/*                   <SolutionTableMultiSelect
                     objectiveData={{
                       values: [
                         {
@@ -1052,7 +1071,7 @@ function NimbusMethod({
                       console.log(x);
                     }}
                     tableTitle={""}
-                  />
+                  /> */}
                   {/* )} */}
                 </CardContent>
               </Card>
