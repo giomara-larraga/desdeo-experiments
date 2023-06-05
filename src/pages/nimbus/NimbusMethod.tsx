@@ -751,7 +751,8 @@ function NimbusMethod({
                     <Form style={{ marginBottom: "1.5rem" }}>
                       <Form.Group as={Row}>
                         <Form.Label column sm="12">
-                          Desired number of solutions
+                          Select the maximum number of solutions you would like
+                          to see
                         </Form.Label>
                         <Col sm={12}>
                           <Form.Check
