@@ -112,7 +112,7 @@ DashboardProps) => {
           color="primary"
           sx={{ mr: "1rem" }}
           onClick={() => {
-            navigate("/demographic");
+            navigate("/prequestionnaire");
           }}
         >
           Start
