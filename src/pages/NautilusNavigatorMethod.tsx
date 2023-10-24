@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { ProblemInfo, NavigationData } from "../types/ProblemTypes";
 import { Tokens } from "../types/AppTypes";
 import { Row, Col, Table } from "react-bootstrap";
@@ -20,6 +20,31 @@ import Slider from "@mui/material/Slider";
 import { createMethod } from "./nimbus/nimbusHelpers";
 import SolutionTable from "../components/SolutionTable";
 import { ParseSolutions } from "../utils/DataHandling";
+import SurveyComponent from "../components/SurveyComponent";
+import defaultSurveyConfig from "../types/survey";
+
+interface QuestionPhase1 {
+  elements: any[];
+  showQuestionNumbers: boolean;
+  /*id: number;
+    question_text: string;
+    question_type: "open"| "likert";
+    show_solution: number;*/
+}
+
+interface IAnswer {
+  key: string[];
+  value: any[];
+}
+
+const QuestionPhase1Defaults: QuestionPhase1 = {
+  elements: [],
+  showQuestionNumbers: true,
+};
+
+
+
+
 const drawerWidth = 300;
 // TODO: should be imported, and need to update the NavigationData type in NavigationBars /types
 // Test with 7 maximizable objectives.. only possible to test the drawing I guess..
@@ -68,6 +93,8 @@ function NautilusNavigatorMethod({
   // These have point, could possibly do nicer but works and needed
   const [iterateNavi, SetIterateNavi] = useState<boolean>(false);
   const [helpMessage, SetHelpMessage] = useState<string>("");
+  const [questions, SetQuestions] = useState<QuestionPhase1>(QuestionPhase1Defaults);
+
   const itestateRef = useRef<boolean>();
   itestateRef.current = iterateNavi;
 
@@ -124,7 +151,7 @@ function NautilusNavigatorMethod({
   const toShowSolution = () => {
     SetShowSolution(true);
   };
-  const toNimbus = async () => {
+/*   const toNimbus = async () => {
     try {
       const methodCreation = {
         problemGroup: problemGroup,
@@ -155,7 +182,7 @@ function NautilusNavigatorMethod({
     }
     navigate("/nimbus");
     //console.log("to nimbus");
-  };
+  }; */
   const saveLog = async (data: ArchiveProps) => {
     const log = {
       method: "NAUTILUS",
@@ -333,6 +360,107 @@ function NautilusNavigatorMethod({
     };
 
     fetchProblemInfo();
+  }, []);
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const res = await fetch(`${apiUrl}/questionnaire/phase1`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${tokens.access}`,
+          },
+        });
+
+        if (res.status == 200) {
+          const body = await res.json();
+          // set questions
+          SetQuestions(body);
+          console.log(body);
+          //SetFetched(true);
+          console.log("Questions fetched successfully!");
+        } else {
+          console.log(
+            `Got return code ${res.status}. Could not fetch resource.`
+          );
+          // do nothing
+        }
+      } catch (e) {
+        console.log("not ok");
+        console.log(e);
+        // do nothing
+      }
+    };
+
+    fetchQuestions();
+  }, []);
+
+  const onSurveyComplete = useCallback(async (sender: any) => {
+    console.log("Sender Data: ", JSON.stringify(sender.data));
+    console.log("Sender PlainData: ", sender.getPlainData());
+    //setTest("changed into oncomplete");
+    //console.log("test", test);
+    const data = JSON.parse(JSON.stringify(sender.data));
+
+    var keys = Object.keys(data);
+    var validated_keys = [];
+    var validated_values = [];
+    for (let i = 0; i < keys.length; i++) {
+      const item = parseInt(keys[i]);
+      const value = data[keys[i]];
+
+      if (isNaN(item)) {
+        console.log(value);
+        var inner_keys = Object.keys(value);
+        var inner_values = Object.values(value);
+        for (let j = 0; j < inner_keys.length; j++) {
+          validated_keys.push(inner_keys[j]);
+          validated_values.push(inner_values[j]);
+        }
+      } else {
+        validated_keys.push(keys[i]);
+        validated_values.push(value);
+      }
+    }
+    const responses: IAnswer = {
+      key: validated_keys,
+      value: validated_values,
+    };
+    console.log("responses", responses);
+
+    const newAnswers = {
+      key: responses.key.map((k) => parseInt(k)),
+      value: responses.value,
+    };
+    console.log("newAnswers:", newAnswers);
+    try {
+      const res = await fetch(`${apiUrl}/answer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokens.access}`,
+        },
+        body: JSON.stringify(newAnswers),
+      });
+
+      console.log(res);
+
+      if (res.status === 200) {
+        console.log("saved");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+    let methodName;
+    let route: string;
+
+    
+    methodName = "synchronous_nimbus";
+    route = "/nimbus";
+ 
+    await createMethod(apiUrl, tokens, problemGroup, methodName);
+
+    navigate(route);
   }, []);
 
   // start the method
@@ -995,14 +1123,19 @@ function NautilusNavigatorMethod({
               </tr>
             </tbody>
           </Table>
-          <Button
+          <SurveyComponent
+            data={defaultSurveyConfig.defaultSurveyData}
+            json={questions}
+            onComplete={onSurveyComplete}
+          />
+{/*           <Button
             variant="contained"
             size="large"
             onClick={toNimbus}
             sx={{ marginTop: "2rem" }}
           >
-            {"Continue to Phase 2"}
-          </Button>
+            {"Continue"}
+          </Button> */}
         </Container>
       )}
     </Box>

@@ -195,17 +195,6 @@ FirstQuestionnaireProps) => {
     <Container className="py-4 main-container">
       <CssBaseline />
       <Toolbar variant="dense" />
-      <Typography
-        variant="h4"
-        color="primary"
-        style={{ marginBottom: "2rem", textAlign: "left" }}
-      >
-        Pre-Solution Process
-      </Typography>
-      <Typography>
-        Before start using the method, we need you to answer the following
-        information.
-      </Typography>
 
       <SurveyComponent
         data={defaultSurveyConfig.defaultSurveyData}

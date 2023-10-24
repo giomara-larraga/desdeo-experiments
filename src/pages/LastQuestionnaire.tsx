@@ -65,7 +65,7 @@ LastQuestionnaireProps) => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await fetch(`${apiUrl}/questionnaire/phase2`, {
+        const res = await fetch(`${apiUrl}/questionnaire/final`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${tokens.access}`,
