@@ -77,6 +77,11 @@ export const Login = ({
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
+            {!loginOk && (
+        <div style={{ color: 'red', marginTop: '0.5rem' }}>
+        {errorMessage}
+        </div>
+      )}
       <TextField
         margin="normal"
         required
@@ -90,6 +95,7 @@ export const Login = ({
           required: { value: true, message: "Username is required." },
         })}
       />
+
 
       <TextField
         margin="normal"
