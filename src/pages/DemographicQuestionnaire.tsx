@@ -9,6 +9,7 @@ import defaultSurveyConfig from "../types/survey";
 import { useNavigate } from "react-router-dom";
 //import "../style/custom.scss";
 import { CssBaseline, Typography, Container, Box } from "@mui/material";
+import { createMethod } from "./nimbus/nimbusHelpers";
 import Toolbar from "@mui/material/Toolbar";
 //import ReactDOM from "react-dom";
 //import { json } from "d3";
@@ -26,6 +27,7 @@ interface DemographicQuestionnaireProps {
   tokens: Tokens;
   apiUrl: string;
   groupId: number;
+  problemGroup: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -69,6 +71,7 @@ const DemographicQuestionnaire = ({
   tokens,
   apiUrl,
   groupId,
+  problemGroup,
   setCurrentPage,
 }: DemographicQuestionnaireProps) => {
   const navigate = useNavigate();
@@ -156,7 +159,17 @@ const DemographicQuestionnaire = ({
       // Do nothing
     }
 
-    navigate(`/prequestionnaire`);
+    let methodName;
+    let route: string;
+
+    if (groupId === 1) {
+      methodName = "synchronous_nimbus";
+      route = "/nimbus";
+    } else {
+      methodName = "nautilus_navigator";
+      route = "/nautilus";
+    }
+    await createMethod(apiUrl, tokens, problemGroup, methodName);
   }, []);
 
   return (

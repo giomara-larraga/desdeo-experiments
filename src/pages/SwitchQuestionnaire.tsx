@@ -63,7 +63,7 @@ SwitchQuestionnaireProps) => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await fetch(`${apiUrl}/questionnaire/switch`, {
+        const res = await fetch(`${apiUrl}/questionnaire/phase2`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${tokens.access}`,
