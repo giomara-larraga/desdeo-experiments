@@ -157,11 +157,11 @@ LastQuestionnaireProps) => {
       console.log(e);
       // Do nothing
     }
-    if (groupId === 1) {
-      navigate(`/thanks`);
-    } else {
+    //if (groupId === 1) {
+    navigate(`/thanks`);
+    /*} else {
       navigate(`/switchquestionnaire`);
-    }
+    }*/
   }, []);
 
   return (

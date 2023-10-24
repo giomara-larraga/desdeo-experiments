@@ -42,9 +42,6 @@ const QuestionPhase1Defaults: QuestionPhase1 = {
   showQuestionNumbers: true,
 };
 
-
-
-
 const drawerWidth = 300;
 // TODO: should be imported, and need to update the NavigationData type in NavigationBars /types
 // Test with 7 maximizable objectives.. only possible to test the drawing I guess..
@@ -93,7 +90,9 @@ function NautilusNavigatorMethod({
   // These have point, could possibly do nicer but works and needed
   const [iterateNavi, SetIterateNavi] = useState<boolean>(false);
   const [helpMessage, SetHelpMessage] = useState<string>("");
-  const [questions, SetQuestions] = useState<QuestionPhase1>(QuestionPhase1Defaults);
+  const [questions, SetQuestions] = useState<QuestionPhase1>(
+    QuestionPhase1Defaults
+  );
 
   const itestateRef = useRef<boolean>();
   itestateRef.current = iterateNavi;
@@ -151,7 +150,7 @@ function NautilusNavigatorMethod({
   const toShowSolution = () => {
     SetShowSolution(true);
   };
-/*   const toNimbus = async () => {
+  /*   const toNimbus = async () => {
     try {
       const methodCreation = {
         problemGroup: problemGroup,
@@ -454,10 +453,9 @@ function NautilusNavigatorMethod({
     let methodName;
     let route: string;
 
-    
     methodName = "synchronous_nimbus";
     route = "/nimbus";
- 
+
     await createMethod(apiUrl, tokens, problemGroup, methodName);
 
     navigate(route);
@@ -981,7 +979,7 @@ function NautilusNavigatorMethod({
                   onClick={toShowSolution}
                   disabled={showFinal ? false : true}
                 >
-                  {"Show solution and Proceed to Phase 2"}
+                  {"Show solution and continue"}
                 </Button>
               </Box>
             </Drawer>
@@ -1128,7 +1126,7 @@ function NautilusNavigatorMethod({
             json={questions}
             onComplete={onSurveyComplete}
           />
-{/*           <Button
+          {/*           <Button
             variant="contained"
             size="large"
             onClick={toNimbus}

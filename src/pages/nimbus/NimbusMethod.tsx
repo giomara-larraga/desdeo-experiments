@@ -99,7 +99,9 @@ function NimbusMethod({
   ] = useState<boolean>(false);
   const [newSolutionTableOffset, SetNewSolutionTableOffset] =
     useState<number>(0);
-  const [questions, SetQuestions] = useState<QuestionPhase2>(QuestionPhase2Defaults);
+  const [questions, SetQuestions] = useState<QuestionPhase2>(
+    QuestionPhase2Defaults
+  );
   const navigate = useNavigate();
   useEffect(() => {
     if (groupId === 1) {
@@ -246,10 +248,9 @@ function NimbusMethod({
     //let methodName;
     let route: string;
 
-    
     //methodName = "synchronous_nimbus";
     route = "/postquestionnaire";
- 
+
     //await createMethod(apiUrl, tokens, problemGroup, methodName);
 
     navigate(route);
@@ -1338,14 +1339,14 @@ function NimbusMethod({
                 json={questions}
                 onComplete={onSurveyComplete}
               />
-              <Button
+              {/*               <Button
                 variant="contained"
                 size="large"
                 onClick={toQuestionnaire}
                 sx={{ marginTop: "2rem" }}
               >
                 {"Continue"}
-              </Button>
+              </Button> */}
             </Container>
           )}
         </Container>
