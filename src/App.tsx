@@ -36,7 +36,7 @@ function App() {
   //const [chosenMethod, SetChosenMethod] = useState("");
   const [currentPage, setCurrentPage] = useState("");
 
-  const API_URL: string = "https://moggroup.pythonanywhere.com/";
+  const API_URL: string = "https://moggroup.pythonanywhere.com";
   //const API_URL: string = "http://127.0.0.1:5000";
 
   // useEffect(() => {
