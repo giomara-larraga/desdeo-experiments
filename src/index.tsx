@@ -5,7 +5,7 @@ import App from "./App";
 import { ThemeProvider, createTheme, responsiveFontSizes } from "@mui/material";
 
 //import 'bootstrap/dist/css/bootstrap.min.css';
-//import './index.css';
+//import "./index.css";
 
 export const themeOptions = createTheme({
   palette: {

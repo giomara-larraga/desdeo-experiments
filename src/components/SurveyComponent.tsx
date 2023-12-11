@@ -31,7 +31,10 @@ const SurveyComponent = ({
 
   survey.completeText = "Next";
   survey.completedHtml = "Please wait";
+  survey.focusFirstQuestionAutomatic = false;
+
   survey.applyTheme(DoubleBorderLight);
+
   //survey.showCompletedPage = false;
   return (
     <Box display="flex" flexDirection="column" width="100%">

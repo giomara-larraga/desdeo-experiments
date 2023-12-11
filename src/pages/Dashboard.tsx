@@ -4,15 +4,9 @@ import Grid from "@mui/material/Grid";
 import { Box, Typography, Toolbar, Container } from "@material-ui/core";
 import CssBaseline from "@mui/material/CssBaseline";
 import Button from "@mui/material/Button";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Avatar from "@mui/material/Avatar";
 import { useNavigate } from "react-router-dom";
-import { createMethod } from "./nimbus/nimbusHelpers";
 import { Tokens } from "../types/AppTypes";
-//import "../style/custom.scss";
+
 interface DashboardProps {
   isLoggedIn: boolean;
   loggedAs: string;
@@ -76,8 +70,6 @@ DashboardProps) => {
 
       <Box justifyContent={"flex-end"} display={"flex"}>
         <Button
-          //component={Link}
-          //to="/demographic"
           size="large"
           variant="contained"
           color="primary"
@@ -88,50 +80,7 @@ DashboardProps) => {
         >
           Start
         </Button>
-        {/* <Button
-          //component={Link}
-          //to="/nautilus"
-          sx={{ mr: "1rem" }}
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            createMethod(apiUrl, tokens, problemGroup, "nautilus_navigator");
-            navigate("/nautilus");
-          }}
-        >
-          Nautilus
-        </Button>
-        <Button
-          //component={Link}
-          //to="/nimbus"
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            createMethod(apiUrl, tokens, problemGroup, "synchronous_nimbus");
-            navigate("/nimbus");
-          }}
-        >
-          Nimbus
-        </Button> */}
       </Box>
-
-      {/*       <Grid
-        item
-        xs={false}
-        sm={false}
-        md={4}
-        display={"flex"}
-        padding={"1rem"}
-        alignContent={"center"}
-        justifyContent={"center"}
-        justifyItems={"center"}
-      >
-        <img
-          src={image}
-          alt="My Team"
-          style={{ maxWidth: "100%", height: "auto", objectFit: "contain" }}
-        />
-      </Grid> */}
     </Container>
   );
 };

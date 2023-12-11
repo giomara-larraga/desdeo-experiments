@@ -22,6 +22,7 @@ import SolutionTable from "../components/SolutionTable";
 import { ParseSolutions } from "../utils/DataHandling";
 import SurveyComponent from "../components/SurveyComponent";
 import defaultSurveyConfig from "../types/survey";
+import SolutionTableShow from "../components/SolutionTableShow";
 
 interface QuestionPhase1 {
   elements: any[];
@@ -1081,24 +1082,24 @@ function NautilusNavigatorMethod({
           <Typography
             variant="h5"
             color={"primary"}
-            sx={{ marginBottom: "2rem" }}
+            sx={{ marginBottom: "2rem", alignSelf: "center" }}
           >
             Final solution of Phase 1
           </Typography>
-          <Typography
+          {/*           <Typography
             variant="h6"
             color={"primary"}
             sx={{ marginTop: "2rem", marginBottom: "2rem" }}
           >
             Objective values:
-          </Typography>
-          <SolutionTable
+          </Typography> */}
+          <SolutionTableShow
             objectiveData={ParseSolutions(finalObjectives, activeProblemInfo!)}
             setIndex={() => console.log("nothing happens...")}
             selectedIndex={0}
             tableTitle={""}
           />
-          <Typography
+          {/* <Typography
             variant="h6"
             color={"primary"}
             sx={{ marginTop: "2rem", marginBottom: "2rem" }}
@@ -1120,7 +1121,7 @@ function NautilusNavigatorMethod({
                 })}
               </tr>
             </tbody>
-          </Table>
+          </Table> */}
           <SurveyComponent
             data={defaultSurveyConfig.defaultSurveyData}
             json={questions}

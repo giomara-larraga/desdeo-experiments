@@ -23,6 +23,7 @@ import HBWindow from "../../components/HBWindow";
 import { CardContent, FormControl, Select } from "@material-ui/core";
 import defaultSurveyConfig from "../../types/survey";
 import SurveyComponent from "../../components/SurveyComponent";
+import SolutionTableShow from "../../components/SolutionTableShow";
 interface NimbusMethodProps {
   isLoggedIn: boolean;
   loggedAs: string;
@@ -829,25 +830,26 @@ function NimbusMethod({
   if (activeProblemInfo === undefined) {
     return <>Please define a method first.</>;
   }
-
+  const drawerWidth = 600;
   return (
     <Box sx={{ display: "flex", width: "-webkit-fill-available" }}>
-      <Toolbar variant="dense" />
+      <Toolbar />
       {currentState !== "stop" && (
         <>
           <Box
             component="nav"
             sx={{
-              width: { sm: 650 },
+              width: { sm: drawerWidth },
               flexShrink: { sm: 0 },
+              padding: "1rem",
+              overflow: "hidden",
             }}
           >
-            {" "}
             <Drawer
               sx={{
                 flexShrink: 0,
                 "& .MuiDrawer-paper": {
-                  width: 650,
+                  width: drawerWidth,
                   boxSizing: "border-box",
                 },
               }}
@@ -855,7 +857,7 @@ function NimbusMethod({
               anchor="left"
               PaperProps={{ elevation: 9 }}
             >
-              <Toolbar variant="dense" />
+              <Toolbar />
               {currentState === "not started" && (
                 <div>Method not started yet</div>
               )}
@@ -1287,22 +1289,21 @@ function NimbusMethod({
           )}
           {currentState === "stop" && (
             <Container>
-              <Toolbar />
               <Typography
                 variant="h5"
                 color={"primary"}
                 sx={{ marginBottom: "2rem" }}
               >
-                Final solution
+                Final solution of phase 2
               </Typography>
-              <Typography
+              {/*               <Typography
                 variant="h6"
                 color={"primary"}
                 sx={{ marginTop: "2rem", marginBottom: "2rem" }}
               >
                 Objective values:
-              </Typography>
-              <SolutionTable
+              </Typography> */}
+              <SolutionTableShow
                 objectiveData={ParseSolutions(
                   [preferredPoint],
                   activeProblemInfo
@@ -1311,7 +1312,7 @@ function NimbusMethod({
                 selectedIndex={0}
                 tableTitle={""}
               />
-              <Typography
+              {/* <Typography
                 variant="h6"
                 color={"primary"}
                 sx={{ marginTop: "2rem", marginBottom: "2rem" }}
@@ -1333,7 +1334,7 @@ function NimbusMethod({
                     })}
                   </tr>
                 </tbody>
-              </Table>
+              </Table> */}
               <SurveyComponent
                 data={defaultSurveyConfig.defaultSurveyData}
                 json={questions}

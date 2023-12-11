@@ -165,8 +165,7 @@ LastQuestionnaireProps) => {
   }, []);
 
   return (
-    <Container className="py-4 main-container">
-      <CssBaseline />
+    <Container>
       <Toolbar />
       <Typography
         variant="h4"
@@ -175,9 +174,6 @@ LastQuestionnaireProps) => {
       >
         Overall Experience
       </Typography>
-      <Row>
-        <p>Please, complete the following questionnaire.</p>
-      </Row>
       <Row className="mb-3">
         <SurveyComponent
           data={defaultSurveyConfig.defaultSurveyData}
