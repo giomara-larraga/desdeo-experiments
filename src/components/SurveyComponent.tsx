@@ -10,6 +10,7 @@ import { Model } from "survey-core";
 import { Box } from "@material-ui/core";
 import "../style/survey.css";
 import Button from "@mui/material/Button";
+import { DoubleBorderLight } from "survey-core/themes";
 
 interface ISurveyComponentProps {
   //css: any;
@@ -29,7 +30,9 @@ const SurveyComponent = ({
   survey.showNavigationButtons = true;
 
   survey.completeText = "Next";
-
+  survey.completedHtml = "Please wait";
+  survey.applyTheme(DoubleBorderLight);
+  //survey.showCompletedPage = false;
   return (
     <Box display="flex" flexDirection="column" width="100%">
       <Survey

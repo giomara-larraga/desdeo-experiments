@@ -49,7 +49,7 @@ DashboardProps) => {
         During the study, you will have the opportunity to work with
         state-of-the-art interactive multiobjective optimization methods, and
         contribute to our research by providing valuable insights on their
-        performance and usability. The study takes about XX minutes to be
+        performance and usability. The study takes about 25 minutes to be
         completed and involves the following steps:
       </Typography>
 
