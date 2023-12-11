@@ -48,61 +48,32 @@ DashboardProps) => {
       <Typography paragraph style={{ textAlign: "left" }}>
         During the study, you will have the opportunity to work with
         state-of-the-art interactive multiobjective optimization methods, and
-        contribute to our research by providing valuable insights on their
-        performance and usability. The study takes about 25 minutes to be
-        completed and involves the following steps:
+        contribute to our research by providing valuable insights. The study
+        takes about 25 minutes to be completed. All data collected in this study
+        is anonymized. The data does not contain any information that could be
+        utilized in identifying individuals. In addition, the data in the
+        research publication based on this data is presented in such a way that
+        the participants in this study cannot be identified. By participating in
+        this study, consent is given for data collection, storage, and
+        utilization as described above. The responsible leader of this study is
+        Professor Francisco Ruiz (rua@uma.es).
+      </Typography>
+      <Typography paragraph style={{ textAlign: "left" }}>
+        All data collected in this study is anonymized. The data does not
+        contain any information that could be utilized in identifying
+        individuals. In addition, the data in the research publication based on
+        this data is presented in such a way that the participants in this study
+        cannot be identified.
+      </Typography>
+      <Typography paragraph style={{ textAlign: "left" }}>
+        By participating in this study, consent is given for data collection,
+        storage, and utilization as described above.
+      </Typography>
+      <Typography paragraph style={{ textAlign: "left" }}>
+        The responsible leader of this study is Professor Francisco Ruiz
+        (rua@uma.es).
       </Typography>
 
-      <List sx={{ width: "100%" }}>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>1</Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary="Demographic Information"
-            secondary="Before starting the study, you will be asked to fill out a brief survey
-      regarding your demographic information. This information is strictly
-      confidential and will be used solely for research purposes."
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>2</Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary="Pre-Solution Process"
-            secondary="You will be asked to answer a few questions related to your experience and
-      expertise in the field before beginning the solution process. This survey
-      is aimed at understanding your background and experience in
-      the field."
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>3</Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary=" Interactive Solution Process"
-            secondary="During the solution process, you will use state-of-the-art interactive 
-      multiobjective optimization methods to solve a given problem. You will be asked to provide
-      feedback on the usability and effectiveness of these methods. Please feel
-      free to ask any questions or request any clarifications throughout the
-      process by raising your hand."
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemAvatar>
-            <Avatar>4</Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary="Overall Experience"
-            secondary="At the end of the study, you will be asked to provide feedback on your
-      overall experience, including your satisfaction with the methods and the
-      study as a whole. Your input is essential to ensure the success of
-      this research."
-          />
-        </ListItem>
-      </List>
       <Box justifyContent={"flex-end"} display={"flex"}>
         <Button
           //component={Link}
