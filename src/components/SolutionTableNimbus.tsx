@@ -9,6 +9,15 @@ import {
   Table,
 } from "react-bootstrap";
 import { ObjectiveData } from "../types/ProblemTypes";
+import {
+  Paper,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  useTheme,
+} from "@mui/material";
 
 interface SolutionTableProps {
   objectiveData: ObjectiveData;
@@ -53,66 +62,85 @@ function SolutionTable({
 
   const ideal = objectiveData.ideal;
   const nadir = objectiveData.nadir;
-
+  const theme = useTheme();
   return (
     <Container>
-      <Tab.Container id="table-of-alternatives">
+      <TableContainer id="table-of-alternatives">
         {tableTitle.length > 0 && <h4>{tableTitle}</h4>}
-        <Table hover>
-          <thead>
-            <tr>
-              <th>{"Solution"}</th>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell
+                sx={{
+                  fontWeight: "bold",
+                }}
+              >
+                {"Solution"}
+              </TableCell>
               {objectiveData.names.map((name, i) => {
                 return (
-                  <th>{`${name} (${
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                    }}
+                  >{`${name} (${
                     objectiveData.directions[i] === 1 ? "min" : "max"
-                  })`}</th>
+                  })`}</TableCell>
                 );
               })}
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="tableInfo">
-              <td>{"Best"}</td>
+            </TableRow>
+          </TableHead>
+          <TableBody
+            style={{
+              backgroundColor: selectedIndex !== null ? "#f5f5f5" : "white",
+            }}
+          >
+            <TableRow className="tableInfo">
+              <TableCell>{"Best"}</TableCell>
               {ideal.map((v, i) => {
                 const v_ = objectiveData.directions[i] === 1 ? v : -v;
-                return <td>{`${v_.toPrecision(4)}`}</td>;
+                return <TableCell>{`${v_.toPrecision(4)}`}</TableCell>;
               })}
-            </tr>
+            </TableRow>
             {data.map((datum, index) => {
               return (
-                <tr
+                <TableRow
                   onClick={() => {
                     console.log("click!");
+                    console.log(index);
                     SetKeySwitch(!keySwitch);
                     SetKey(index);
                   }}
                   key={index}
-                  className={index === selectedIndex ? "tableSelected" : ""}
+                  style={{
+                    cursor: "pointer",
+                    backgroundColor:
+                      index === selectedIndex ? "#D9D9D9" : "white",
+                  }}
                 >
-                  <td>{`#${index + 1}`}</td>
+                  <TableCell>{`#${index + 1}`}</TableCell>
                   {datum.value.map((value) => {
                     return (
-                      <td>{`${
+                      <TableCell>{`${
                         objectiveData.directions[index] === 1
                           ? value.toPrecision(4)
                           : -value.toPrecision(4)
-                      }`}</td>
+                      }`}</TableCell>
                     );
                   })}
-                </tr>
+                </TableRow>
               );
             })}
-            <tr className="tableInfo">
-              <td>{"Worst"}</td>
+            <TableRow className="tableInfo">
+              <TableCell>{"Worst"}</TableCell>
               {nadir.map((v, i) => {
                 const v_ = objectiveData.directions[i] === 1 ? v : -v;
-                return <td>{`${v_.toPrecision(4)}`}</td>;
+                return <TableCell>{`${v_.toPrecision(4)}`}</TableCell>;
               })}
-            </tr>
-          </tbody>
+            </TableRow>
+          </TableBody>
         </Table>
-      </Tab.Container>
+      </TableContainer>
     </Container>
   );
 }
