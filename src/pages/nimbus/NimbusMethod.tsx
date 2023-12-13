@@ -651,6 +651,8 @@ function NimbusMethod({
               );*/
               SetPreferredPoint(response.objective);
               SetFinalVariables(response.solution);
+              console.log(response.objective);
+              console.log(response.solution);
               SetHelpMessage("Stopped. Showing final solution reached.");
               SetCurrentState("stop");
               break;

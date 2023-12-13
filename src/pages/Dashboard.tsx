@@ -43,14 +43,7 @@ DashboardProps) => {
         During the study, you will have the opportunity to work with
         state-of-the-art interactive multiobjective optimization methods, and
         contribute to our research by providing valuable insights. The study
-        takes about 25 minutes to be completed. All data collected in this study
-        is anonymized. The data does not contain any information that could be
-        utilized in identifying individuals. In addition, the data in the
-        research publication based on this data is presented in such a way that
-        the participants in this study cannot be identified. By participating in
-        this study, consent is given for data collection, storage, and
-        utilization as described above. The responsible leader of this study is
-        Professor Francisco Ruiz (rua@uma.es).
+        takes about 25 minutes to be completed.
       </Typography>
       <Typography paragraph style={{ textAlign: "left" }}>
         All data collected in this study is anonymized. The data does not
