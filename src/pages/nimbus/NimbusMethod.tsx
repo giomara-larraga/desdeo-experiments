@@ -246,30 +246,6 @@ function NimbusMethod({
     } catch (e) {
       console.log(e);
     }
-    // Saving solutions to the archive.
-    const log = {
-      method: "NIMBUS",
-      variables: finalVariables.join(","),
-      objectives: preferredPoint.join(","),
-    };
-    try {
-      const res = await fetch(`${apiUrl}/archive`, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${tokens.access}`,
-        },
-        body: JSON.stringify(log),
-      });
-
-      if (res.status == 201) {
-        // OK
-        console.log("OK", log);
-      }
-    } catch (e) {
-      console.log(e);
-      // Do nothing
-    }
     //let methodName;
     let route: string;
 
@@ -651,8 +627,35 @@ function NimbusMethod({
               );*/
               SetPreferredPoint(response.objective);
               SetFinalVariables(response.solution);
+              console.log("Saving solutions to the database.")
               console.log(response.objective);
               console.log(response.solution);
+              
+              // Saving solutions to the archive.
+              const log = {
+                method: "NIMBUS",
+                variables: response.solution.join(","),
+                objectives: response.objective.join(","),
+              };
+              try {
+                const res = await fetch(`${apiUrl}/archive`, {
+                  method: "POST",
+                  headers: {
+                    "Content-type": "application/json",
+                    Authorization: `Bearer ${tokens.access}`,
+                  },
+                  body: JSON.stringify(log),
+                });
+
+                if (res.status == 201) {
+                  // OK
+                  console.log("OK", log);
+                }
+              } catch (e) {
+                console.log(e);
+                // Do nothing
+              }
+
               SetHelpMessage("Stopped. Showing final solution reached.");
               SetCurrentState("stop");
               break;
