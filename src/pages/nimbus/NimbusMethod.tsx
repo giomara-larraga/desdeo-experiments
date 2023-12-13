@@ -246,6 +246,30 @@ function NimbusMethod({
     } catch (e) {
       console.log(e);
     }
+    // Saving solutions to the archive.
+    const log = {
+      method: "NIMBUS",
+      variables: finalVariables.join(","),
+      objectives: preferredPoint.join(","),
+    };
+    try {
+      const res = await fetch(`${apiUrl}/archive`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${tokens.access}`,
+        },
+        body: JSON.stringify(log),
+      });
+
+      if (res.status == 201) {
+        // OK
+        console.log("OK", log);
+      }
+    } catch (e) {
+      console.log(e);
+      // Do nothing
+    }
     //let methodName;
     let route: string;
 
