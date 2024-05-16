@@ -57,8 +57,8 @@ DashboardProps) => {
         storage, and utilization as described above.
       </Typography>
       <Typography paragraph style={{ textAlign: "left" }}>
-        The responsible leader of this study is Professor Francisco Ruiz
-        (rua@uma.es).
+        The responsible leader of this study is Professor Kaisa Miettinen
+        (kaisa.miettinen@jyu.fi).
       </Typography>
 
       <Box justifyContent={"flex-end"} display={"flex"}>
