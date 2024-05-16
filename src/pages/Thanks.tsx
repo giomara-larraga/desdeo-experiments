@@ -58,6 +58,9 @@ ThanksProps) {
             <Typography variant="h4" sx={{ textAlign: "center" }}>
               Thank you for participating in this study.
             </Typography>
+            <Typography variant="h4" sx={{ textAlign: "center" }}>
+              Please, do not close this Tab and call the supervisor of the experiment.
+            </Typography>
             <Box
               sx={{
                 display: "flex",
